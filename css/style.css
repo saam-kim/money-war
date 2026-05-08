@@ -25,7 +25,7 @@
   --color-warning-border: #d89119;
   --color-warning-text: #5b3a00;
   --color-danger: #d64545;
-  --font-display: "Black Han Sans", "Arial Black", "Malgun Gothic", sans-serif;
+  --font-display: "Pretendard", "Malgun Gothic", sans-serif;
   --font-serif: "Gowun Batang", "Noto Serif KR", "Nanum Myeongjo", serif;
   --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --text-xs: 0.72rem;
@@ -37,15 +37,15 @@
   --text-2xl: 1.4rem;
   --text-3xl: 1.75rem;
   --text-4xl: 2.4rem;
-  --text-display: 3.65rem;
+  --text-display: 3.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
   --space-4: 1rem;
   --space-5: 1.25rem;
   --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
+  --space-8: 1.75rem;
+  --space-10: 2.1rem;
+  --space-12: 2.4rem;
   --radius: 8px;
   --radius-lg: 12px;
   --shadow-sm: 0 1px 2px rgba(17, 20, 24, 0.04);
@@ -65,7 +65,7 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: 18px;
-  background: radial-gradient(circle at top right, #f0f7ff, #ffffff 42%);
+  background: linear-gradient(180deg, #f6f9ff 0%, #ffffff 42%);
 }
 
 button,
@@ -90,9 +90,9 @@ input:focus-visible {
   z-index: 10;
   display: grid;
   grid-template-columns: minmax(310px, 1fr) minmax(390px, 1fr) auto;
-  gap: var(--space-4);
+  gap: var(--space-3);
   align-items: center;
-  padding: var(--space-4) var(--space-8);
+  padding: var(--space-3) var(--space-6);
   background: rgba(255, 255, 255, 0.94);
   border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(6px);
@@ -101,7 +101,7 @@ input:focus-visible {
 .brand-block h1 {
   margin: 0;
   color: var(--color-brand-ink);
-  font-size: var(--text-3xl);
+  font-size: 1.55rem;
   font-weight: 800;
   line-height: 1.18;
   letter-spacing: -0.02em;
@@ -122,8 +122,8 @@ input:focus-visible {
 }
 
 .status-strip div {
-  min-height: 64px;
-  padding: var(--space-3) var(--space-4);
+  min-height: 56px;
+  padding: 0.65rem var(--space-4);
   border: 1px solid var(--color-border);
   border-radius: var(--radius);
   background: var(--color-brand-soft);
@@ -165,8 +165,8 @@ input:focus-visible {
 .secondary-button,
 .choice-button,
 .mini-button {
-  min-height: 48px;
-  padding: 0.72rem 1rem;
+  min-height: 44px;
+  padding: 0.64rem 0.92rem;
   border-radius: var(--radius);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -231,9 +231,9 @@ button:disabled {
 }
 
 .app-shell {
-  width: min(1440px, calc(100vw - 48px));
+  width: min(1440px, calc(100vw - 36px));
   margin: 0 auto;
-  padding: var(--space-6) 0 var(--space-12);
+  padding: var(--space-4) 0 var(--space-8);
 }
 
 .app-shell:focus {
@@ -242,7 +242,7 @@ button:disabled {
 
 .screen {
   display: grid;
-  gap: var(--space-6);
+  gap: var(--space-4);
 }
 
 .hero-panel,
@@ -259,7 +259,7 @@ button:disabled {
 
 .hero-panel {
   overflow: hidden;
-  min-height: 590px;
+  min-height: 470px;
   display: grid;
   grid-template-columns: 1.08fr 0.92fr;
   animation: fadeIn 0.38s ease-out;
@@ -269,8 +269,8 @@ button:disabled {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: var(--space-6);
-  padding: var(--space-12);
+  gap: var(--space-5);
+  padding: var(--space-8);
 }
 
 .hero-copy h2,
@@ -301,7 +301,7 @@ button:disabled {
   color: var(--color-text);
   font-family: var(--font-serif);
   font-size: 1.35rem;
-  line-height: 1.7;
+  line-height: 1.55;
   font-weight: 700;
 }
 
@@ -318,15 +318,15 @@ button:disabled {
 }
 
 .hero-art::after {
-  content: "환율\A국제 거래\A역할 토의";
+  content: "환율 변화\A국제 거래\A역할 선택";
   white-space: pre;
   position: absolute;
-  inset: var(--space-12);
+  inset: var(--space-8);
   display: grid;
   place-items: center;
   color: var(--color-brand-ink);
   font-family: var(--font-sans);
-  font-size: 4rem;
+  font-size: 3.35rem;
   font-weight: 800;
   line-height: 1.35;
   letter-spacing: -0.03em;
@@ -338,10 +338,10 @@ button:disabled {
 }
 
 .hero-art::before {
-  content: "BOOONG CLASSROOM GAME";
+  content: "CLASSROOM GAME";
   position: absolute;
-  left: var(--space-12);
-  bottom: var(--space-12);
+  left: var(--space-8);
+  bottom: var(--space-8);
   z-index: 1;
   padding: 0.5rem 1rem;
   border-radius: 999px;
@@ -357,7 +357,7 @@ button:disabled {
 .round-panel,
 .result-panel,
 .summary-panel {
-  padding: var(--space-8);
+  padding: var(--space-6);
 }
 
 .info-grid,
@@ -411,7 +411,7 @@ button:disabled {
 .progress-card {
   position: relative;
   min-width: 0;
-  padding: var(--space-6);
+  padding: var(--space-5);
   border: 1px solid rgba(207, 214, 226, 0.75);
   border-radius: var(--radius-lg);
   background: rgba(255, 255, 255, 0.9);
@@ -503,13 +503,13 @@ button:disabled {
   color: var(--color-text);
   font-family: var(--font-serif);
   font-size: var(--text-base);
-  line-height: 1.7;
+  line-height: 1.55;
 }
 
 .setup-controls {
   display: grid;
   grid-template-columns: 260px 1fr;
-  gap: var(--space-6);
+  gap: var(--space-4);
   align-items: start;
 }
 
@@ -528,8 +528,8 @@ button:disabled {
 .number-control input,
 .team-name-grid input {
   width: 100%;
-  min-height: 54px;
-  padding: 0.75rem 0.9rem;
+  min-height: 48px;
+  padding: 0.65rem 0.85rem;
   border: 1.5px solid var(--color-border-strong);
   border-radius: var(--radius);
   color: var(--color-text);
@@ -604,7 +604,7 @@ button:disabled {
 }
 
 .exchange-card {
-  padding: var(--space-8);
+  padding: var(--space-5);
   border-left: 4px solid var(--color-brand);
   border-radius: var(--radius-lg);
   color: var(--color-brand-ink);
@@ -623,7 +623,7 @@ button:disabled {
   margin: 0;
   font-family: var(--font-serif);
   font-size: var(--text-xl);
-  line-height: 1.7;
+  line-height: 1.55;
   font-weight: 700;
 }
 
@@ -650,7 +650,7 @@ button:disabled {
 .classroom-tools {
   display: grid;
   grid-template-columns: 1fr 1fr minmax(300px, 0.78fr);
-  gap: var(--space-4);
+  gap: var(--space-3);
   align-items: stretch;
 }
 
@@ -719,7 +719,7 @@ button:disabled {
   display: block;
   margin: var(--space-2) 0 var(--space-4);
   color: var(--color-case-border);
-  font-size: 3.4rem;
+  font-size: 3rem;
   line-height: 1;
   font-weight: 800;
   letter-spacing: -0.02em;
@@ -750,7 +750,7 @@ button:disabled {
   gap: var(--space-2);
   align-content: center;
   width: 100%;
-  min-height: 82px;
+  min-height: 74px;
   color: var(--color-brand-ink);
   background: #ffffff;
   border: 1px solid var(--color-border-strong);
@@ -837,7 +837,7 @@ button:disabled {
 }
 
 .explain-box {
-  padding: var(--space-5);
+  padding: var(--space-4);
   border-left: 6px solid var(--color-case-border);
   border-radius: var(--radius-lg);
   background: #dff0e8;
@@ -869,7 +869,7 @@ button:disabled {
 .result-reason p {
   font-family: var(--font-serif);
   font-size: var(--text-md);
-  line-height: 1.75;
+  line-height: 1.6;
 }
 
 .final-teacher-note {
@@ -909,7 +909,7 @@ button:disabled {
   border-left: 1px solid var(--color-border);
   font-family: var(--font-serif);
   font-size: var(--text-sm);
-  line-height: 1.7;
+  line-height: 1.55;
 }
 
 .material-row span:first-child {
@@ -1046,7 +1046,7 @@ button:disabled {
   }
 }
 
-/* BOOONG UX patch: hero, cards, timer, results, header, and final capture affordances updated. */
+/* Classroom flow patch: restored Korean UI text, reduced empty space, and tightened lesson flow. */
 
 @media (max-width: 1180px) {
   .top-bar,

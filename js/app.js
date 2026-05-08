@@ -5,7 +5,7 @@ const homeButton = document.querySelector("#homeButton");
 const materialsButton = document.querySelector("#materialsButton");
 const resetButton = document.querySelector("#resetButton");
 
-const STORAGE_KEY = "exchange-board-game-state-v2";
+const STORAGE_KEY = "exchange-board-game-state-v3";
 
 const initialState = {
   screen: "start",
@@ -72,17 +72,17 @@ function renderStart() {
     <section class="hero-panel">
       <div class="hero-copy">
         <div>
-          <p class="subject-label">우리나라 경제와 세계화</p>
-          <h2>환율이 바뀌면 누가 웃고, 누가 고민할까?</h2>
+          <p class="subject-label">국제 거래와 환율</p>
+          <h2>같은 환율 변화도 역할마다 결과가 다릅니다</h2>
         </div>
-        <p class="lead">모둠별 역할을 맡아 여행, 수출, 수입, 유학, K-콘텐츠 거래의 선택을 해 보며 환율 변동의 영향을 비교합니다.</p>
+        <p class="lead">모둠별로 경제 주체가 되어 환율 상승·하락 상황에서 선택하고, 결과를 비교합니다.</p>
         <div class="action-row">
-          <button class="primary-button" type="button" data-action="lesson">수업 설명 보기</button>
+          <button class="primary-button" type="button" data-action="lesson">수업 흐름 보기</button>
           <button class="secondary-button" type="button" data-action="setup">바로 모둠 설정</button>
           ${hasSavedGame ? '<button class="secondary-button" type="button" data-action="resume">저장된 게임 이어가기</button>' : ""}
         </div>
       </div>
-      <div class="hero-art" aria-label="환전과 국제 거래 이미지"></div>
+      <div class="hero-art" aria-label="환율 그래프와 국제 거래 이미지"></div>
     </section>
   `;
 
@@ -105,25 +105,25 @@ function renderLesson() {
   const screen = createScreen();
   screen.innerHTML = `
     <section class="info-panel">
-      <h2 class="screen-title">수업 핵심 개념</h2>
-      <p class="lead">국제 거래는 국가 간에 재화, 서비스, 자본, 노동 등을 사고파는 활동입니다. 환율은 두 나라 화폐가 교환되는 비율입니다.</p>
+      <h2 class="screen-title">수업 흐름</h2>
+      <p class="lead">학생은 역할을 맡고, 교사는 모둠 선택을 화면에 입력합니다. 토의-선택-결과-짧은 발표가 한 라운드입니다.</p>
       <div class="info-grid">
         <article class="concept-card">
-          <h3>환율 상승</h3>
-          <p>외국 화폐의 가격이 올라가고 원화 가치는 하락합니다. 해외여행자와 수입업자는 부담이 커질 수 있습니다.</p>
+          <h3>1. 역할 이해</h3>
+          <p>우리 모둠이 외화를 쓰는지, 외화를 버는지 먼저 판단합니다.</p>
         </article>
         <article class="concept-card">
-          <h3>환율 하락</h3>
-          <p>외국 화폐의 가격이 낮아지고 원화 가치는 상승합니다. 해외 구매와 유학비 송금에는 유리할 수 있습니다.</p>
+          <h3>2. 선택과 결과</h3>
+          <p>환율 상황에 맞는 선택을 고르고 점수, 자금, 안정도, 위험도 변화를 확인합니다.</p>
         </article>
         <article class="concept-card">
-          <h3>유리함과 불리함</h3>
-          <p>환율 변동은 모든 경제 주체에게 같은 영향을 주지 않습니다. 역할과 거래 방식에 따라 결과가 달라집니다.</p>
+          <h3>3. 개념 정리</h3>
+          <p>환율 상승·하락의 의미와 국제 거래 유형을 역할 사례로 정리합니다.</p>
         </article>
       </div>
       <div class="teacher-panel">
-        <h3>교사용 진행 안내</h3>
-        <p>역할이 다르면 같은 환율 상황도 다르게 느껴진다는 점을 먼저 확인한 뒤 게임을 시작하세요.</p>
+        <h3>20분 운영 기준</h3>
+        <p>도입 2분, 역할 확인 3분, 라운드별 토의와 결과 12분, 최종 정리 3분으로 운영하면 여유가 있습니다.</p>
       </div>
       <div class="action-row">
         <button class="primary-button" type="button" data-action="setup">모둠 설정하기</button>
@@ -140,12 +140,12 @@ function renderSetup() {
   screen.innerHTML = `
     <section class="setup-panel">
       <h2 class="screen-title">모둠 설정</h2>
-      <p class="lead">2~8개 모둠을 설정합니다. 이름을 비워 두면 자동으로 1모둠, 2모둠처럼 표시됩니다.</p>
+      <p class="lead">2~8개 모둠을 설정합니다. 이름을 비우면 1모둠, 2모둠처럼 자동 표시됩니다.</p>
       <div class="setup-controls">
         <div class="number-control">
           <label for="teamCount">모둠 수</label>
           <input id="teamCount" type="number" min="2" max="8" value="${state.teamCount}" />
-          <button class="mini-button" type="button" data-action="apply-count">모둠 수 적용</button>
+          <button class="mini-button" type="button" data-action="apply-count">적용</button>
         </div>
         <div class="team-name-grid">
           ${names.map((name, index) => `
@@ -157,8 +157,8 @@ function renderSetup() {
         </div>
       </div>
       <div class="teacher-panel">
-        <h3>교사용 진행 안내</h3>
-        <p>모둠 이름을 학생들이 직접 정하게 하면 역할 몰입도가 올라갑니다. 시간이 부족하면 이름을 비워 두고 바로 배정하세요.</p>
+        <h3>운영 팁</h3>
+        <p>시간이 부족하면 이름 입력을 생략하고 바로 역할을 배정하세요.</p>
       </div>
       <div class="action-row">
         <button class="primary-button" type="button" data-action="assign">역할 자동 배정</button>
@@ -189,8 +189,8 @@ function renderRoles() {
       <h2 class="screen-title">역할 배정</h2>
       <p class="lead">각 모둠은 서로 다른 경제 주체가 되어 5개의 환율 상황에 대응합니다.</p>
       <div class="teacher-panel">
-        <h3>교사용 진행 안내</h3>
-        <p>각 모둠이 자기 역할의 유리한 상황과 불리한 상황을 한 문장으로 말한 뒤 1라운드를 시작하면 좋습니다.</p>
+        <h3>활동 안내</h3>
+        <p>시작 전 각 모둠이 “우리 역할은 환율 상승에 유리/불리하다”를 한 문장으로 말하게 하면 판단 기준이 선명해집니다.</p>
       </div>
       <div class="role-grid">
         ${state.teams.map((team) => roleCardTemplate(team)).join("")}
@@ -226,7 +226,7 @@ function renderRound() {
         <article class="progress-card">
           <p class="section-label">선택 완료</p>
           <strong>${selectedCount} / ${state.teams.length}</strong>
-          <p>각 모둠 카드에서 선택지를 하나씩 고릅니다.</p>
+          <p>모둠 카드에서 선택지 하나를 고릅니다.</p>
         </article>
       </div>
       <div class="classroom-tools">
@@ -235,11 +235,11 @@ function renderRound() {
         ${timerPanelTemplate()}
       </div>
       <div class="pace-panel">
-        <strong>20분 운영 리듬</strong>
+        <strong>진행 리듬</strong>
         <span>토의 45초</span>
         <span>입력 30초</span>
-        <span>해설 60초</span>
-        <span>발표는 추천 모둠 1~2곳만</span>
+        <span>결과 60초</span>
+        <span>발표는 1~2모둠만</span>
       </div>
       <div class="team-grid">
         ${state.teams.map((team) => teamChoiceTemplate(team, round)).join("")}
@@ -278,13 +278,13 @@ function renderResult() {
     <section class="result-panel">
       <h2 class="screen-title">${state.currentRoundIndex + 1}라운드 결과</h2>
       <div class="classroom-tools two-column-tools">
-        ${teacherPanelTemplate("20분 운영에서는 아래 추천 모둠만 짧게 발표시키고, 나머지는 결과 카드 확인으로 넘어가세요.")}
+        ${teacherPanelTemplate("추천 모둠 1~2곳만 짧게 발표하고, 나머지는 결과 카드 확인으로 넘어가면 흐름이 끊기지 않습니다.")}
         ${promptPanelTemplate(round.resultFocus)}
       </div>
       <div class="pace-panel">
-        <strong>이번 라운드 발표 추천</strong>
-        <span>${highlights.best.name}: 대응이 좋았던 이유 20초</span>
-        <span>${highlights.risky.name}: 위험도가 오른 이유 20초</span>
+        <strong>발표 추천</strong>
+        <span>${highlights.best.name}: 대응이 좋았던 이유</span>
+        <span>${highlights.risky.name}: 위험이 커진 이유</span>
       </div>
       <div class="explain-box">
         <h3>경제 개념 해설</h3>
@@ -329,11 +329,11 @@ function renderFinal() {
         <article class="winner-card">
           <h3>가장 위험하게 대응한 모둠</h3>
           <span class="score-big">${escapeHtml(riskiest.name)}</span>
-          <p>위험도 ${riskiest.risk}. 환율 선택에서는 기회와 위험을 함께 보아야 합니다.</p>
+          <p>위험도 ${riskiest.risk}. 기회와 위험을 함께 보는 판단이 필요합니다.</p>
         </article>
       </div>
       <article class="ranking-card">
-        <h3>모둠별 최종 점수판</h3>
+        <h3>모둠별 최종 점수</h3>
         <ol class="rank-list">
           ${sorted.map((team, index) => `
             <li>
@@ -365,8 +365,8 @@ function renderFinal() {
         <p>환율 변동은 모든 경제 주체에게 같은 영향을 주지 않습니다. 해외여행자, 수출기업, 수입기업, 유학생 가정처럼 자신이 어떤 경제 활동을 하는지에 따라 유리함과 불리함이 달라집니다.</p>
       </div>
       <div class="teacher-panel final-teacher-note">
-        <h3>교사용 마무리 발문</h3>
-        <p>“우리 모둠의 선택은 어떤 국제 거래 유형과 연결되었나요?”를 묻고 학습지 마지막 문장을 작성하게 하세요.</p>
+        <h3>마무리 질문</h3>
+        <p>우리 모둠의 선택은 어떤 국제 거래 유형과 연결되었나요? 한 문장으로 정리해 보세요.</p>
       </div>
       <div class="action-row final-actions">
         <button class="secondary-button" type="button" data-action="capture">${state.captureMode ? "일반 보기" : "캡처용 보기"}</button>
@@ -388,7 +388,7 @@ function renderMaterials() {
   screen.innerHTML = `
     <section class="summary-panel print-materials">
       <h2 class="screen-title">인쇄 자료</h2>
-      <p class="lead">수업 전에 출력하거나 화면으로 보여 줄 수 있는 자료입니다.</p>
+      <p class="lead">수업 전 출력하거나 화면으로 보여 줄 수 있는 역할 카드와 진행 요약입니다.</p>
       <div class="action-row print-hide">
         <button class="primary-button" type="button" data-action="print">현재 자료 인쇄</button>
         <button class="secondary-button" type="button" data-action="setup">게임으로 돌아가기</button>
@@ -411,13 +411,13 @@ function renderMaterials() {
         </div>
       </article>
       <article class="print-section">
-        <h3 class="section-label">라운드 진행 요약</h3>
+        <h3 class="section-label">라운드 요약</h3>
         <div class="material-table">
           <div class="material-row material-head">
             <span>라운드</span>
             <span>상황</span>
             <span>토의 질문</span>
-            <span>핵심 포인트</span>
+            <span>핵심 정리</span>
           </div>
           ${ROUNDS.map((round, index) => `
             <div class="material-row">
@@ -430,7 +430,7 @@ function renderMaterials() {
         </div>
       </article>
       <article class="print-section">
-        <h3 class="section-label">수업 마무리 발문</h3>
+        <h3 class="section-label">마무리 질문</h3>
         <div class="info-grid">
           <article class="concept-card">
             <h3>개념 확인</h3>
@@ -489,7 +489,7 @@ function timerPanelTemplate() {
         <button class="mini-button" type="button" data-timer-duration="60">60초</button>
       </div>
       <div class="action-row">
-        <button class="primary-button" type="button" data-timer-action="start">${state.timer.running ? "계속 진행 중" : "시작"}</button>
+        <button class="primary-button" type="button" data-timer-action="start">${state.timer.running ? "진행 중" : "시작"}</button>
         <button class="secondary-button" type="button" data-timer-action="pause">일시정지</button>
         <button class="ghost-button" type="button" data-timer-action="reset">다시 설정</button>
       </div>
@@ -589,7 +589,7 @@ function tradeTypesTemplate() {
         `).join("")}
       </div>
       <div class="explain-box">
-        <p>K-pop 공연 기획사는 서비스 거래 및 문화 콘텐츠 거래와 연결됩니다. 해외 원자재 수입 공장은 재화 거래와 연결됩니다. 유학생 가정은 교육 서비스와 환율 변동의 영향을 함께 보여 줍니다.</p>
+        <p>K-pop 공연 기획사는 서비스 거래와 문화 콘텐츠 거래, 해외 원자재 수입 공장은 재화 거래, 유학생 가정은 교육 서비스 거래와 연결됩니다.</p>
       </div>
     </article>
   `;
@@ -597,12 +597,8 @@ function tradeTypesTemplate() {
 
 function choiceMetaTemplate(choice, roleName) {
   const roles = choice.recommendedRoles || [];
-  if (!roles.length) {
-    return "공통 선택";
-  }
-  if (roles.includes(roleName)) {
-    return "우리 역할에 잘 맞는 선택";
-  }
+  if (!roles.length) return "공통 선택";
+  if (roles.includes(roleName)) return "우리 역할과 잘 맞는 선택";
   return `추천 역할: ${roles.slice(0, 2).join(", ")}${roles.length > 2 ? " 등" : ""}`;
 }
 
@@ -655,14 +651,14 @@ function getRoleAdjustment(roleName, round) {
     return {
       type: "strong",
       effect: { scoreChange: 2, moneyChange: 4, stabilityChange: 1, riskChange: -1 },
-      note: "역할 보정: 이번 환율 상황은 이 역할에 비교적 유리하게 작용했습니다."
+      note: "역할 보정: 이번 환율 상황은 이 역할에 유리하게 작용했습니다."
     };
   }
   if (round.weakRoles.includes(roleName)) {
     return {
       type: "weak",
       effect: { scoreChange: -2, moneyChange: -5, stabilityChange: -2, riskChange: 3 },
-      note: "역할 보정: 이번 환율 상황은 이 역할에 부담으로 작용했습니다."
+      note: "역할 보정: 이번 환율 상황은 이 역할에 불리하게 작용했습니다."
     };
   }
   return {
@@ -683,16 +679,16 @@ function getRoundHighlights() {
 
 function buildResultSummary(team, choice, roleAdjust, total) {
   const roleText = {
-    strong: "역할 자체가 이번 상황에서 유리했기 때문에 선택 효과가 더 크게 나타났습니다.",
-    weak: "역할 자체가 이번 상황에서 불리했기 때문에 좋은 선택을 해도 부담이 일부 남았습니다.",
-    neutral: "역할의 직접 영향은 크지 않아 선택 전략의 효과가 중심이 되었습니다."
+    strong: "이 역할은 이번 상황에서 기본적으로 유리했습니다.",
+    weak: "이 역할은 이번 상황에서 기본적으로 불리했습니다.",
+    neutral: "이 역할은 이번 상황의 직접 영향이 크지 않았습니다."
   }[roleAdjust.type];
   const riskText = total.riskChange > 0
-    ? "다만 위험도는 올라가 다음 라운드에서 더 신중한 대응이 필요합니다."
+    ? "다만 위험도가 올라 다음 선택에서 신중한 대응이 필요합니다."
     : total.riskChange < 0
-      ? "위험도를 낮춘 점이 안정적인 대응으로 평가됩니다."
+      ? "위험도를 낮춘 점은 안정적인 대응으로 볼 수 있습니다."
       : "위험도 변화는 크지 않았습니다.";
-  return `${team.role.name}은 ${choice.text}를 선택했습니다. ${roleText} ${riskText}`;
+  return `${team.role.name}은 “${choice.text}”를 선택했습니다. ${roleText} ${riskText}`;
 }
 
 function addEffects(...effects) {
@@ -775,8 +771,6 @@ function updateTimerDisplay() {
     timerDisplay.classList.toggle("timer-urgent", state.timer.remaining > 0 && state.timer.remaining <= 10);
   }
 }
-
-// BOOONG UX patch: timer urgency class toggles during the final 10 seconds.
 
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
