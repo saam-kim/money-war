@@ -83,7 +83,7 @@ function renderStart() {
             <small>국제 거래와 환율 역할 시뮬레이션</small>
           </h2>
         </div>
-        <p class="lead">달러·엔·원이 흔들릴 때 여행자, 수출기업, 수입기업의 선택은 달라집니다. 모둠별 역할로 환율 변동의 유불리를 겨뤄 봅니다.</p>
+        <p class="lead">뉴스를 읽고 환율 방향을 예측한 뒤, 우리 역할에 가장 유리한 선택을 찾습니다.</p>
         <div class="role-preview" aria-label="대표 역할 미리보기">
           <div class="role-chip role-chip-exporter">
             <b aria-hidden="true">🏭</b>
@@ -150,14 +150,14 @@ function renderStart() {
         <i aria-hidden="true">→</i>
         <article>
           <span aria-hidden="true">📰</span>
-          <strong>뉴스 확인</strong>
-          <p>라운드별 환율 상황을 읽습니다.</p>
+          <strong>뉴스 예측</strong>
+          <p>시장 뉴스에서 환율 방향을 추리합니다.</p>
         </article>
         <i aria-hidden="true">→</i>
         <article>
           <span aria-hidden="true">💱</span>
-          <strong>환전 결정</strong>
-          <p>역할에 맞는 선택지를 고릅니다.</p>
+          <strong>전략 선택</strong>
+          <p>우리 역할에 유리한 선택을 고릅니다.</p>
         </article>
         <i aria-hidden="true">→</i>
         <article>
@@ -189,7 +189,7 @@ function renderLesson() {
   screen.innerHTML = `
     <section class="info-panel">
       <h2 class="screen-title">활동 방법</h2>
-      <p class="lead">각 모둠은 역할을 맡고, 환율 상황마다 하나의 선택을 정합니다. 교사는 선택을 입력하고 결과와 발표를 이어 갑니다.</p>
+      <p class="lead">뉴스를 읽고 환율 방향을 예측한 뒤, 역할에 맞는 선택을 정합니다. 결과 화면에서는 왜 유리하거나 불리했는지 발표합니다.</p>
       <div class="flow-rail">
         <article>
           <span>1</span>
@@ -198,13 +198,13 @@ function renderLesson() {
         </article>
         <article>
           <span>2</span>
-          <strong>모둠 토의</strong>
-          <p>제시된 환율 상황에서 유리함과 위험을 비교합니다.</p>
+          <strong>뉴스 예측</strong>
+          <p>뉴스 속 수요와 공급 변화를 찾아 환율 방향을 예상합니다.</p>
         </article>
         <article>
           <span>3</span>
-          <strong>선택 입력</strong>
-          <p>교사가 각 모둠의 선택지 하나를 화면에 입력합니다.</p>
+          <strong>전략 선택</strong>
+          <p>우리 역할이 외화를 쓰는지 버는지 따져 선택합니다.</p>
         </article>
         <article>
           <span>4</span>
@@ -214,7 +214,7 @@ function renderLesson() {
       </div>
       <div class="teacher-panel">
         <h3>20분 운영 기준</h3>
-        <p>도입 2분, 역할 확인 3분, 라운드 진행 12분, 최종 정리 3분을 기준으로 합니다.</p>
+        <p>도입 2분, 역할 확인 3분, 뉴스 예측과 선택 12분, 결과 발표와 정리 3분을 기준으로 합니다.</p>
       </div>
       <div class="action-row">
         <button class="primary-button" type="button" data-action="setup">모둠 설정하기</button>
@@ -278,10 +278,10 @@ function renderRoles() {
   screen.innerHTML = `
     <section class="info-panel">
       <h2 class="screen-title">역할 배정</h2>
-      <p class="lead">각 모둠은 서로 다른 경제 주체가 되어 5개의 환율 상황에 대응합니다.</p>
-      <div class="teacher-panel">
-        <h3>활동 안내</h3>
-        <p>시작 전 각 모둠이 “우리 역할은 환율 상승에 유리/불리하다”를 한 문장으로 말하게 하면 판단 기준이 선명해집니다.</p>
+      <p class="lead">우리 모둠이 외화를 쓰는 쪽인지, 벌어들이는 쪽인지 먼저 확인합니다.</p>
+      <div class="prompt-panel">
+        <h3>시작 전 한 문장</h3>
+        <p>“우리 역할은 외화를 쓰기 때문에 환율이 오르면 불리하다”처럼 역할의 기준을 먼저 말해 봅니다.</p>
       </div>
       <div class="role-grid">
         ${state.teams.map((team) => roleCardTemplate(team)).join("")}
@@ -314,10 +314,10 @@ function renderRound() {
       <div class="round-header">
         <article class="exchange-card news-card ${newsTone} ${revealedNewsRounds.has(state.currentRoundIndex) ? "is-revealed" : ""}">
           <div class="news-card-toolbar">
-            <span class="news-label">환율 힌트 뉴스</span>
+            <span class="news-label">시장 뉴스</span>
             <button class="mini-button fullscreen-button" type="button" data-action="toggle-fullscreen">전체화면</button>
           </div>
-          <button class="news-reveal-button" type="button" data-action="reveal-news" aria-label="환율 힌트 뉴스 공개">
+          <button class="news-reveal-button" type="button" data-action="reveal-news" aria-label="시장 뉴스 공개">
             <span>▶ 클릭하여 공개</span>
           </button>
           <div class="news-card-content">
@@ -325,22 +325,22 @@ function renderRound() {
           </div>
         </article>
         <article class="progress-card">
-          <p class="section-label">선택 완료</p>
+          <p class="section-label">입력 현황</p>
           <strong>${selectedCount} / ${state.teams.length}</strong>
-          <p>모둠 카드에서 선택지 하나를 고릅니다.</p>
+          <p>각 모둠의 전략 선택을 입력합니다.</p>
         </article>
       </div>
       <div class="classroom-tools">
         ${showTeacherStatus ? teacherPanelTemplate(round.teacherGuide) : predictionPanelTemplate()}
-        ${promptPanelTemplate("뉴스를 보고 환율 방향을 먼저 예측한 뒤, 우리 역할이 외화를 쓰는 쪽인지 벌어들이는 쪽인지 따져 보세요.")}
+        ${promptPanelTemplate("뉴스 속에서 외화를 사려는 쪽과 팔려는 쪽을 찾고, 우리 역할의 비용과 수입이 어떻게 바뀔지 따져 보세요.")}
         ${timerPanelTemplate()}
       </div>
       <div class="pace-panel">
-        <strong>진행 리듬</strong>
-        <span>토의 45초</span>
-        <span>입력 30초</span>
-        <span>결과 60초</span>
-        <span>발표는 1~2모둠만</span>
+        <strong>수업 흐름</strong>
+        <span>뉴스 예측</span>
+        <span>전략 선택</span>
+        <span>결과 확인</span>
+        <span>짧은 발표</span>
       </div>
       ${showTeacherStatus ? teacherSubmissionPanelTemplate() : ""}
       <div class="team-grid">
@@ -770,8 +770,8 @@ function roundNewsHintTemplate() {
 function predictionPanelTemplate() {
   return `
     <article class="prediction-panel">
-      <h3>예측 순서</h3>
-      <p>1. 뉴스만 보고 환율 방향을 먼저 예상합니다.<br>2. 우리 역할이 유리한지 불리한지 판단합니다.<br>3. 역할에 맞는 선택지를 하나 고릅니다.</p>
+      <h3>생각 순서</h3>
+      <p>뉴스에서 외화 수요·공급 변화를 찾고, 우리 역할이 외화를 쓰는지 버는지 연결합니다.</p>
     </article>
   `;
 }
@@ -1144,7 +1144,13 @@ function buildResultSummary(team, choice, roleAdjust, total) {
     : total.riskChange < 0
       ? "위험도를 낮춘 점은 안정적인 대응으로 볼 수 있습니다."
       : "위험도 변화는 크지 않았습니다.";
-  return `${team.role.name}은 “${choice.text}”를 선택했습니다. ${roleText} ${riskText}`;
+  return `${team.role.name}${subjectParticle(team.role.name)} “${choice.text}”를 선택했습니다. ${roleText} ${riskText}`;
+}
+
+function subjectParticle(text) {
+  const last = text.trim().charCodeAt(text.trim().length - 1);
+  if (last < 0xac00 || last > 0xd7a3) return "은";
+  return (last - 0xac00) % 28 === 0 ? "는" : "은";
 }
 
 function addEffects(...effects) {
