@@ -24,6 +24,7 @@ const initialState = {
 
 let state = structuredClone(initialState);
 let timerInterval = null;
+const revealedNewsRounds = new Set();
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -35,7 +36,11 @@ function updateHeader() {
     : `${state.currentRoundIndex + 1} / ${ROUNDS.length}`;
 
   headerRound.textContent = state.screen === "final" ? "종료" : roundText;
-  headerExchange.textContent = preGameScreens.includes(state.screen) ? "수업 준비" : round.shortStatus;
+  headerExchange.textContent = preGameScreens.includes(state.screen)
+    ? "수업 준비"
+    : state.screen === "round"
+      ? "뉴스 예측 중"
+      : round.shortStatus;
   document.body.classList.toggle("capture-mode", state.captureMode && state.screen === "final");
 }
 
@@ -72,21 +77,100 @@ function renderStart() {
     <section class="hero-panel">
       <div class="hero-copy">
         <div>
-          <p class="subject-label">국제 거래와 환율</p>
-          <h2>같은 환율 변화도 역할마다 결과가 다릅니다</h2>
+          <p class="game-tag">환율 전략 시뮬레이션 게임</p>
+          <h2>
+            <span>환율 배틀: 머니워</span>
+            <small>국제 거래와 환율 역할 시뮬레이션</small>
+          </h2>
         </div>
-        <p class="lead">모둠별로 경제 주체가 되어 환율 상승·하락 상황에서 선택하고, 결과를 비교합니다.</p>
+        <p class="lead">달러·엔·원이 흔들릴 때 여행자, 수출기업, 수입기업의 선택은 달라집니다. 모둠별 역할로 환율 변동의 유불리를 겨뤄 봅니다.</p>
+        <div class="role-preview" aria-label="대표 역할 미리보기">
+          <div class="role-chip role-chip-exporter">
+            <b aria-hidden="true">🏭</b>
+            <span>팀 A</span>
+            <strong>수출기업</strong>
+            <small>환율 상승 시 유리</small>
+          </div>
+          <div class="role-chip role-chip-importer">
+            <b aria-hidden="true">📦</b>
+            <span>팀 B</span>
+            <strong>수입기업</strong>
+            <small>환율 하락 시 유리</small>
+          </div>
+          <div class="role-chip role-chip-traveler">
+            <b aria-hidden="true">✈️</b>
+            <span>팀 C</span>
+            <strong>해외여행자</strong>
+            <small>환율 하락 시 유리</small>
+          </div>
+        </div>
         <div class="action-row">
-          <button class="primary-button" type="button" data-action="lesson">수업 흐름 보기</button>
-          <button class="secondary-button" type="button" data-action="setup">바로 모둠 설정</button>
+          <button class="primary-button" type="button" data-action="setup">게임 시작하기</button>
+          <button class="secondary-button" type="button" data-action="lesson">활동 방법 보기</button>
           ${hasSavedGame ? '<button class="secondary-button" type="button" data-action="resume">저장된 게임 이어가기</button>' : ""}
         </div>
+      </div>
+      <aside class="hero-dashboard" aria-label="환율 배틀 핵심 정보">
+        <div class="dashboard-section">
+          <p class="dashboard-label">오늘의 환율 현황</p>
+          <div class="ticker-row">
+            <strong>USD/KRW</strong>
+            <span>1,380</span>
+            <em class="ticker-up">+12</em>
+          </div>
+          <div class="ticker-row">
+            <strong>JPY/KRW</strong>
+            <span>9.24</span>
+            <em class="ticker-down">-0.08</em>
+          </div>
+        </div>
+        <div class="dashboard-section">
+          <p class="dashboard-label">판단 기준</p>
+          <div class="criteria-list">
+            <span>환율 상승</span><p>외화 가격 상승, 원화 가치 하락</p>
+            <span>환율 하락</span><p>외화 가격 하락, 원화 가치 상승</p>
+            <span>역할 차이</span><p>수출·수입·여행·유학의 손익 비교</p>
+          </div>
+        </div>
+        <div class="asset-preview">
+          <div><span>자금</span><strong>100</strong><small>초기 보유 자산 (만 원)</small></div>
+          <div><span>안정도</span><strong>50</strong><small>환율 예측 정확도 점수</small></div>
+          <div><span>위험도</span><strong>10</strong><small>고위험 환전 시 패널티</small></div>
+        </div>
+      </aside>
+    </section>
+    <section class="home-flow" aria-label="게임 진행 흐름">
+      <h3>어떻게 진행되나요?</h3>
+      <div class="home-flow-steps">
+        <article>
+          <span aria-hidden="true">🎭</span>
+          <strong>역할 배정</strong>
+          <p>모둠별 경제 주체를 확인합니다.</p>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span aria-hidden="true">📰</span>
+          <strong>뉴스 확인</strong>
+          <p>라운드별 환율 상황을 읽습니다.</p>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span aria-hidden="true">💱</span>
+          <strong>환전 결정</strong>
+          <p>역할에 맞는 선택지를 고릅니다.</p>
+        </article>
+        <i aria-hidden="true">→</i>
+        <article>
+          <span aria-hidden="true">📊</span>
+          <strong>결과 비교</strong>
+          <p>점수와 이유를 함께 확인합니다.</p>
+        </article>
       </div>
     </section>
   `;
 
-  screen.querySelector("[data-action='lesson']").addEventListener("click", () => go("lesson"));
-  screen.querySelector("[data-action='setup']").addEventListener("click", () => go("setup"));
+  screen.querySelectorAll("[data-action='lesson']").forEach((button) => button.addEventListener("click", () => go("lesson")));
+  screen.querySelectorAll("[data-action='setup']").forEach((button) => button.addEventListener("click", () => go("setup")));
   const resumeButton = screen.querySelector("[data-action='resume']");
   if (resumeButton) {
     resumeButton.addEventListener("click", () => {
@@ -104,25 +188,33 @@ function renderLesson() {
   const screen = createScreen();
   screen.innerHTML = `
     <section class="info-panel">
-      <h2 class="screen-title">수업 흐름</h2>
-      <p class="lead">학생은 역할을 맡고, 교사는 모둠 선택을 화면에 입력합니다. 토의-선택-결과-짧은 발표가 한 라운드입니다.</p>
-      <div class="info-grid">
-        <article class="concept-card">
-          <h3>1. 역할 이해</h3>
-          <p>우리 모둠이 외화를 쓰는지, 외화를 버는지 먼저 판단합니다.</p>
+      <h2 class="screen-title">활동 방법</h2>
+      <p class="lead">각 모둠은 역할을 맡고, 환율 상황마다 하나의 선택을 정합니다. 교사는 선택을 입력하고 결과와 발표를 이어 갑니다.</p>
+      <div class="flow-rail">
+        <article>
+          <span>1</span>
+          <strong>역할 확인</strong>
+          <p>외화를 쓰는 역할인지, 버는 역할인지 판단합니다.</p>
         </article>
-        <article class="concept-card">
-          <h3>2. 선택과 결과</h3>
-          <p>환율 상황에 맞는 선택을 고르고 점수, 자금, 안정도, 위험도 변화를 확인합니다.</p>
+        <article>
+          <span>2</span>
+          <strong>모둠 토의</strong>
+          <p>제시된 환율 상황에서 유리함과 위험을 비교합니다.</p>
         </article>
-        <article class="concept-card">
-          <h3>3. 개념 정리</h3>
-          <p>환율 상승·하락의 의미와 국제 거래 유형을 역할 사례로 정리합니다.</p>
+        <article>
+          <span>3</span>
+          <strong>선택 입력</strong>
+          <p>교사가 각 모둠의 선택지 하나를 화면에 입력합니다.</p>
+        </article>
+        <article>
+          <span>4</span>
+          <strong>결과 발표</strong>
+          <p>추천 모둠 1~2곳만 이유를 짧게 말합니다.</p>
         </article>
       </div>
       <div class="teacher-panel">
         <h3>20분 운영 기준</h3>
-        <p>도입 2분, 역할 확인 3분, 라운드별 토의와 결과 12분, 최종 정리 3분으로 운영하면 여유가 있습니다.</p>
+        <p>도입 2분, 역할 확인 3분, 라운드 진행 12분, 최종 정리 3분을 기준으로 합니다.</p>
       </div>
       <div class="action-row">
         <button class="primary-button" type="button" data-action="setup">모둠 설정하기</button>
@@ -202,6 +294,7 @@ function renderRoles() {
   `;
   screen.querySelector("[data-action='setup']").addEventListener("click", () => go("setup"));
   screen.querySelector("[data-action='start-round']").addEventListener("click", () => {
+    revealedNewsRounds.clear();
     state.currentRoundIndex = 0;
     state.selections = {};
     resetTimer(false);
@@ -213,14 +306,23 @@ function renderRoles() {
 function renderRound() {
   const round = ROUNDS[state.currentRoundIndex];
   const selectedCount = Object.keys(state.selections).length;
+  const newsTone = "news-neutral";
+  const showTeacherStatus = new URLSearchParams(window.location.search).get("teacher") === "true";
   const screen = createScreen();
   screen.innerHTML = `
     <section class="round-panel">
       <div class="round-header">
-        <article class="exchange-card">
-          <h2>${state.currentRoundIndex + 1}라운드: ${round.title}</h2>
-          ${exchangeMoveTemplate()}
-          <p>${round.situation}</p>
+        <article class="exchange-card news-card ${newsTone} ${revealedNewsRounds.has(state.currentRoundIndex) ? "is-revealed" : ""}">
+          <div class="news-card-toolbar">
+            <span class="news-label">환율 힌트 뉴스</span>
+            <button class="mini-button fullscreen-button" type="button" data-action="toggle-fullscreen">전체화면</button>
+          </div>
+          <button class="news-reveal-button" type="button" data-action="reveal-news" aria-label="환율 힌트 뉴스 공개">
+            <span>▶ 클릭하여 공개</span>
+          </button>
+          <div class="news-card-content">
+            ${roundNewsHintTemplate()}
+          </div>
         </article>
         <article class="progress-card">
           <p class="section-label">선택 완료</p>
@@ -229,8 +331,8 @@ function renderRound() {
         </article>
       </div>
       <div class="classroom-tools">
-        ${teacherPanelTemplate(round.teacherGuide)}
-        ${promptPanelTemplate(round.discussionPrompt)}
+        ${showTeacherStatus ? teacherPanelTemplate(round.teacherGuide) : predictionPanelTemplate()}
+        ${promptPanelTemplate("뉴스를 보고 환율 방향을 먼저 예측한 뒤, 우리 역할이 외화를 쓰는 쪽인지 벌어들이는 쪽인지 따져 보세요.")}
         ${timerPanelTemplate()}
       </div>
       <div class="pace-panel">
@@ -240,6 +342,7 @@ function renderRound() {
         <span>결과 60초</span>
         <span>발표는 1~2모둠만</span>
       </div>
+      ${showTeacherStatus ? teacherSubmissionPanelTemplate() : ""}
       <div class="team-grid">
         ${state.teams.map((team) => teamChoiceTemplate(team, round)).join("")}
       </div>
@@ -249,6 +352,7 @@ function renderRound() {
     </section>
   `;
 
+  bindNewsCardControls(screen);
   bindTimerControls(screen);
 
   screen.querySelectorAll("[data-choice-button]").forEach((button) => {
@@ -276,22 +380,23 @@ function renderResult() {
   screen.innerHTML = `
     <section class="result-panel">
       <h2 class="screen-title">${state.currentRoundIndex + 1}라운드 결과</h2>
-      <div class="classroom-tools two-column-tools">
-        ${teacherPanelTemplate("추천 모둠 1~2곳만 짧게 발표하고, 나머지는 결과 카드 확인으로 넘어가면 흐름이 끊기지 않습니다.")}
+      <div class="result-brief">
         ${promptPanelTemplate(round.resultFocus)}
-      </div>
-      <div class="pace-panel">
+        <div class="pace-panel">
         <strong>발표 추천</strong>
         <span>${highlights.best.name}: 대응이 좋았던 이유</span>
         <span>${highlights.risky.name}: 위험이 커진 이유</span>
+        </div>
       </div>
       <div class="explain-box">
         <h3>경제 개념 해설</h3>
         <p>${round.concept}</p>
       </div>
+      ${assetBarChartTemplate()}
       <div class="result-grid">
         ${state.teams.map((team) => resultCardTemplate(team)).join("")}
       </div>
+      ${roundConceptCardTemplate(round)}
       ${state.currentRoundIndex === 2 ? tradeTypesTemplate() : ""}
       <div class="action-row sticky-actions">
         <button class="primary-button" type="button" data-action="next">${isLastRound ? "최종 결과 보기" : "다음 라운드"}</button>
@@ -318,6 +423,7 @@ function renderFinal() {
   const screen = createScreen();
   screen.innerHTML = `
     <section class="summary-panel capture-target">
+      ${finalVictoryBannerTemplate(sorted)}
       <h2 class="screen-title">최종 결과</h2>
       <div class="final-grid">
         <article class="winner-card">
@@ -343,6 +449,8 @@ function renderFinal() {
           `).join("")}
         </ol>
       </article>
+      ${moneyTrendChartTemplate()}
+      ${learningSummaryTemplate()}
       <article class="info-panel">
         <h3 class="section-label">역할별 유불리 정리</h3>
         <div class="role-grid">
@@ -380,6 +488,116 @@ function renderFinal() {
     persistAndRender();
   });
   return screen;
+}
+
+function finalVictoryBannerTemplate(sortedTeams) {
+  const winner = sortedTeams[0];
+  const runnerText = sortedTeams.slice(1, 3)
+    .map((team, index) => `${index + 2}위 ${escapeHtml(team.name)}`)
+    .join(" · ");
+  const visual = roleVisualTemplate(winner);
+  return `
+    <article class="victory-banner" style="--winner-bg: ${visual.bg}; --winner-text: ${visual.text}; --winner-line: ${visual.line}">
+      <strong>🏆 ${escapeHtml(winner.name)} 우승! 최종 자산 ${winner.money}만 원</strong>
+      <span>${runnerText || "끝까지 참여한 모든 모둠이 환율 전략가입니다."}</span>
+    </article>
+  `;
+}
+
+function moneyTrendChartTemplate() {
+  const teams = getTrendTeams();
+  const series = teams.map((team) => ({
+    team,
+    visual: roleVisualTemplate(team),
+    values: getMoneyHistory(team)
+  }));
+  const maxRounds = Math.max(...series.map((item) => item.values.length), 1);
+  const allValues = series.flatMap((item) => item.values);
+  const minValue = Math.min(...allValues, 0);
+  const maxValue = Math.max(...allValues, 1);
+  const range = Math.max(1, maxValue - minValue);
+  const width = 1000;
+  const height = 260;
+  const plot = { left: 96, right: 36, top: 28, bottom: 58 };
+  const plotWidth = width - plot.left - plot.right;
+  const plotHeight = height - plot.top - plot.bottom;
+  const xFor = (index) => plot.left + (maxRounds === 1 ? 0 : (plotWidth * index) / (maxRounds - 1));
+  const yFor = (value) => plot.top + plotHeight - ((value - minValue) / range) * plotHeight;
+  const labels = Array.from({ length: maxRounds }, (_, index) => index === 0 ? "시작" : `${index}라운드 후`);
+
+  return `
+    <article class="trend-card">
+      <h3 class="section-label">라운드별 자산 변동</h3>
+      <svg class="money-trend-chart" viewBox="0 0 ${width} ${height}" role="img" aria-label="라운드별 자산 변동 꺾은선 그래프">
+        <line class="trend-axis" x1="${plot.left}" y1="${plot.top}" x2="${plot.left}" y2="${height - plot.bottom}"></line>
+        <line class="trend-axis" x1="${plot.left}" y1="${height - plot.bottom}" x2="${width - plot.right}" y2="${height - plot.bottom}"></line>
+        ${labels.map((label, index) => `
+          <text class="trend-x-label" x="${xFor(index)}" y="${height - 24}">${label}</text>
+        `).join("")}
+        ${[minValue, maxValue].map((value) => `
+          <text class="trend-y-label" x="${plot.left - 12}" y="${yFor(value) + 4}">${Math.round(value)}</text>
+        `).join("")}
+        ${series.map((item) => {
+          const points = item.values.map((value, index) => `${xFor(index)},${yFor(value)}`).join(" ");
+          return `
+            <polyline class="trend-line" points="${points}" fill="none" stroke="${item.visual.line}"></polyline>
+            ${item.values.map((value, index) => `
+              <circle class="trend-dot" cx="${xFor(index)}" cy="${yFor(value)}" r="7" fill="${item.visual.line}">
+                <title>${escapeHtml(item.team.name)} · ${labels[index]} · ${value}만 원</title>
+              </circle>
+            `).join("")}
+          `;
+        }).join("")}
+      </svg>
+      <div class="trend-legend">
+        ${series.map((item) => `<span><i style="background:${item.visual.line}"></i>${escapeHtml(item.team.name)} · ${item.team.role.name}</span>`).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function getTrendTeams() {
+  const preferred = ["수출", "수입", "여행"]
+    .map((keyword) => state.teams.find((team) => team.role.name.includes(keyword)))
+    .filter(Boolean);
+  const combined = [...preferred, ...state.teams].filter((team, index, array) => (
+    array.findIndex((item) => item.id === team.id) === index
+  ));
+  return combined.slice(0, 3);
+}
+
+function getMoneyHistory(team) {
+  const values = [team.role.initialMoney];
+  team.history.forEach((entry) => {
+    const previous = values[values.length - 1];
+    values.push(Math.max(0, previous + entry.total.moneyChange));
+  });
+  if (values.length === 1 && team.money !== values[0]) {
+    values.push(team.money);
+  }
+  return values;
+}
+
+function learningSummaryTemplate() {
+  return `
+    <section class="learning-summary-grid" aria-label="오늘 배운 것">
+      <article>
+        <span aria-hidden="true">📈</span>
+        <h3>환율이 오르면</h3>
+        <p>수출기업 유리<br>수입기업 불리<br>여행자 불리</p>
+      </article>
+      <article>
+        <span aria-hidden="true">📉</span>
+        <h3>환율이 내리면</h3>
+        <p>수입기업 유리<br>수출기업 불리<br>여행자 유리</p>
+      </article>
+      <article>
+        <span aria-hidden="true">⚖️</span>
+        <h3>역할마다 전략이 다르다</h3>
+        <p>같은 환율도<br>입장에 따라 득실이<br>달라진다</p>
+      </article>
+    </section>
+  `;
 }
 
 function renderMaterials() {
@@ -445,6 +663,50 @@ function renderMaterials() {
           </article>
         </div>
       </article>
+      <article class="print-section worksheet-section page-break">
+        <h2>환율 배틀 · 모둠 활동지</h2>
+        <div class="worksheet-meta">
+          <span>나의 역할: ____________________</span>
+          <span>모둠명: ____________________</span>
+          <span>이름: ____________________</span>
+        </div>
+        <h3>라운드별 기록표</h3>
+        <table class="worksheet-table">
+          <thead>
+            <tr>
+              <th>라운드</th>
+              <th>뉴스 내용 요약</th>
+              <th>우리 팀 예측</th>
+              <th>실제 환율 방향</th>
+              <th>우리 팀 손익</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${[1, 2, 3].map((roundNumber) => `
+              <tr>
+                <th>${roundNumber}라운드</th>
+                <td></td>
+                <td>상승 / 하락</td>
+                <td>상승 / 하락</td>
+                <td>이익 / 손실</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <h3>생각해보기</h3>
+        <div class="worksheet-question">
+          <p>Q1. 환율이 오르면 수출기업에 유리한 이유는 무엇인가요?</p>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div class="worksheet-question">
+          <p>Q2. 내가 속한 역할에서 환율 변동에 대응하는 가장 좋은 전략은?</p>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </article>
     </section>
   `;
   screen.querySelector("[data-action='print']").addEventListener("click", () => window.print());
@@ -457,7 +719,7 @@ function renderMaterials() {
 function teacherPanelTemplate(text) {
   return `
     <article class="teacher-panel">
-      <h3>교사용 진행 안내</h3>
+      <h3>진행 안내</h3>
       <p>${text}</p>
     </article>
   `;
@@ -467,6 +729,101 @@ function exchangeMoveTemplate() {
   const moves = ["+9.2%", "-12.0%", "엔화↓", "비용↑", "수출↑"];
   return `<span class="exchange-move">${moves[state.currentRoundIndex] || ""}</span>`;
 }
+
+function roundNewsHintTemplate() {
+  const hints = [
+    {
+      title: "공항 환전소 앞 긴 줄... 달러 사려는 사람이 몰렸다",
+      lead: "방학 해외여행 예약이 늘고, 일부 수입업체도 결제일을 앞두고 달러를 서둘러 확보하고 있습니다. 은행 직원들은 “오전부터 달러 문의가 평소보다 훨씬 많다”고 전했습니다.",
+      cue: "뉴스 판단: 달러를 사려는 사람이 많아지면 원/달러 환율은 어느 쪽으로 움직일까요?"
+    },
+    {
+      title: "수출 대금 들어오고 외국인 투자도 회복... 달러 매물 늘어",
+      lead: "대형 수출기업들이 받은 달러를 원화로 바꾸기 시작했고, 외국인 투자자금도 국내 시장으로 들어오고 있습니다. 외환 딜러들은 “달러를 팔려는 주문이 눈에 띈다”고 말했습니다.",
+      cue: "뉴스 판단: 시장에 달러를 파는 사람이 많아지면 원/달러 환율은 어느 쪽으로 움직일까요?"
+    },
+    {
+      title: "“지금 일본 가면 싸다” 여행사 예약 알림이 쏟아졌다",
+      lead: "일본 호텔과 항공권을 검색하던 소비자들이 예상보다 낮은 여행 경비에 반응하고 있습니다. 온라인 커뮤니티에는 ‘엔화로 결제하니 부담이 줄었다’는 후기가 이어졌습니다.",
+      cue: "뉴스 판단: 일본 여행 비용이 싸게 느껴진다면 엔화 가치는 강해졌을까요, 약해졌을까요?"
+    },
+    {
+      title: "기름값·구리값 동반 상승... 공장들 원가 계산 다시 한다",
+      lead: "국제 원자재 가격이 뛰자, 해외에서 원료를 들여오는 공장들이 납품 가격과 생산량 조정을 검토하고 있습니다. 여기에 외화 결제 부담까지 겹칠 수 있다는 우려도 나옵니다.",
+      cue: "뉴스 판단: 원자재를 수입하는 기업은 어떤 위험을 먼저 줄여야 할까요?"
+    },
+    {
+      title: "월드투어 매진에 굿즈 주문 폭주... K-콘텐츠 달러 수입 늘었다",
+      lead: "해외 공연 티켓과 온라인 콘텐츠 판매가 빠르게 늘면서 기획사들이 해외 홍보 예산을 늘리고 있습니다. 팬덤 소비가 음원, 공연, 관광 상품으로 이어지는 모습입니다.",
+      cue: "뉴스 판단: 문화 콘텐츠로 외화를 버는 기업은 지금 어떤 전략을 세우는 게 좋을까요?"
+    }
+  ];
+  const hint = hints[state.currentRoundIndex] || hints[0];
+  return `
+    <h2>${state.currentRoundIndex + 1}라운드 뉴스</h2>
+    <strong class="news-headline">${hint.title}</strong>
+    <p>${hint.lead}</p>
+    <p class="news-cue">${hint.cue}</p>
+  `;
+}
+
+function predictionPanelTemplate() {
+  return `
+    <article class="prediction-panel">
+      <h3>예측 순서</h3>
+      <p>1. 뉴스만 보고 환율 방향을 먼저 예상합니다.<br>2. 우리 역할이 유리한지 불리한지 판단합니다.<br>3. 역할에 맞는 선택지를 하나 고릅니다.</p>
+    </article>
+  `;
+}
+
+function getNewsTone(round) {
+  const text = `${round.shortStatus} ${round.title}`;
+  if (text.includes("상승") || text.includes("수출 증가")) {
+    return "news-up";
+  }
+  if (text.includes("하락") || text.includes("엔화↓")) {
+    return "news-down";
+  }
+  return "news-neutral";
+}
+
+function bindNewsCardControls(root) {
+  const newsCard = root.querySelector(".news-card");
+  const revealButton = root.querySelector("[data-action='reveal-news']");
+  const fullscreenButton = root.querySelector("[data-action='toggle-fullscreen']");
+
+  if (revealButton && newsCard) {
+    revealButton.addEventListener("click", () => {
+      revealedNewsRounds.add(state.currentRoundIndex);
+      newsCard.classList.add("is-revealed");
+    });
+  }
+
+  if (fullscreenButton) {
+    updateFullscreenButtons();
+    fullscreenButton.addEventListener("click", async () => {
+      try {
+        if (document.fullscreenElement) {
+          await document.exitFullscreen();
+        } else if (document.documentElement.requestFullscreen) {
+          await document.documentElement.requestFullscreen();
+        }
+      } catch (error) {
+        console.warn("Fullscreen toggle failed", error);
+      } finally {
+        updateFullscreenButtons();
+      }
+    });
+  }
+}
+
+function updateFullscreenButtons() {
+  document.querySelectorAll("[data-action='toggle-fullscreen']").forEach((button) => {
+    button.textContent = document.fullscreenElement ? "나가기" : "전체화면";
+  });
+}
+
+document.addEventListener("fullscreenchange", updateFullscreenButtons);
 
 function promptPanelTemplate(text) {
   return `
@@ -478,10 +835,13 @@ function promptPanelTemplate(text) {
 }
 
 function timerPanelTemplate() {
+  const progress = state.timer.duration ? Math.round((state.timer.remaining / state.timer.duration) * 100) : 0;
   return `
-    <article class="timer-panel">
+    <article class="timer-panel ${state.timer.remaining <= 10 ? "timer-panel-danger" : state.timer.remaining <= 20 ? "timer-panel-warning" : ""}" style="--timer-progress: ${progress}%">
       <h3>토의 타이머</h3>
-      <strong id="timerDisplay">${formatTime(state.timer.remaining)}</strong>
+      <div class="timer-orb" aria-label="남은 시간">
+        <strong id="timerDisplay">${formatTime(state.timer.remaining)}</strong>
+      </div>
       <div class="timer-presets">
         <button class="mini-button" type="button" data-timer-duration="30">30초</button>
         <button class="mini-button" type="button" data-timer-duration="45">45초</button>
@@ -518,10 +878,14 @@ function roleCardTemplate(team) {
 
 function teamChoiceTemplate(team, round) {
   const selected = state.selections[team.id];
+  const visual = roleVisualTemplate(team);
   return `
     <article class="team-card ${selected !== undefined ? "selected" : ""}">
-      <h3>${escapeHtml(team.name)}</h3>
-      <p>${team.role.name}</p>
+      <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
+        <span aria-hidden="true">${visual.icon}</span>
+        <strong>${escapeHtml(team.name)} · ${team.role.name}</strong>
+        <em>${selected !== undefined ? "선택 완료" : "지금 결정하세요"}</em>
+      </div>
       <div class="metric-row">
         <span class="metric">점수 ${team.score}</span>
         <span class="metric">자금 ${team.money}</span>
@@ -533,7 +897,6 @@ function teamChoiceTemplate(team, round) {
         ${round.choices.map((choice, index) => `
           <button class="choice-button ${selected === index ? "selected" : ""}" type="button" data-choice-button data-team-id="${team.id}" data-choice-index="${index}">
             <span>${choice.text}</span>
-            <small>${choiceMetaTemplate(choice, team.role.name)}</small>
           </button>
         `).join("")}
       </div>
@@ -541,11 +904,37 @@ function teamChoiceTemplate(team, round) {
   `;
 }
 
+function roleVisualTemplate(team) {
+  const roleName = team.role.name;
+  if (roleName.includes("수출") || roleName.includes("K-pop")) {
+    return { icon: "🏭", bg: "#dcfce7", text: "#166534", line: "#16a34a" };
+  }
+  if (roleName.includes("수입") || roleName.includes("원자재")) {
+    return { icon: "📦", bg: "#fee2e2", text: "#991b1b", line: "#dc2626" };
+  }
+  if (roleName.includes("여행") || roleName.includes("직구") || roleName.includes("유학생")) {
+    return { icon: "✈️", bg: "#fef9c3", text: "#854d0e", line: "#d97706" };
+  }
+  return { icon: "💱", bg: "var(--color-brand-soft)", text: "var(--color-brand-ink)", line: "var(--color-brand)" };
+}
+
+function teacherSubmissionPanelTemplate() {
+  return `
+    <aside class="submission-panel" aria-label="선생님용 제출 현황">
+      <strong>제출 현황</strong>
+      ${state.teams.map((team) => {
+        const done = state.selections[team.id] !== undefined;
+        return `<span class="${done ? "is-done" : ""}">${escapeHtml(team.name)} 제출: ${done ? "✅ 완료" : "⏳ 대기중"}</span>`;
+      }).join("")}
+    </aside>
+  `;
+}
+
 function resultCardTemplate(team) {
   const last = team.history[team.history.length - 1];
   return `
     <article class="change-card">
-      <h3>${escapeHtml(team.name)}</h3>
+      <h3 class="result-card-title">${escapeHtml(team.name)} ${profitBadgeTemplate(team, last)}</h3>
       <p>${team.role.name} · 선택: ${last.choiceText}</p>
       <div class="delta-row">
         ${deltaTemplate("점수", last.total.scoreChange)}
@@ -567,6 +956,81 @@ function resultCardTemplate(team) {
       <p>${last.roleNote}</p>
     </article>
   `;
+}
+
+function assetBarChartTemplate() {
+  const maxMoney = Math.max(...state.teams.map((team) => team.money), 1);
+  const rowHeight = 52;
+  const chartHeight = state.teams.length * rowHeight + 16;
+  return `
+    <article class="asset-chart-card">
+      <h3 class="section-label">팀별 현재 자산 비교</h3>
+      <svg class="asset-bar-chart" viewBox="0 0 1000 ${chartHeight}" role="img" aria-label="팀별 현재 자산 가로 막대 차트">
+        ${state.teams.map((team, index) => {
+          const visual = roleVisualTemplate(team);
+          const y = 10 + index * rowHeight;
+          const width = Math.max(28, Math.round((team.money / maxMoney) * 680));
+          const isTop = team.money === maxMoney;
+          const valueX = Math.min(950, 230 + width + 16);
+          return `
+            <text class="bar-team-label" x="18" y="${y + 26}">${escapeHtml(team.name)}</text>
+            <rect class="asset-bar ${isTop ? "is-top" : ""}" x="230" y="${y}" width="${width}" height="40" rx="6" fill="${visual.line}" ${isTop ? 'stroke="#d97706" stroke-width="4"' : ""}></rect>
+            <text class="bar-value-label" x="${valueX}" y="${y + 26}">${team.money}만 원</text>
+          `;
+        }).join("")}
+      </svg>
+    </article>
+  `;
+}
+
+function profitBadgeTemplate(team, last) {
+  const startMoney = Math.max(1, team.money - last.total.moneyChange);
+  const rate = ((team.money - startMoney) / startMoney) * 100;
+  if (Math.abs(rate) < 0.05) {
+    return '<span class="profit-badge neutral">— 0%</span>';
+  }
+  const isUp = rate > 0;
+  return `<span class="profit-badge ${isUp ? "up" : "down"}">${isUp ? "▲" : "▼"} ${isUp ? "+" : ""}${rate.toFixed(1)}%</span>`;
+}
+
+function roundConceptCardTemplate(round) {
+  const direction = getRoundDirection(round);
+  if (direction === "down") {
+    return `
+      <article class="round-core-card">
+        <h3>📉 이번 라운드 핵심</h3>
+        <p>환율이 내렸습니다. (USD/KRW ▼)</p>
+        <p>→ 수출기업: 달러 수입을 원화로 환전할 때 이익 ↓</p>
+        <p>→ 수입기업: 달러 결제 비용 감소 → 부담 완화</p>
+        <p>→ 여행자: 해외 체류비 부담 감소 → 유리</p>
+      </article>
+    `;
+  }
+  if (direction === "up") {
+    return `
+      <article class="round-core-card">
+        <h3>📈 이번 라운드 핵심</h3>
+        <p>환율이 올랐습니다. (USD/KRW ▲)</p>
+        <p>→ 수출기업: 달러 수입을 원화로 환전 시 이익 ↑</p>
+        <p>→ 수입기업: 달러 결제 비용 증가 → 손실</p>
+        <p>→ 여행자: 해외 체류비 증가 → 손실</p>
+      </article>
+    `;
+  }
+  return `
+    <article class="round-core-card">
+      <h3>💡 이번 라운드 핵심</h3>
+      <p>환율 변화는 재화, 서비스, 관광, 문화 콘텐츠 거래에 서로 다른 영향을 줍니다.</p>
+      <p>→ 같은 변화도 역할에 따라 기회가 되거나 위험이 될 수 있습니다.</p>
+    </article>
+  `;
+}
+
+function getRoundDirection(round) {
+  const text = `${round.shortStatus} ${round.title}`;
+  if (text.includes("상승") || text.includes("수출 증가")) return "up";
+  if (text.includes("하락") || text.includes("엔화↓")) return "down";
+  return "neutral";
 }
 
 function deltaTemplate(label, value, inverse = false) {
@@ -592,13 +1056,6 @@ function tradeTypesTemplate() {
       </div>
     </article>
   `;
-}
-
-function choiceMetaTemplate(choice, roleName) {
-  const roles = choice.recommendedRoles || [];
-  if (!roles.length) return "공통 선택";
-  if (roles.includes(roleName)) return "우리 역할과 잘 맞는 선택";
-  return `추천 역할: ${roles.slice(0, 2).join(", ")}${roles.length > 2 ? " 등" : ""}`;
 }
 
 function readTeamNames(root) {
@@ -729,6 +1186,7 @@ function startTimer() {
     updateTimerDisplay();
     saveState();
     if (state.timer.remaining <= 0) {
+      playTimerBeep();
       stopTimer(true);
     }
   }, 1000);
@@ -764,10 +1222,17 @@ function resetTimer(shouldRender) {
 
 function updateTimerDisplay() {
   const timerDisplay = document.querySelector("#timerDisplay");
+  const timerPanel = document.querySelector(".timer-panel");
   if (timerDisplay) {
     timerDisplay.textContent = formatTime(state.timer.remaining);
     timerDisplay.classList.toggle("timer-done", state.timer.remaining === 0);
     timerDisplay.classList.toggle("timer-urgent", state.timer.remaining > 0 && state.timer.remaining <= 10);
+  }
+  if (timerPanel) {
+    const progress = state.timer.duration ? Math.round((state.timer.remaining / state.timer.duration) * 100) : 0;
+    timerPanel.style.setProperty("--timer-progress", `${progress}%`);
+    timerPanel.classList.toggle("timer-panel-warning", state.timer.remaining > 10 && state.timer.remaining <= 20);
+    timerPanel.classList.toggle("timer-panel-danger", state.timer.remaining <= 10);
   }
 }
 
@@ -775,6 +1240,27 @@ function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
   const rest = String(seconds % 60).padStart(2, "0");
   return `${minutes}:${rest}`;
+}
+
+function playTimerBeep() {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const audioContext = new AudioContext();
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.value = 880;
+    gain.gain.setValueAtTime(0.001, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.12, audioContext.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.24);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start();
+    oscillator.stop(audioContext.currentTime + 0.25);
+  } catch (error) {
+    console.warn("타이머 알림음을 재생하지 못했습니다.", error);
+  }
 }
 
 function go(screen) {
@@ -829,6 +1315,7 @@ function loadState() {
 
 function resetGame() {
   stopTimer(false);
+  revealedNewsRounds.clear();
   state = structuredClone(initialState);
   try {
     localStorage.removeItem(STORAGE_KEY);
