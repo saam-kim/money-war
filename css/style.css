@@ -259,9 +259,9 @@ button:disabled {
 
 .hero-panel {
   overflow: hidden;
-  min-height: 470px;
+  min-height: 360px;
   display: grid;
-  grid-template-columns: 1.08fr 0.92fr;
+  grid-template-columns: 1fr;
   animation: fadeIn 0.38s ease-out;
 }
 
@@ -271,6 +271,7 @@ button:disabled {
   justify-content: center;
   gap: var(--space-5);
   padding: var(--space-8);
+  max-width: 920px;
 }
 
 .hero-copy h2,
@@ -305,58 +306,13 @@ button:disabled {
   font-weight: 700;
 }
 
-.hero-art {
-  position: relative;
-  min-height: 100%;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='280' viewBox='0 0 420 280'%3E%3Cpath d='M24 220 L95 165 L150 190 L220 95 L280 128 L382 52' fill='none' stroke='%231B6BFF' stroke-width='8' stroke-linecap='round' stroke-linejoin='round' opacity='.18'/%3E%3Cpath d='M42 64 L120 118 L190 92 L260 178 L356 148' fill='none' stroke='%230F4FCC' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' opacity='.12'/%3E%3Ccircle cx='220' cy='95' r='9' fill='%231B6BFF' opacity='.2'/%3E%3Ccircle cx='382' cy='52' r='10' fill='%231B6BFF' opacity='.22'/%3E%3C/svg%3E"),
-    radial-gradient(circle at 78% 18%, rgba(27, 107, 255, 0.12), transparent 30%),
-    var(--color-bg-sidebar);
-  background-position: center, center, center;
-  background-repeat: repeat, no-repeat, no-repeat;
-  border-left: 1px solid var(--color-border);
-}
-
-.hero-art::after {
-  content: "환율 변화\A국제 거래\A역할 선택";
-  white-space: pre;
-  position: absolute;
-  inset: var(--space-8);
-  display: grid;
-  place-items: center;
-  color: var(--color-brand-ink);
-  font-family: var(--font-sans);
-  font-size: 3.35rem;
-  font-weight: 800;
-  line-height: 1.35;
-  letter-spacing: -0.03em;
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-lg);
-  background: rgba(255, 255, 255, 0.86);
-  backdrop-filter: blur(6px);
-  box-shadow: var(--shadow-md);
-}
-
-.hero-art::before {
-  content: "CLASSROOM GAME";
-  position: absolute;
-  left: var(--space-8);
-  bottom: var(--space-8);
-  z-index: 1;
-  padding: 0.5rem 1rem;
-  border-radius: 999px;
-  color: #ffffff;
-  background: var(--color-brand);
-  font-size: var(--text-xs);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-}
-
 .info-panel,
 .setup-panel,
 .round-panel,
 .result-panel,
 .summary-panel {
+  display: grid;
+  gap: var(--space-5);
   padding: var(--space-6);
 }
 
@@ -368,7 +324,7 @@ button:disabled {
 .trade-grid,
 .print-card-grid {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
 }
 
 .info-grid {
@@ -650,7 +606,7 @@ button:disabled {
 .classroom-tools {
   display: grid;
   grid-template-columns: 1fr 1fr minmax(300px, 0.78fr);
-  gap: var(--space-3);
+  gap: var(--space-4);
   align-items: stretch;
 }
 

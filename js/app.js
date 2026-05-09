@@ -82,7 +82,6 @@ function renderStart() {
           ${hasSavedGame ? '<button class="secondary-button" type="button" data-action="resume">저장된 게임 이어가기</button>' : ""}
         </div>
       </div>
-      <div class="hero-art" aria-label="환율 그래프와 국제 거래 이미지"></div>
     </section>
   `;
 
