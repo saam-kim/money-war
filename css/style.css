@@ -441,6 +441,18 @@ button:disabled {
   text-align: center;
 }
 
+.ticker-note {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid rgba(27, 107, 255, 0.14);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  line-height: 1.45;
+}
+
 .ticker-up {
   color: var(--color-case-border);
   background: var(--color-case-bg);
@@ -459,11 +471,27 @@ button:disabled {
   content: "▼ ";
 }
 
-.criteria-list {
+.criteria-list,
+.rule-list {
   display: grid;
-  grid-template-columns: 92px 1fr;
-  gap: var(--space-3);
+  gap: var(--space-2);
   align-items: center;
+}
+
+.rule-list p {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.8;
+}
+
+.dashboard-label small {
+  margin-left: var(--space-2);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
 }
 
 .criteria-list span {
@@ -555,7 +583,7 @@ button:disabled {
 }
 
 .home-flow-steps article span {
-  font-size: 24px;
+  font-size: 28px;
   line-height: 1;
 }
 
@@ -599,8 +627,16 @@ button:disabled {
   font-size: 1.05rem;
 }
 
-.hero-copy .primary-button::after {
-  content: " →";
+.resume-link {
+  width: fit-content;
+  min-height: 0;
+  padding: 0;
+  color: var(--color-text-muted);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .lead {
@@ -682,6 +718,45 @@ button:disabled {
   line-height: 1.48;
 }
 
+.lesson-metrics {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+}
+
+.lesson-metrics h3 {
+  margin-bottom: 0;
+  font-size: var(--text-xl);
+}
+
+.lesson-metrics > div {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+}
+
+.lesson-metrics article {
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-bg-soft);
+}
+
+.lesson-metrics strong {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--color-brand);
+  font-size: var(--text-md);
+  font-weight: 900;
+}
+
+.lesson-metrics p {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
 .info-grid {
   grid-template-columns: repeat(3, 1fr);
 }
@@ -689,6 +764,10 @@ button:disabled {
 .role-grid,
 .team-grid {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.role-grid {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
 .round-panel .team-grid {
@@ -833,7 +912,17 @@ button:disabled {
 
 .number-control {
   display: grid;
-  gap: var(--space-3);
+  gap: var(--space-2);
+}
+
+.field-help,
+.action-help,
+.memo-help {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
 }
 
 .number-control label,
@@ -858,8 +947,12 @@ button:disabled {
 
 .team-name-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
+}
+
+.team-name-grid.single-column {
+  grid-template-columns: 1fr;
 }
 
 .tag,
@@ -876,6 +969,10 @@ button:disabled {
   font-size: var(--text-xs);
   font-weight: 800;
   letter-spacing: 0.03em;
+}
+
+.trade-tag {
+  cursor: help;
 }
 
 .metric {
@@ -983,7 +1080,7 @@ button:disabled {
 .news-card-content {
   position: relative;
   z-index: 1;
-  filter: blur(12px);
+  filter: blur(16px);
   transition: filter 0.4s ease;
 }
 
@@ -998,7 +1095,9 @@ button:disabled {
   display: grid;
   place-items: center;
   color: #ffffff;
-  background: linear-gradient(135deg, rgba(10, 46, 122, 0.72), rgba(27, 107, 255, 0.48));
+  background:
+    linear-gradient(135deg, rgba(30, 64, 175, 0.5), rgba(30, 64, 175, 0.5)),
+    linear-gradient(135deg, rgba(10, 46, 122, 0.78), rgba(27, 107, 255, 0.58));
   font-size: 18px;
   font-weight: 900;
   transition: opacity 0.4s ease, visibility 0.4s ease;
@@ -1071,6 +1170,16 @@ button:disabled {
   font-size: 2.55rem;
   font-weight: 800;
   line-height: 1;
+}
+
+.teacher-check-label {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.progress-count {
+  font-size: 2rem !important;
 }
 
 .classroom-tools {
@@ -1270,6 +1379,42 @@ button:disabled {
   font-weight: 700;
 }
 
+.start-check-panel {
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid #1d4ed8;
+  border-radius: var(--radius-lg);
+  background: #eff6ff;
+}
+
+.start-check-panel h3 {
+  margin: 0 0 var(--space-2);
+  color: var(--color-brand-ink);
+  font-size: var(--text-2xl);
+  font-weight: 900;
+}
+
+.start-check-panel p {
+  margin: 0;
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  font-weight: 700;
+  line-height: 1.55;
+}
+
+.role-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.role-actions .primary-button {
+  padding: 14px 40px;
+  font-size: 16px;
+}
+
 .prompt-panel {
   border-left: 4px solid var(--color-question-border);
   background: var(--color-question-bg);
@@ -1296,12 +1441,29 @@ button:disabled {
   color: var(--color-case-text);
 }
 
+.timer-panel {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  grid-template-areas:
+    "title title"
+    "orb presets"
+    "actions actions";
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+}
+
+.timer-panel h3 {
+  grid-area: title;
+  margin-bottom: 0;
+}
+
 .timer-orb {
+  grid-area: orb;
   position: relative;
   display: grid;
   width: 96px;
   height: 96px;
-  margin: var(--space-1) 0 var(--space-3);
+  margin: 0;
   place-items: center;
   border-radius: 999px;
   background:
@@ -1342,6 +1504,37 @@ button:disabled {
 
 .timer-panel strong.timer-done {
   color: var(--color-danger);
+}
+
+.timer-panel .timer-presets,
+.timer-panel > .action-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.timer-panel .timer-presets {
+  grid-area: presets;
+  align-self: end;
+}
+
+.timer-panel > .action-row {
+  grid-area: actions;
+}
+
+.timer-panel .mini-button,
+.timer-panel > .action-row button {
+  width: 100%;
+  min-height: 36px;
+  padding: var(--space-2);
+  justify-content: center;
+  text-align: center;
+}
+
+.timer-panel .timer-presets .mini-button {
+  min-height: 32px;
+  color: var(--color-brand);
+  background: #ffffff;
 }
 
 .timer-urgent {
@@ -1470,7 +1663,11 @@ button:disabled {
 }
 
 .choice-button.selected {
-  padding-left: 2.3rem;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  column-gap: var(--space-2);
+  align-items: center;
+  padding-left: var(--space-2);
   color: #ffffff;
   background: var(--color-brand);
   border-color: var(--color-brand);
@@ -1479,12 +1676,16 @@ button:disabled {
 
 .choice-button.selected::before {
   content: "✓";
-  position: absolute;
-  left: 0.85rem;
-  top: 50%;
-  transform: translateY(-50%);
-  margin-right: 0.4rem;
+  position: static;
+  grid-column: 1;
+  grid-row: 1;
+  justify-self: center;
   font-weight: 800;
+}
+
+.choice-button.selected span {
+  grid-column: 2;
+  min-width: 0;
 }
 
 .team-card.selected {
@@ -1498,6 +1699,15 @@ button:disabled {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: var(--color-bg-sidebar);
+  justify-content: center;
+  position: sticky;
+  bottom: var(--space-3);
+  z-index: 6;
+}
+
+.sticky-actions .primary-button {
+  padding: 12px 36px;
+  font-size: 15px;
 }
 
 .section-label {
@@ -1517,6 +1727,12 @@ button:disabled {
   border-radius: 2px;
   vertical-align: -0.18em;
   background: var(--color-brand);
+}
+
+.print-materials .section-label {
+  color: #1d4ed8;
+  font-size: 15px;
+  font-weight: 900;
 }
 
 .explain-box {
@@ -1579,20 +1795,23 @@ button:disabled {
 .victory-banner {
   display: grid;
   gap: var(--space-2);
-  padding: var(--space-6);
-  border: 1px solid var(--winner-line);
-  border-left: 6px solid var(--winner-line);
+  padding: 20px 28px;
+  border: 2px solid #f59e0b;
   border-radius: var(--radius-lg);
-  color: var(--winner-text);
-  background: var(--winner-bg);
+  color: #854d0e;
+  background: linear-gradient(135deg, #fef9c3, #fde68a);
 }
 
 .victory-banner strong {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 900;
   line-height: 1.25;
   animation: victoryPulse 2s ease-in-out infinite;
   transform-origin: left center;
+}
+
+.victory-banner strong span {
+  font-size: 28px;
 }
 
 .victory-banner span {
@@ -1613,7 +1832,7 @@ button:disabled {
 .money-trend-chart {
   display: block;
   width: 100%;
-  height: 220px;
+  height: 260px;
   margin-top: var(--space-3);
 }
 
@@ -1664,8 +1883,26 @@ button:disabled {
   border-radius: 999px;
   color: var(--color-text-muted);
   background: var(--color-bg-soft);
-  font-size: var(--text-xs);
+  font-size: 13px;
   font-weight: 900;
+}
+
+.final-memo {
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius);
+  color: var(--color-text);
+  background: #ffffff;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  resize: vertical;
+}
+
+.final-actions {
+  justify-content: center;
+  gap: 16px;
 }
 
 .trend-legend i {
@@ -1773,8 +2010,8 @@ button:disabled {
 
 .worksheet-section h3 {
   margin: var(--space-2) 0 0;
-  color: var(--color-brand-ink);
-  font-size: var(--text-xl);
+  color: #1d4ed8;
+  font-size: 15px;
   font-weight: 900;
 }
 
@@ -1815,6 +2052,7 @@ button:disabled {
 }
 
 .worksheet-table tbody tr {
+  min-height: 72px;
   height: 72px;
 }
 
@@ -1834,7 +2072,7 @@ button:disabled {
 .worksheet-question span {
   display: block;
   width: 100%;
-  height: 28px;
+  height: 32px;
   margin-bottom: 4px;
   border-bottom: 1px solid #999999;
 }
@@ -1986,9 +2224,837 @@ button:disabled {
   }
 }
 
+/* Viewport density patch: compact classroom screens without changing game data or logic. */
+.app-shell {
+  width: min(1600px, calc(100vw - 32px));
+  padding: var(--space-2) 0 var(--space-3);
+}
+
+.setup-screen {
+  height: calc(100vh - 88px);
+  overflow: hidden;
+}
+
+.start-screen {
+  display: block;
+  height: auto;
+  overflow: visible;
+}
+
+.hero-panel {
+  height: auto;
+  min-height: 0;
+  grid-template-columns: minmax(0, 1.25fr) minmax(320px, 0.75fr);
+  gap: var(--space-4);
+}
+
+.hero-copy,
+.hero-dashboard {
+  min-height: 0;
+  overflow-y: visible;
+}
+
+.hero-copy {
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+}
+
+.game-tag {
+  min-height: 28px;
+  margin-bottom: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+}
+
+.hero-copy h2 {
+  font-size: clamp(2.4rem, 4vw, 4.2rem);
+}
+
+.hero-copy h2 small {
+  margin-top: var(--space-2);
+  color: var(--color-brand);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.hero-copy .lead {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.role-preview {
+  gap: var(--space-2);
+}
+
+.role-chip {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.role-chip b {
+  flex: 0 0 auto;
+  font-size: 20px;
+}
+
+.role-chip span,
+.role-chip strong,
+.role-chip small {
+  margin: 0;
+  line-height: 1.15;
+}
+
+.role-chip span {
+  font-size: 11px;
+}
+
+.role-chip strong {
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.role-chip small {
+  font-size: 12px;
+}
+
+.hero-dashboard {
+  align-content: start;
+  align-self: start;
+  gap: var(--space-3);
+  margin: var(--space-3);
+  padding: var(--space-3);
+  box-shadow: none;
+}
+
+.dashboard-section {
+  gap: var(--space-2);
+  padding-bottom: var(--space-2);
+}
+
+.ticker-row {
+  padding: 10px;
+}
+
+.ticker-row span {
+  font-size: 20px;
+}
+
+.ticker-note {
+  padding: 8px 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.rule-list {
+  gap: var(--space-1);
+}
+
+.rule-list p {
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.asset-preview {
+  gap: var(--space-2);
+}
+
+.asset-preview div {
+  padding: 10px;
+  box-shadow: none;
+}
+
+.asset-preview span,
+.asset-preview small {
+  font-size: 11px;
+}
+
+.asset-preview strong {
+  font-size: 18px;
+}
+
+.home-flow {
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+  padding: var(--space-3);
+}
+
+.home-flow h3 {
+  font-size: 12px;
+}
+
+.home-flow-steps {
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+  gap: var(--space-2);
+}
+
+.home-flow-steps article {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+}
+
+.home-flow-steps article span {
+  font-size: 16px;
+}
+
+.home-flow-steps article strong {
+  font-size: 12px;
+}
+
+.home-flow-steps article p {
+  display: none;
+}
+
+.home-flow-steps i {
+  font-size: 16px;
+}
+
+.setup-panel {
+  width: min(680px, 100%);
+  min-height: auto;
+  margin: auto;
+  padding: var(--space-4);
+}
+
+.setup-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.setup-controls {
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.setup-panel .screen-title {
+  margin-bottom: var(--space-1);
+  font-size: 36px;
+}
+
+.setup-panel .lead {
+  margin-bottom: var(--space-2);
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.setup-panel .teacher-panel {
+  padding: var(--space-2) var(--space-3);
+}
+
+.setup-panel .teacher-panel h3 {
+  display: none;
+}
+
+.setup-panel .teacher-panel p {
+  font-size: 13px;
+}
+
+.setup-panel .action-row {
+  margin-top: var(--space-2);
+}
+
+.number-control input,
+.team-name-grid input {
+  min-height: 36px;
+}
+
+.setup-panel .team-name-grid {
+  gap: var(--space-2);
+}
+
+.role-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.role-card {
+  display: grid;
+  gap: var(--space-2);
+  padding: 14px;
+}
+
+.role-card h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.role-card .role-desc {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 14px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.role-card .tag-row {
+  gap: var(--space-1);
+}
+
+.role-card .tag {
+  min-height: 26px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.compact-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.compact-stats span {
+  display: grid;
+  min-height: 52px;
+  min-width: 0;
+  align-content: center;
+  justify-items: center;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  background: var(--color-case-bg);
+  text-align: center;
+}
+
+.compact-stats small {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.compact-stats strong {
+  color: var(--color-case-text);
+  font-size: 14px;
+  font-weight: 900;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.start-check-panel {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+}
+
+.start-check-panel h3,
+.start-check-panel p {
+  margin: 0;
+  font-size: 14px;
+}
+
+.role-actions {
+  margin-top: var(--space-2);
+}
+
+.role-actions .primary-button,
+.role-actions .secondary-button {
+  min-height: 48px;
+}
+
+.round-panel,
+.result-panel,
+.summary-panel {
+  height: calc(100vh - 88px);
+  overflow: hidden;
+}
+
+.round-workspace,
+.result-workspace,
+.final-workspace {
+  display: grid;
+  height: 100%;
+  min-height: 0;
+  gap: var(--space-3);
+}
+
+.round-workspace {
+  grid-template-columns: minmax(0, 7fr) minmax(240px, 3fr);
+}
+
+.round-left,
+.result-left,
+.final-left,
+.final-right {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.round-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  overflow-y: auto;
+  padding-right: var(--space-1);
+}
+
+.round-side {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.round-header {
+  grid-template-columns: 1fr;
+}
+
+.news-card {
+  min-height: 160px;
+  height: 160px;
+  padding: var(--space-3);
+}
+
+.news-card-toolbar {
+  align-items: start;
+}
+
+.news-label {
+  min-height: 26px;
+  padding: var(--space-1) var(--space-2);
+}
+
+.fullscreen-button,
+.mini-button {
+  min-height: 32px;
+  padding: var(--space-1) var(--space-2);
+}
+
+.exchange-card h2,
+.news-headline {
+  margin-bottom: var(--space-2);
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+.exchange-card p {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 13px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.news-cue {
+  margin-top: var(--space-2) !important;
+  padding: var(--space-2);
+  font-size: 13px !important;
+}
+
+.exchange-move {
+  margin-bottom: var(--space-1);
+  font-size: 32px;
+}
+
+.pace-panel {
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-bottom: 1px solid var(--color-border);
+  border-left: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.pace-panel strong,
+.pace-panel span {
+  min-height: 36px;
+  padding: 0 var(--space-2);
+  border-radius: 0;
+  background: transparent;
+  white-space: nowrap;
+}
+
+.pace-panel strong {
+  border-bottom: 2px solid var(--color-brand);
+  color: var(--color-brand);
+}
+
+.round-panel .team-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+  overflow: visible;
+}
+
+.team-card {
+  padding: var(--space-4);
+}
+
+.team-card h3 {
+  font-size: 16px;
+}
+
+.team-role-banner {
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 48px;
+  margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.team-role-banner span {
+  font-size: 16px;
+}
+
+.team-role-banner strong {
+  font-size: 13px;
+  line-height: 1.25;
+  overflow-wrap: normal;
+}
+
+.team-role-banner em {
+  grid-column: 1 / -1;
+  justify-self: start;
+  font-size: 11px;
+}
+
+.team-card .metric-row,
+.team-card .delta-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-2);
+}
+
+.team-card .metric-row {
+  margin-bottom: var(--space-3);
+}
+
+.team-card .metric {
+  justify-content: center;
+  min-height: 28px;
+  padding: var(--space-1);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.team-card .section-label {
+  display: none;
+}
+
+.team-card .choices-list {
+  gap: var(--space-2);
+  clear: both;
+}
+
+.choice-button {
+  min-height: 40px;
+  padding: var(--space-2);
+  gap: var(--space-2);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.round-panel .teacher-panel,
+.round-panel .prediction-panel,
+.round-panel .prompt-panel,
+.round-panel .timer-panel,
+.round-panel .progress-card {
+  padding: var(--space-3);
+}
+
+.round-panel .teacher-panel h3,
+.round-panel .prediction-panel h3,
+.round-panel .prompt-panel h3,
+.round-panel .timer-panel h3 {
+  font-size: 16px;
+}
+
+.round-panel .teacher-panel p,
+.round-panel .prediction-panel p,
+.round-panel .prompt-panel p,
+.round-panel .timer-panel p,
+.progress-card p {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.progress-card strong {
+  font-size: 28px;
+}
+
+.timer-orb {
+  width: 80px;
+  height: 80px;
+  margin: 0;
+}
+
+.timer-panel strong {
+  font-size: 28px;
+}
+
+.sticky-actions {
+  margin-top: auto;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+}
+
+.sticky-actions .primary-button {
+  width: 100%;
+  min-height: 40px;
+}
+
+.result-workspace {
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+}
+
+.result-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.result-side {
+  display: grid;
+  min-height: 0;
+  gap: var(--space-2);
+  overflow: hidden;
+}
+
+.round-summary-banner {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--color-brand);
+  border-radius: var(--radius);
+  background: var(--color-brand-soft);
+}
+
+.round-summary-banner strong {
+  flex: 0 0 auto;
+  color: var(--color-brand);
+  font-size: 13px;
+}
+
+.round-summary-banner span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.result-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.change-card {
+  padding: 10px;
+}
+
+.change-card h3 {
+  margin-bottom: var(--space-2);
+  font-size: 15px;
+}
+
+.result-choice {
+  display: block;
+  overflow: hidden;
+  margin-bottom: var(--space-2) !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.change-card .delta-row,
+.change-card .metric-row {
+  gap: var(--space-1);
+}
+
+.asset-chart-card,
+.round-core-card,
+.trend-card {
+  padding: var(--space-3);
+  box-shadow: none;
+}
+
+.asset-bar-chart {
+  height: 160px;
+}
+
+.bar-team-label,
+.bar-value-label {
+  font-size: 18px;
+}
+
+.round-core-card h3 {
+  margin-bottom: var(--space-2);
+  font-size: 16px;
+}
+
+.round-core-card p {
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.final-workspace {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.final-left,
+.final-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.victory-banner {
+  min-height: 52px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.victory-banner strong {
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.victory-banner strong span {
+  font-size: 20px;
+}
+
+.victory-banner > span {
+  font-size: 12px;
+  text-align: right;
+}
+
+.rank-list {
+  gap: var(--space-1);
+}
+
+.rank-list li {
+  min-height: 36px;
+  padding: var(--space-2);
+  font-size: 13px;
+}
+
+.learning-summary-grid {
+  gap: var(--space-2);
+}
+
+.learning-summary-grid article {
+  padding: var(--space-3);
+  box-shadow: none;
+}
+
+.learning-summary-grid span {
+  display: inline;
+  margin: 0 var(--space-1) 0 0;
+  font-size: 20px;
+}
+
+.learning-summary-grid h3 {
+  display: inline;
+  font-size: 13px;
+}
+
+.learning-summary-grid p {
+  margin-top: var(--space-1);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.money-trend-chart {
+  height: 200px;
+}
+
+.trend-x-label,
+.trend-y-label {
+  font-size: 16px;
+}
+
+.trend-legend {
+  justify-content: center;
+  margin-top: var(--space-2);
+}
+
+.trend-legend span {
+  min-height: 24px;
+  font-size: 11px;
+}
+
+.role-summary-accordion {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+}
+
+.role-summary-accordion summary {
+  cursor: pointer;
+  color: var(--color-brand-ink);
+  font-weight: 900;
+}
+
+.role-summary-accordion .role-grid {
+  margin-top: var(--space-2);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.role-summary-accordion .role-card p {
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.final-teacher-note {
+  margin-top: 0;
+  padding: var(--space-3);
+}
+
+.final-teacher-note h3 {
+  font-size: 16px;
+}
+
+.final-teacher-note p {
+  font-size: 13px;
+}
+
+.final-memo {
+  min-height: 64px;
+  font-size: 13px;
+}
+
+.final-actions {
+  position: sticky;
+  bottom: 0;
+  margin-top: auto;
+  padding: var(--space-2);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
 /* Classroom flow patch: restored Korean UI text, reduced empty space, and tightened lesson flow. */
 
 @media (max-width: 1180px) {
+  .start-screen {
+    height: auto;
+    overflow: visible;
+  }
+
+  .hero-panel {
+    height: auto;
+  }
+
+  .hero-copy,
+  .hero-dashboard {
+    overflow: visible;
+  }
+
   .top-bar,
   .hero-panel,
   .round-header,
@@ -2080,7 +3146,7 @@ button:disabled {
 
 @media print {
   @page {
-    margin: 20mm;
+    margin: 15mm;
   }
 
   * {
@@ -2088,11 +3154,13 @@ button:disabled {
     background: #ffffff !important;
     box-shadow: none !important;
     text-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   body {
     margin: 0;
-    font-size: 12pt;
+    font-size: 11pt;
     background: #ffffff !important;
   }
 
@@ -2155,17 +3223,31 @@ button:disabled {
     grid-template-columns: repeat(2, 1fr);
   }
 
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  td,
+  th {
+    padding: 6px;
+    border: 1px solid #999999 !important;
+  }
+
   .material-row span,
+  table,
   .worksheet-table th,
   .worksheet-table td {
     border-color: #999999 !important;
   }
 
   .worksheet-table tbody tr {
-    height: 68px;
+    min-height: 72px;
+    height: 72px;
   }
 
   .worksheet-question span {
+    height: 32px;
     border-bottom: 1px solid #999999 !important;
   }
 

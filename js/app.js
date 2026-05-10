@@ -25,6 +25,7 @@ const initialState = {
 let state = structuredClone(initialState);
 let timerInterval = null;
 const revealedNewsRounds = new Set();
+let roundLeftScrollTop = 0;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -61,7 +62,17 @@ function render() {
   };
 
   app.appendChild(renderers[state.screen]());
+  restoreRoundScrollPosition();
   updateTimerDisplay();
+}
+
+function restoreRoundScrollPosition() {
+  if (state.screen !== "round") return;
+  const roundLeft = app.querySelector(".round-left");
+  if (!roundLeft) return;
+  requestAnimationFrame(() => {
+    roundLeft.scrollTop = roundLeftScrollTop;
+  });
 }
 
 function createScreen(className = "") {
@@ -105,31 +116,39 @@ function renderStart() {
           </div>
         </div>
         <div class="action-row">
-          <button class="primary-button" type="button" data-action="setup">게임 시작하기</button>
+          <button class="primary-button" type="button" data-action="setup">게임 시작하기 →</button>
           <button class="secondary-button" type="button" data-action="lesson">활동 방법 보기</button>
-          ${hasSavedGame ? '<button class="secondary-button" type="button" data-action="resume">저장된 게임 이어가기</button>' : ""}
         </div>
+        ${hasSavedGame ? '<button class="resume-link" type="button" data-action="resume">저장된 게임 이어가기</button>' : ""}
+        <section class="home-flow" aria-label="게임 진행 흐름">
+          <h3>어떻게 진행되나요?</h3>
+          <div class="home-flow-steps">
+            <article><span aria-hidden="true">🎭</span><strong>역할 배정</strong></article>
+            <i aria-hidden="true">→</i>
+            <article><span aria-hidden="true">📰</span><strong>뉴스 예측</strong></article>
+            <i aria-hidden="true">→</i>
+            <article><span aria-hidden="true">💱</span><strong>전략 선택</strong></article>
+            <i aria-hidden="true">→</i>
+            <article><span aria-hidden="true">📊</span><strong>결과 비교</strong></article>
+          </div>
+        </section>
       </div>
       <aside class="hero-dashboard" aria-label="환율 배틀 핵심 정보">
         <div class="dashboard-section">
-          <p class="dashboard-label">오늘의 환율 현황</p>
+          <p class="dashboard-label">이번 게임 시작 환율 (가상) <small>실제 환율과 다를 수 있습니다</small></p>
           <div class="ticker-row">
             <strong>USD/KRW</strong>
             <span>1,380</span>
             <em class="ticker-up">+12</em>
           </div>
-          <div class="ticker-row">
-            <strong>JPY/KRW</strong>
-            <span>9.24</span>
-            <em class="ticker-down">-0.08</em>
-          </div>
+          <p class="ticker-note">모든 라운드는 원/달러 환율을 중심으로 진행됩니다.</p>
         </div>
         <div class="dashboard-section">
-          <p class="dashboard-label">판단 기준</p>
-          <div class="criteria-list">
-            <span>환율 상승</span><p>외화 가격 상승, 원화 가치 하락</p>
-            <span>환율 하락</span><p>외화 가격 하락, 원화 가치 상승</p>
-            <span>역할 차이</span><p>수출·수입·여행·유학의 손익 비교</p>
+          <p class="dashboard-label">게임 규칙</p>
+          <div class="rule-list">
+            <p>🏆 승리 조건: 5라운드 후 자산이 가장 많은 모둠</p>
+            <p>🔄 진행: 뉴스 확인 → 모둠 토의 → 선택 → 결과 공개</p>
+            <p>💡 핵심: 내 역할에 환율 변동이 유리한지 불리한지 판단</p>
           </div>
         </div>
         <div class="asset-preview">
@@ -138,34 +157,6 @@ function renderStart() {
           <div><span>위험도</span><strong>10</strong><small>고위험 환전 시 패널티</small></div>
         </div>
       </aside>
-    </section>
-    <section class="home-flow" aria-label="게임 진행 흐름">
-      <h3>어떻게 진행되나요?</h3>
-      <div class="home-flow-steps">
-        <article>
-          <span aria-hidden="true">🎭</span>
-          <strong>역할 배정</strong>
-          <p>모둠별 경제 주체를 확인합니다.</p>
-        </article>
-        <i aria-hidden="true">→</i>
-        <article>
-          <span aria-hidden="true">📰</span>
-          <strong>뉴스 예측</strong>
-          <p>시장 뉴스에서 환율 방향을 추리합니다.</p>
-        </article>
-        <i aria-hidden="true">→</i>
-        <article>
-          <span aria-hidden="true">💱</span>
-          <strong>전략 선택</strong>
-          <p>우리 역할에 유리한 선택을 고릅니다.</p>
-        </article>
-        <i aria-hidden="true">→</i>
-        <article>
-          <span aria-hidden="true">📊</span>
-          <strong>결과 비교</strong>
-          <p>점수와 이유를 함께 확인합니다.</p>
-        </article>
-      </div>
     </section>
   `;
 
@@ -216,6 +207,23 @@ function renderLesson() {
         <h3>20분 운영 기준</h3>
         <p>도입 2분, 역할 확인 3분, 뉴스 예측과 선택 12분, 결과 발표와 정리 3분을 기준으로 합니다.</p>
       </div>
+      <div class="concept-card lesson-metrics">
+        <h3>점수판 지표 이해하기</h3>
+        <div>
+          <article>
+            <strong>자금</strong>
+            <p>모둠이 가진 돈입니다. 선택 결과에 따라 늘거나 줄어듭니다. 최종 결과에서는 자금이 많은 모둠이 유리합니다.</p>
+          </article>
+          <article>
+            <strong>안정도</strong>
+            <p>환율 변화에 흔들리지 않고 안전하게 대응한 정도입니다. 무리하지 않고 나누어 거래하거나 위험을 줄이면 올라갈 수 있습니다.</p>
+          </article>
+          <article>
+            <strong>위험도</strong>
+            <p>선택이 실패했을 때 손해가 커질 가능성입니다. 높을수록 조심해야 하며, 위험도는 낮을수록 좋습니다.</p>
+          </article>
+        </div>
+      </div>
       <div class="action-row">
         <button class="primary-button" type="button" data-action="setup">모둠 설정하기</button>
       </div>
@@ -236,9 +244,10 @@ function renderSetup() {
         <div class="number-control">
           <label for="teamCount">모둠 수</label>
           <input id="teamCount" type="number" min="2" max="8" value="${state.teamCount}" />
+          <p class="field-help">모둠 수를 바꾸면 '적용'을 눌러주세요.</p>
           <button class="mini-button" type="button" data-action="apply-count">적용</button>
         </div>
-        <div class="team-name-grid">
+        <div class="team-name-grid ${state.teamCount <= 2 ? "single-column" : ""}">
           ${names.map((name, index) => `
             <label>
               ${index + 1}모둠 이름
@@ -253,6 +262,7 @@ function renderSetup() {
       </div>
       <div class="action-row">
         <button class="primary-button" type="button" data-action="assign">역할 자동 배정</button>
+        <span class="action-help">각 모둠에 역할(해외여행자·수출기업·수입기업 등)을 자동으로 배정합니다.</span>
       </div>
     </section>
   `;
@@ -279,14 +289,14 @@ function renderRoles() {
     <section class="info-panel">
       <h2 class="screen-title">역할 배정</h2>
       <p class="lead">우리 모둠이 외화를 쓰는 쪽인지, 벌어들이는 쪽인지 먼저 확인합니다.</p>
-      <div class="prompt-panel">
-        <h3>시작 전 한 문장</h3>
+      <div class="start-check-panel">
+        <h3>시작 전 확인</h3>
         <p>“우리 역할은 외화를 쓰기 때문에 환율이 오르면 불리하다”처럼 역할의 기준을 먼저 말해 봅니다.</p>
       </div>
       <div class="role-grid">
         ${state.teams.map((team) => roleCardTemplate(team)).join("")}
       </div>
-      <div class="action-row">
+      <div class="role-actions">
         <button class="secondary-button" type="button" data-action="setup">모둠 다시 설정</button>
         <button class="primary-button" type="button" data-action="start-round">1라운드 시작</button>
       </div>
@@ -311,43 +321,46 @@ function renderRound() {
   const screen = createScreen();
   screen.innerHTML = `
     <section class="round-panel">
-      <div class="round-header">
-        <article class="exchange-card news-card ${newsTone} ${revealedNewsRounds.has(state.currentRoundIndex) ? "is-revealed" : ""}">
-          <div class="news-card-toolbar">
-            <span class="news-label">시장 뉴스</span>
-            <button class="mini-button fullscreen-button" type="button" data-action="toggle-fullscreen">전체화면</button>
+      <div class="round-workspace">
+        <div class="round-left">
+          <div class="round-header">
+            <article class="exchange-card news-card ${newsTone} ${revealedNewsRounds.has(state.currentRoundIndex) ? "is-revealed" : ""}">
+              <div class="news-card-toolbar">
+                <span class="news-label">시장 뉴스</span>
+                <button class="mini-button fullscreen-button" type="button" data-action="toggle-fullscreen">전체화면</button>
+              </div>
+              <button class="news-reveal-button" type="button" data-action="reveal-news" aria-label="시장 뉴스 공개">
+                <span>▶ 클릭하여 공개</span>
+              </button>
+              <div class="news-card-content">
+                ${roundNewsHintTemplate()}
+              </div>
+            </article>
           </div>
-          <button class="news-reveal-button" type="button" data-action="reveal-news" aria-label="시장 뉴스 공개">
-            <span>▶ 클릭하여 공개</span>
-          </button>
-          <div class="news-card-content">
-            ${roundNewsHintTemplate()}
+          <div class="pace-panel">
+            <strong>① 뉴스 확인</strong>
+            <span>② 모둠 토의 (45초)</span>
+            <span>③ 선택 입력 (30초)</span>
+            <span>④ 결과 공개 (60초)</span>
           </div>
-        </article>
-        <article class="progress-card">
-          <p class="section-label">입력 현황</p>
-          <strong>${selectedCount} / ${state.teams.length}</strong>
-          <p>각 모둠의 전략 선택을 입력합니다.</p>
-        </article>
-      </div>
-      <div class="classroom-tools">
-        ${showTeacherStatus ? teacherPanelTemplate(round.teacherGuide) : predictionPanelTemplate()}
-        ${promptPanelTemplate("뉴스 속에서 외화를 사려는 쪽과 팔려는 쪽을 찾고, 우리 역할의 비용과 수입이 어떻게 바뀔지 따져 보세요.")}
-        ${timerPanelTemplate()}
-      </div>
-      <div class="pace-panel">
-        <strong>수업 흐름</strong>
-        <span>뉴스 예측</span>
-        <span>전략 선택</span>
-        <span>결과 확인</span>
-        <span>짧은 발표</span>
-      </div>
-      ${showTeacherStatus ? teacherSubmissionPanelTemplate() : ""}
-      <div class="team-grid">
-        ${state.teams.map((team) => teamChoiceTemplate(team, round)).join("")}
-      </div>
-      <div class="action-row sticky-actions">
-        <button class="primary-button" type="button" data-action="show-result" ${selectedCount === state.teams.length ? "" : "disabled"}>결과 보기</button>
+          <div class="team-grid">
+            ${state.teams.map((team) => teamChoiceTemplate(team, round)).join("")}
+          </div>
+          <div class="action-row sticky-actions">
+            <button class="primary-button" type="button" data-action="show-result" ${selectedCount === state.teams.length ? "" : "disabled"}>결과 보기</button>
+          </div>
+        </div>
+        <aside class="round-side">
+          <article class="progress-card">
+            <p class="section-label teacher-check-label">(교사 확인) 선택 완료</p>
+            <strong class="progress-count">${selectedCount} / ${state.teams.length}</strong>
+            <p>각 모둠의 전략 선택을 입력합니다.</p>
+          </article>
+          ${showTeacherStatus ? teacherPanelTemplate(round.teacherGuide) : predictionPanelTemplate()}
+          ${promptPanelTemplate("뉴스 속에서 외화를 사려는 쪽과 팔려는 쪽을 찾고, 우리 역할의 비용과 수입이 어떻게 바뀔지 따져 보세요.")}
+          ${timerPanelTemplate()}
+          ${showTeacherStatus ? teacherSubmissionPanelTemplate() : ""}
+        </aside>
       </div>
     </section>
   `;
@@ -357,6 +370,7 @@ function renderRound() {
 
   screen.querySelectorAll("[data-choice-button]").forEach((button) => {
     button.addEventListener("click", () => {
+      roundLeftScrollTop = screen.querySelector(".round-left")?.scrollTop || 0;
       const teamId = button.dataset.teamId;
       state.selections[teamId] = Number(button.dataset.choiceIndex);
       persistAndRender();
@@ -379,27 +393,25 @@ function renderResult() {
   const highlights = getRoundHighlights();
   screen.innerHTML = `
     <section class="result-panel">
-      <h2 class="screen-title">${state.currentRoundIndex + 1}라운드 결과</h2>
-      <div class="result-brief">
-        ${promptPanelTemplate(round.resultFocus)}
-        <div class="pace-panel">
-        <strong>발표 추천</strong>
-        <span>${highlights.best.name}: 대응이 좋았던 이유</span>
-        <span>${highlights.risky.name}: 위험이 커진 이유</span>
+      <div class="result-workspace">
+        <div class="result-left">
+          <h2 class="screen-title">${state.currentRoundIndex + 1}라운드 결과</h2>
+          <article class="round-summary-banner">
+            <strong>핵심 정리</strong>
+            <span>${round.resultFocus}</span>
+          </article>
+          <div class="result-grid">
+            ${state.teams.map((team) => resultCardTemplate(team)).join("")}
+          </div>
         </div>
-      </div>
-      <div class="explain-box">
-        <h3>경제 개념 해설</h3>
-        <p>${round.concept}</p>
-      </div>
-      ${assetBarChartTemplate()}
-      <div class="result-grid">
-        ${state.teams.map((team) => resultCardTemplate(team)).join("")}
-      </div>
-      ${roundConceptCardTemplate(round)}
-      ${state.currentRoundIndex === 2 ? tradeTypesTemplate() : ""}
-      <div class="action-row sticky-actions">
-        <button class="primary-button" type="button" data-action="next">${isLastRound ? "최종 결과 보기" : "다음 라운드"}</button>
+        <aside class="result-side">
+          ${assetBarChartTemplate()}
+          ${roundConceptCardTemplate(round)}
+          ${state.currentRoundIndex === 2 ? tradeTypesTemplate() : ""}
+          <div class="action-row sticky-actions">
+            <button class="primary-button" type="button" data-action="next">${isLastRound ? "최종 결과 보기" : "다음 라운드"}</button>
+          </div>
+        </div>
       </div>
     </section>
   `;
@@ -419,66 +431,59 @@ function renderResult() {
 function renderFinal() {
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
   const best = sorted[0];
-  const riskiest = [...state.teams].sort((a, b) => b.risk - a.risk)[0];
   const screen = createScreen();
   screen.innerHTML = `
     <section class="summary-panel capture-target">
-      ${finalVictoryBannerTemplate(sorted)}
-      <h2 class="screen-title">최종 결과</h2>
-      <div class="final-grid">
-        <article class="winner-card">
-          <h3>환율 변화에 가장 잘 대응한 모둠</h3>
-          <span class="score-big">${escapeHtml(best.name)}</span>
-          <p>${best.role.name} 역할, 최종 ${best.score}점</p>
-        </article>
-        <article class="winner-card">
-          <h3>가장 위험하게 대응한 모둠</h3>
-          <span class="score-big">${escapeHtml(riskiest.name)}</span>
-          <p>위험도 ${riskiest.risk}. 기회와 위험을 함께 보는 판단이 필요합니다.</p>
-        </article>
-      </div>
-      <article class="ranking-card">
-        <h3>모둠별 최종 점수</h3>
-        <ol class="rank-list">
-          ${sorted.map((team, index) => `
-            <li>
-              <span>${index + 1}위</span>
-              <span>${escapeHtml(team.name)} · ${team.role.name}</span>
-              <span>${team.score}점 · 자금 ${team.money} · 안정도 ${team.stability} · 위험도 ${team.risk}</span>
-            </li>
-          `).join("")}
-        </ol>
-      </article>
-      ${moneyTrendChartTemplate()}
-      ${learningSummaryTemplate()}
-      <article class="info-panel">
-        <h3 class="section-label">역할별 유불리 정리</h3>
-        <div class="role-grid">
-          ${ROLE_CARDS.map((role) => `
-            <article class="role-card">
-              <h3>${role.name}</h3>
-              <div class="tag-row">
-                <span class="tag">유리: ${role.strongWhen}</span>
-                <span class="tag">불리: ${role.weakWhen}</span>
-              </div>
-              <p>${role.explanation}</p>
-            </article>
-          `).join("")}
+      <div class="final-workspace">
+        <div class="final-left">
+          ${finalVictoryBannerTemplate(sorted)}
+          <article class="ranking-card">
+            <h3>모둠별 최종 점수</h3>
+            <ol class="rank-list">
+              ${sorted.map((team, index) => `
+                <li>
+                  <span>${index + 1}위</span>
+                  <span>${escapeHtml(team.name)} · ${team.role.name}</span>
+                  <span>${team.score}점 · 자금 ${team.money} · 안정도 ${team.stability} · 위험도 ${team.risk}</span>
+                </li>
+              `).join("")}
+            </ol>
+          </article>
+          ${learningSummaryTemplate()}
+          <div class="explain-box">
+            <h3>수업 정리</h3>
+            <p>환율 변동은 모든 경제 주체에게 같은 영향을 주지 않습니다. 해외여행자, 수출기업, 수입기업, 유학생 가정처럼 자신이 어떤 경제 활동을 하는지에 따라 유리함과 불리함이 달라집니다.</p>
+          </div>
         </div>
-      </article>
-      ${tradeTypesTemplate()}
-      <div class="explain-box">
-        <h3>수업 정리</h3>
-        <p>환율 변동은 모든 경제 주체에게 같은 영향을 주지 않습니다. 해외여행자, 수출기업, 수입기업, 유학생 가정처럼 자신이 어떤 경제 활동을 하는지에 따라 유리함과 불리함이 달라집니다.</p>
-      </div>
-      <div class="teacher-panel final-teacher-note">
-        <h3>마무리 질문</h3>
-        <p>우리 모둠의 선택은 어떤 국제 거래 유형과 연결되었나요? 한 문장으로 정리해 보세요.</p>
-      </div>
-      <div class="action-row final-actions">
-        <button class="secondary-button" type="button" data-action="capture">${state.captureMode ? "일반 보기" : "캡처용 보기"}</button>
-        <span class="shortcut-hint">Ctrl+P / ⌘P로 인쇄</span>
-        <button class="secondary-button" type="button" data-action="restart">새 게임 시작</button>
+        <aside class="final-right">
+          ${moneyTrendChartTemplate()}
+          <details class="role-summary-accordion">
+            <summary>역할별 유불리 정리 ▾</summary>
+            <div class="role-grid">
+              ${ROLE_CARDS.map((role) => `
+                <article class="role-card">
+                  <h3>${role.name}</h3>
+                  <div class="tag-row">
+                    <span class="tag">유리: ${role.strongWhen}</span>
+                    <span class="tag">불리: ${role.weakWhen}</span>
+                  </div>
+                  <p>${role.explanation}</p>
+                </article>
+              `).join("")}
+            </div>
+          </details>
+          <div class="teacher-panel final-teacher-note">
+            <h3>마무리 질문</h3>
+            <p>우리 모둠의 선택은 어떤 국제 거래 유형과 연결되었나요? 한 문장으로 정리해 보세요.</p>
+            <p class="memo-help">발표 준비 메모 (저장되지 않습니다)</p>
+            <textarea class="final-memo" rows="2" placeholder="여기에 입력하세요"></textarea>
+          </div>
+          <div class="action-row final-actions">
+            <button class="secondary-button" type="button" data-action="capture">${state.captureMode ? "일반 보기" : "인쇄하기 🖨️"}</button>
+            <span class="shortcut-hint">Ctrl+P / ⌘P로 인쇄</span>
+            <button class="primary-button" type="button" data-action="restart">새 게임 시작</button>
+          </div>
+        </aside>
       </div>
     </section>
   `;
@@ -498,7 +503,7 @@ function finalVictoryBannerTemplate(sortedTeams) {
   const visual = roleVisualTemplate(winner);
   return `
     <article class="victory-banner" style="--winner-bg: ${visual.bg}; --winner-text: ${visual.text}; --winner-line: ${visual.line}">
-      <strong>🏆 ${escapeHtml(winner.name)} 우승! 최종 자산 ${winner.money}만 원</strong>
+      <strong><span aria-hidden="true">🏆</span> ${escapeHtml(winner.name)} 우승! 최종 자산 ${winner.money}만 원</strong>
       <span>${runnerText || "끝까지 참여한 모든 모둠이 환율 전략가입니다."}</span>
     </article>
   `;
@@ -513,8 +518,8 @@ function moneyTrendChartTemplate() {
   }));
   const maxRounds = Math.max(...series.map((item) => item.values.length), 1);
   const allValues = series.flatMap((item) => item.values);
-  const minValue = Math.min(...allValues, 0);
-  const maxValue = Math.max(...allValues, 1);
+  const minValue = Math.max(0, Math.min(...allValues) - 10);
+  const maxValue = Math.max(...allValues) + 10;
   const range = Math.max(1, maxValue - minValue);
   const width = 1000;
   const height = 260;
@@ -699,9 +704,11 @@ function renderMaterials() {
           <span></span>
           <span></span>
           <span></span>
+          <span></span>
         </div>
         <div class="worksheet-question">
           <p>Q2. 내가 속한 역할에서 환율 변동에 대응하는 가장 좋은 전략은?</p>
+          <span></span>
           <span></span>
           <span></span>
           <span></span>
@@ -726,7 +733,7 @@ function teacherPanelTemplate(text) {
 }
 
 function exchangeMoveTemplate() {
-  const moves = ["+9.2%", "-12.0%", "엔화↓", "비용↑", "수출↑"];
+  const moves = ["+9.2%", "-12.0%", "달러↓", "비용↑", "수출↑"];
   return `<span class="exchange-move">${moves[state.currentRoundIndex] || ""}</span>`;
 }
 
@@ -743,9 +750,9 @@ function roundNewsHintTemplate() {
       cue: "뉴스 판단: 시장에 달러를 파는 사람이 많아지면 원/달러 환율은 어느 쪽으로 움직일까요?"
     },
     {
-      title: "“지금 일본 가면 싸다” 여행사 예약 알림이 쏟아졌다",
-      lead: "일본 호텔과 항공권을 검색하던 소비자들이 예상보다 낮은 여행 경비에 반응하고 있습니다. 온라인 커뮤니티에는 ‘엔화로 결제하니 부담이 줄었다’는 후기가 이어졌습니다.",
-      cue: "뉴스 판단: 일본 여행 비용이 싸게 느껴진다면 엔화 가치는 강해졌을까요, 약해졌을까요?"
+      title: "해외직구 결제액 증가... 여행사도 달러 결제 상품 할인 경쟁",
+      lead: "달러로 결제하는 해외 숙박권과 직구 상품을 찾는 소비자가 늘고 있습니다. 일부 여행사는 “환전 부담이 줄었다고 느끼는 고객 문의가 많다”고 전했습니다.",
+      cue: "뉴스 판단: 달러 결제 부담이 줄어든다면 원/달러 환율은 어느 쪽으로 움직였을까요?"
     },
     {
       title: "기름값·구리값 동반 상승... 공장들 원가 계산 다시 한다",
@@ -768,12 +775,7 @@ function roundNewsHintTemplate() {
 }
 
 function predictionPanelTemplate() {
-  return `
-    <article class="prediction-panel">
-      <h3>생각 순서</h3>
-      <p>뉴스에서 외화 수요·공급 변화를 찾고, 우리 역할이 외화를 쓰는지 버는지 연결합니다.</p>
-    </article>
-  `;
+  return "";
 }
 
 function getNewsTone(round) {
@@ -781,7 +783,7 @@ function getNewsTone(round) {
   if (text.includes("상승") || text.includes("수출 증가")) {
     return "news-up";
   }
-  if (text.includes("하락") || text.includes("엔화↓")) {
+  if (text.includes("하락") || text.includes("달러↓")) {
     return "news-down";
   }
   return "news-neutral";
@@ -859,19 +861,18 @@ function timerPanelTemplate() {
 function roleCardTemplate(team) {
   return `
     <article class="role-card">
-      <h3>${escapeHtml(team.name)}</h3>
-      <p><strong>${team.role.name}</strong> · ${team.role.description}</p>
+      <h3>${escapeHtml(team.name)} · ${team.role.name}</h3>
+      <p class="role-desc">${team.role.description}</p>
       <div class="tag-row">
         <span class="tag">유리: ${team.role.strongWhen}</span>
         <span class="tag">불리: ${team.role.weakWhen}</span>
-        <span class="tag">${team.role.tradeType}</span>
+        <span class="tag trade-tag" title="${tradeTypeTitle(team.role.tradeType)}">${team.role.tradeType}</span>
       </div>
-      <div class="metric-row">
-        <span class="metric">자금 ${team.money}</span>
-        <span class="metric">안정도 ${team.stability}</span>
-        <span class="metric">위험도 ${team.risk}</span>
+      <div class="compact-stats">
+        <span><small>자금</small><strong>${team.money}</strong></span>
+        <span><small>안정도</small><strong>${team.stability}</strong></span>
+        <span><small>위험도</small><strong>${team.risk}</strong></span>
       </div>
-      <p>${team.role.explanation}</p>
     </article>
   `;
 }
@@ -902,6 +903,12 @@ function teamChoiceTemplate(team, round) {
       </div>
     </article>
   `;
+}
+
+function tradeTypeTitle(tradeType) {
+  if (tradeType === "재화 거래") return "자동차·가전 등 물건을 사고파는 거래";
+  if (tradeType === "서비스 거래") return "여행·교육 등 서비스를 사고파는 거래";
+  return "국가 사이에서 이루어지는 거래";
 }
 
 function roleVisualTemplate(team) {
@@ -935,16 +942,12 @@ function resultCardTemplate(team) {
   return `
     <article class="change-card">
       <h3 class="result-card-title">${escapeHtml(team.name)} ${profitBadgeTemplate(team, last)}</h3>
-      <p>${team.role.name} · 선택: ${last.choiceText}</p>
+      <p class="result-choice">${team.role.name} · 선택: ${last.choiceText}</p>
       <div class="delta-row">
         ${deltaTemplate("점수", last.total.scoreChange)}
         ${deltaTemplate("자금", last.total.moneyChange)}
         ${deltaTemplate("안정도", last.total.stabilityChange)}
         ${deltaTemplate("위험도", last.total.riskChange, true)}
-      </div>
-      <div class="result-reason">
-        <strong>결과 이유</strong>
-        <p>${last.summary}</p>
       </div>
       <div class="metric-row">
         <span class="metric">현재 점수 ${team.score}</span>
@@ -952,8 +955,6 @@ function resultCardTemplate(team) {
         <span class="metric">안정도 ${team.stability}</span>
         <span class="metric">위험도 ${team.risk}</span>
       </div>
-      <p>${last.feedback}</p>
-      <p>${last.roleNote}</p>
     </article>
   `;
 }
@@ -1029,7 +1030,7 @@ function roundConceptCardTemplate(round) {
 function getRoundDirection(round) {
   const text = `${round.shortStatus} ${round.title}`;
   if (text.includes("상승") || text.includes("수출 증가")) return "up";
-  if (text.includes("하락") || text.includes("엔화↓")) return "down";
+  if (text.includes("하락") || text.includes("달러↓")) return "down";
   return "neutral";
 }
 
@@ -1272,6 +1273,9 @@ function playTimerBeep() {
 function go(screen) {
   state.screen = screen;
   state.captureMode = false;
+  if (screen !== "round") {
+    roundLeftScrollTop = 0;
+  }
   persistAndRender();
 }
 

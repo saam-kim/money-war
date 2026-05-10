@@ -1,7 +1,7 @@
 const ROLE_CARDS = [
   {
     name: "해외여행자",
-    description: "해외여행을 위해 달러나 엔화를 환전해야 합니다.",
+    description: "해외여행을 위해 달러를 환전해야 합니다.",
     strongWhen: "환율 하락",
     weakWhen: "환율 상승",
     explanation: "환율이 오르면 같은 외화를 사기 위해 더 많은 원화가 필요하므로 여행 비용이 늘어납니다.",
@@ -167,27 +167,27 @@ const ROUNDS = [
     concept: "환율이 하락하면 외국 화폐의 가격이 낮아지고 원화 가치는 상승합니다. 해외여행, 유학비 송금, 수입에는 유리할 수 있지만 수출기업은 가격 경쟁력이 약해질 수 있습니다."
   },
   {
-    title: "엔화 가치 하락",
-    shortStatus: "엔화 가치 하락",
-    situation: "엔화 가치가 낮아져 일본 여행 수요가 증가했습니다. 일본 관련 소비와 여행 계획에 변화가 생겼습니다.",
-    teacherGuide: "달러뿐 아니라 다른 나라 화폐 가치도 국제 거래에 영향을 준다는 점을 짚어 주세요.",
-    discussionPrompt: "엔화 가치가 낮아지면 일본 여행, 일본 상품 구매, 국내 관광에는 각각 어떤 변화가 생길까요?",
-    resultFocus: "특정 국가의 화폐 가치 변화는 그 나라 여행, 상품, 국내 경쟁 산업까지 연결됩니다.",
+    title: "달러 약세와 해외 소비 증가",
+    shortStatus: "달러 약세 전망",
+    situation: "원/달러 환율이 더 내려갈 수 있다는 전망이 나오며 해외여행과 해외직구 수요가 증가했습니다.",
+    teacherGuide: "달러 가격이 낮아질 때 외화를 쓰는 주체와 외화를 버는 주체의 판단이 어떻게 달라지는지 짚어 주세요.",
+    discussionPrompt: "달러 결제 부담이 줄어들면 해외여행자, 해외직구 소비자, 수출기업의 선택은 어떻게 달라질까요?",
+    resultFocus: "달러 약세는 달러를 써야 하는 주체에게 기회가 될 수 있지만 달러를 벌어들이는 주체에게는 부담이 될 수 있습니다.",
     baseEffect: { scoreChange: 1, moneyChange: 0, stabilityChange: 1, riskChange: 1 },
     strongRoles: ["해외여행자", "해외직구 소비자", "유학생 가정"],
     weakRoles: ["외국인 관광객 대상 가게"],
     choices: [
       {
-        text: "일본 여행 비용을 비교해 계획을 확정한다",
+        text: "해외여행 비용을 비교해 계획을 확정한다",
         recommendedRoles: ["해외여행자"],
         effect: { scoreChange: 5, moneyChange: 7, stabilityChange: 2, riskChange: 2 },
-        feedback: "엔화 가치 하락은 일본 여행 비용을 낮춰 여행 수요를 늘릴 수 있습니다."
+        feedback: "달러 가격이 낮아지면 해외여행 비용 부담이 줄어 여행 수요가 늘 수 있습니다."
       },
       {
-        text: "일본 상품을 비교해 일부 수입한다",
+        text: "달러 결제 상품을 비교해 일부 수입한다",
         recommendedRoles: ["수입기업", "해외직구 소비자"],
         effect: { scoreChange: 4, moneyChange: 6, stabilityChange: 2, riskChange: 1 },
-        feedback: "특정 국가의 화폐 가치 변화는 그 나라 상품 가격에도 영향을 줍니다."
+        feedback: "달러 가격 변화는 해외 상품의 원화 기준 가격에도 영향을 줍니다."
       },
       {
         text: "국내 관광객 대상 행사를 강화한다",
@@ -202,7 +202,7 @@ const ROUNDS = [
         feedback: "환율 변화가 기회가 될 수 있지만 무리한 투자는 위험을 높입니다."
       }
     ],
-    concept: "환율은 달러만의 문제가 아닙니다. 엔화 가치가 낮아지면 일본 여행과 일본 상품 구매가 상대적으로 쉬워질 수 있고, 국내 관광업은 경쟁 압력을 받을 수 있습니다."
+    concept: "원/달러 환율이 낮아지면 달러로 결제하는 여행, 유학비 송금, 해외직구 부담이 줄어들 수 있습니다. 반대로 달러 수입을 원화로 바꾸는 수출기업은 불리해질 수 있습니다."
   },
   {
     title: "원자재 가격과 환율 동시 상승",
