@@ -1,6 +1,5 @@
 const app = document.querySelector("#app");
-const headerRound = document.querySelector("#headerRound");
-const headerExchange = document.querySelector("#headerExchange");
+const prevButton = document.querySelector("#prevButton");
 const homeButton = document.querySelector("#homeButton");
 const materialsButton = document.querySelector("#materialsButton");
 const resetButton = document.querySelector("#resetButton");
@@ -26,22 +25,14 @@ let state = structuredClone(initialState);
 let timerInterval = null;
 const revealedNewsRounds = new Set();
 let roundLeftScrollTop = 0;
+let enlargedNewsOpen = false;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
 function updateHeader() {
-  const round = ROUNDS[state.currentRoundIndex] || ROUNDS[0];
-  const preGameScreens = ["start", "lesson", "setup", "roles", "materials"];
-  const roundText = preGameScreens.includes(state.screen)
-    ? "시작 전"
-    : `${state.currentRoundIndex + 1} / ${ROUNDS.length}`;
-
-  headerRound.textContent = state.screen === "final" ? "종료" : roundText;
-  headerExchange.textContent = preGameScreens.includes(state.screen)
-    ? "수업 준비"
-    : state.screen === "round"
-      ? "뉴스 예측 중"
-      : round.shortStatus;
+  if (prevButton) {
+    prevButton.disabled = state.screen === "start";
+  }
   document.body.classList.toggle("capture-mode", state.captureMode && state.screen === "final");
 }
 
@@ -327,7 +318,7 @@ function renderRound() {
             <article class="exchange-card news-card ${newsTone} ${revealedNewsRounds.has(state.currentRoundIndex) ? "is-revealed" : ""}">
               <div class="news-card-toolbar">
                 <span class="news-label">시장 뉴스</span>
-                <button class="mini-button fullscreen-button" type="button" data-action="toggle-fullscreen">전체화면</button>
+                <button class="mini-button fullscreen-button" type="button" data-action="open-news-large">크게 보기</button>
               </div>
               <button class="news-reveal-button" type="button" data-action="reveal-news" aria-label="시장 뉴스 공개">
                 <span>▶ 클릭하여 공개</span>
@@ -352,7 +343,7 @@ function renderRound() {
         </div>
         <aside class="round-side">
           <article class="progress-card">
-            <p class="section-label teacher-check-label">(교사 확인) 선택 완료</p>
+            <p class="section-label teacher-check-label">선택 완료</p>
             <strong class="progress-count">${selectedCount} / ${state.teams.length}</strong>
             <p>각 모둠의 전략 선택을 입력합니다.</p>
           </article>
@@ -362,6 +353,7 @@ function renderRound() {
           ${showTeacherStatus ? teacherSubmissionPanelTemplate() : ""}
         </aside>
       </div>
+      ${enlargedNewsOpen ? newsLargeViewTemplate() : ""}
     </section>
   `;
 
@@ -475,8 +467,6 @@ function renderFinal() {
           <div class="teacher-panel final-teacher-note">
             <h3>마무리 질문</h3>
             <p>우리 모둠의 선택은 어떤 국제 거래 유형과 연결되었나요? 한 문장으로 정리해 보세요.</p>
-            <p class="memo-help">발표 준비 메모 (저장되지 않습니다)</p>
-            <textarea class="final-memo" rows="2" placeholder="여기에 입력하세요"></textarea>
           </div>
           <div class="action-row final-actions">
             <button class="secondary-button" type="button" data-action="capture">${state.captureMode ? "일반 보기" : "인쇄하기 🖨️"}</button>
@@ -792,7 +782,8 @@ function getNewsTone(round) {
 function bindNewsCardControls(root) {
   const newsCard = root.querySelector(".news-card");
   const revealButton = root.querySelector("[data-action='reveal-news']");
-  const fullscreenButton = root.querySelector("[data-action='toggle-fullscreen']");
+  const openLargeButton = root.querySelector("[data-action='open-news-large']");
+  const closeLargeButton = root.querySelector("[data-action='close-news-large']");
 
   if (revealButton && newsCard) {
     revealButton.addEventListener("click", () => {
@@ -801,31 +792,36 @@ function bindNewsCardControls(root) {
     });
   }
 
-  if (fullscreenButton) {
-    updateFullscreenButtons();
-    fullscreenButton.addEventListener("click", async () => {
-      try {
-        if (document.fullscreenElement) {
-          await document.exitFullscreen();
-        } else if (document.documentElement.requestFullscreen) {
-          await document.documentElement.requestFullscreen();
-        }
-      } catch (error) {
-        console.warn("Fullscreen toggle failed", error);
-      } finally {
-        updateFullscreenButtons();
-      }
+  if (openLargeButton) {
+    openLargeButton.addEventListener("click", () => {
+      enlargedNewsOpen = true;
+      render();
+    });
+  }
+
+  if (closeLargeButton) {
+    closeLargeButton.addEventListener("click", () => {
+      enlargedNewsOpen = false;
+      render();
     });
   }
 }
 
-function updateFullscreenButtons() {
-  document.querySelectorAll("[data-action='toggle-fullscreen']").forEach((button) => {
-    button.textContent = document.fullscreenElement ? "나가기" : "전체화면";
-  });
+function newsLargeViewTemplate() {
+  return `
+    <div class="news-large-backdrop" role="dialog" aria-modal="true" aria-label="시장 뉴스 크게 보기">
+      <article class="news-large-panel">
+        <div class="news-card-toolbar">
+          <span class="news-label">시장 뉴스 크게 보기</span>
+          <button class="mini-button" type="button" data-action="close-news-large">닫기</button>
+        </div>
+        <div class="news-large-content">
+          ${roundNewsHintTemplate()}
+        </div>
+      </article>
+    </div>
+  `;
 }
-
-document.addEventListener("fullscreenchange", updateFullscreenButtons);
 
 function promptPanelTemplate(text) {
   return `
@@ -843,6 +839,7 @@ function timerPanelTemplate() {
       <h3>토의 타이머</h3>
       <div class="timer-orb" aria-label="남은 시간">
         <strong id="timerDisplay">${formatTime(state.timer.remaining)}</strong>
+        <small>${state.timer.duration}초</small>
       </div>
       <div class="timer-presets">
         <button class="mini-button" type="button" data-timer-duration="30">30초</button>
@@ -850,9 +847,9 @@ function timerPanelTemplate() {
         <button class="mini-button" type="button" data-timer-duration="60">60초</button>
       </div>
       <div class="action-row">
-        <button class="primary-button" type="button" data-timer-action="start">${state.timer.running ? "진행 중" : "시작"}</button>
-        <button class="secondary-button" type="button" data-timer-action="pause">일시정지</button>
-        <button class="ghost-button" type="button" data-timer-action="reset">다시 설정</button>
+        <button class="primary-button" type="button" data-timer-action="start">▷ ${state.timer.running ? "진행 중" : "시작"}</button>
+        <button class="secondary-button" type="button" data-timer-action="pause">Ⅱ 일시정지</button>
+        <button class="ghost-button timer-reset-button" type="button" data-timer-action="reset" title="다시 설정" aria-label="다시 설정">↻</button>
       </div>
     </article>
   `;
@@ -896,7 +893,7 @@ function teamChoiceTemplate(team, round) {
       <p class="section-label">선택 ${selected !== undefined ? "완료" : "대기"}</p>
       <div class="choices-list">
         ${round.choices.map((choice, index) => `
-          <button class="choice-button ${selected === index ? "selected" : ""}" type="button" data-choice-button data-team-id="${team.id}" data-choice-index="${index}">
+          <button class="choice-button ${selected === index ? "selected" : ""}" type="button" data-choice-button data-team-id="${team.id}" data-choice-index="${index}" ${selected === index ? "disabled" : ""}>
             <span>${choice.text}</span>
           </button>
         `).join("")}
@@ -961,22 +958,22 @@ function resultCardTemplate(team) {
 
 function assetBarChartTemplate() {
   const maxMoney = Math.max(...state.teams.map((team) => team.money), 1);
-  const rowHeight = 52;
-  const chartHeight = state.teams.length * rowHeight + 16;
+  const rowHeight = 44;
+  const chartHeight = state.teams.length * rowHeight + 12;
   return `
     <article class="asset-chart-card">
       <h3 class="section-label">팀별 현재 자산 비교</h3>
-      <svg class="asset-bar-chart" viewBox="0 0 1000 ${chartHeight}" role="img" aria-label="팀별 현재 자산 가로 막대 차트">
+      <svg class="asset-bar-chart" style="height: ${chartHeight}px" viewBox="0 0 1000 ${chartHeight}" role="img" aria-label="팀별 현재 자산 가로 막대 차트">
         ${state.teams.map((team, index) => {
           const visual = roleVisualTemplate(team);
-          const y = 10 + index * rowHeight;
+          const y = 8 + index * rowHeight;
           const width = Math.max(28, Math.round((team.money / maxMoney) * 680));
           const isTop = team.money === maxMoney;
           const valueX = Math.min(950, 230 + width + 16);
           return `
-            <text class="bar-team-label" x="18" y="${y + 26}">${escapeHtml(team.name)}</text>
-            <rect class="asset-bar ${isTop ? "is-top" : ""}" x="230" y="${y}" width="${width}" height="40" rx="6" fill="${visual.line}" ${isTop ? 'stroke="#d97706" stroke-width="4"' : ""}></rect>
-            <text class="bar-value-label" x="${valueX}" y="${y + 26}">${team.money}만 원</text>
+            <text class="bar-team-label" x="18" y="${y + 22}">${escapeHtml(team.name)}</text>
+            <rect class="asset-bar ${isTop ? "is-top" : ""}" x="230" y="${y}" width="${width}" height="34" rx="6" fill="${visual.line}" ${isTop ? 'stroke="#d97706" stroke-width="4"' : ""}></rect>
+            <text class="bar-value-label" x="${valueX}" y="${y + 22}">${team.money}만 원</text>
           `;
         }).join("")}
       </svg>
@@ -1273,10 +1270,66 @@ function playTimerBeep() {
 function go(screen) {
   state.screen = screen;
   state.captureMode = false;
+  enlargedNewsOpen = false;
   if (screen !== "round") {
     roundLeftScrollTop = 0;
   }
   persistAndRender();
+}
+
+function goPreviousStep() {
+  stopTimer(false);
+  enlargedNewsOpen = false;
+  if (state.screen === "lesson") {
+    go("start");
+    return;
+  }
+  if (state.screen === "setup") {
+    go("lesson");
+    return;
+  }
+  if (state.screen === "roles") {
+    go("setup");
+    return;
+  }
+  if (state.screen === "round") {
+    state.selections = {};
+    if (state.currentRoundIndex > 0) {
+      state.currentRoundIndex -= 1;
+      go("result");
+      return;
+    }
+    go("roles");
+    return;
+  }
+  if (state.screen === "result") {
+    undoCurrentRoundResults();
+    go("round");
+    return;
+  }
+  if (state.screen === "final") {
+    state.currentRoundIndex = ROUNDS.length - 1;
+    go("result");
+    return;
+  }
+  if (state.screen === "materials") {
+    go("start");
+    return;
+  }
+  go("start");
+}
+
+function undoCurrentRoundResults() {
+  const round = ROUNDS[state.currentRoundIndex];
+  state.teams.forEach((team) => {
+    const last = team.history[team.history.length - 1];
+    if (!last || last.roundTitle !== round.title) return;
+    team.score -= last.total.scoreChange;
+    team.money = Math.max(0, team.money - last.total.moneyChange);
+    team.stability = clamp(team.stability - last.total.stabilityChange, 0, 100);
+    team.risk = clamp(team.risk - last.total.riskChange, 0, 100);
+    team.history.pop();
+  });
 }
 
 function persistAndRender() {
@@ -1316,7 +1369,8 @@ function loadState() {
         remaining: Math.min(savedTimer.remaining || migratedDuration, migratedDuration),
         running: false
       },
-      captureMode: false
+      captureMode: false,
+      screen: "start"
     };
   } catch (error) {
     console.warn("저장된 진행 상황을 불러오지 못했습니다.", error);
@@ -1343,9 +1397,12 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;");
 }
 
+prevButton.addEventListener("click", goPreviousStep);
+
 homeButton.addEventListener("click", () => {
   state.screen = "start";
   state.captureMode = false;
+  enlargedNewsOpen = false;
   stopTimer(false);
   render();
 });
@@ -1353,6 +1410,7 @@ homeButton.addEventListener("click", () => {
 materialsButton.addEventListener("click", () => {
   state.screen = "materials";
   state.captureMode = false;
+  enlargedNewsOpen = false;
   stopTimer(false);
   render();
 });
