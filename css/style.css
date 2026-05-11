@@ -3148,6 +3148,8 @@ button:disabled {
   font-size: 30px;
   font-weight: 900;
   line-height: 1;
+  align-self: center;
+  justify-self: center;
 }
 
 .timer-orb small {

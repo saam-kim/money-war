@@ -839,7 +839,6 @@ function timerPanelTemplate() {
       <h3>토의 타이머</h3>
       <div class="timer-orb" aria-label="남은 시간">
         <strong id="timerDisplay">${formatTime(state.timer.remaining)}</strong>
-        <small>${state.timer.duration}초</small>
       </div>
       <div class="timer-presets">
         <button class="mini-button" type="button" data-timer-duration="30">30초</button>
