@@ -226,13 +226,12 @@ function renderStart() {
       </div>
       <aside class="hero-dashboard" aria-label="환율 배틀 핵심 정보">
         <div class="dashboard-section">
-          <p class="dashboard-label">이번 게임 시작 환율 (가상) <small>실제 환율과 다를 수 있습니다</small></p>
+          <p class="dashboard-label">게임 시작 환율 <small>(가상 수치)</small></p>
           <div class="ticker-row">
-            <strong>USD/KRW</strong>
+            <strong>원·달러 환율</strong>
             <span>1,380</span>
             <em class="ticker-up">+12</em>
           </div>
-          <p class="ticker-note">모든 라운드는 원/달러 환율을 중심으로 진행됩니다.</p>
         </div>
         <div class="dashboard-section">
           <p class="dashboard-label">게임 규칙</p>
@@ -243,8 +242,8 @@ function renderStart() {
           </div>
         </div>
         <div class="asset-preview">
-          <div><span>자금</span><strong>100</strong><small>초기 보유 자산 (만 원)</small></div>
-          <div><span>대응 안전성</span><strong>50</strong><small>위험을 줄이고 계획적으로 대응한 정도</small></div>
+          <div><span>시작 자금</span><strong>100만 원</strong></div>
+          <div><span>대응 안전성</span><strong>50점</strong><small>안전하게 대응할수록 올라갑니다</small></div>
         </div>
         <div class="dashboard-section classroom-brief">
           <p class="dashboard-label">모둠 판단 루틴</p>
@@ -322,7 +321,7 @@ function renderLesson() {
       <div class="concept-card lesson-example">
         <h3>선택 예시</h3>
         <p><strong>수입기업</strong>이 뉴스에서 달러를 사려는 사람이 많다는 단서를 찾았다면, 환율 상승을 예상할 수 있습니다.</p>
-        <p>수입기업은 달러로 대금을 내야 하므로 환율 상승은 <strong>불리</strong>합니다. 그래서 “달러를 일부 미리 확보한다”처럼 비용 위험을 줄이는 선택을 할 수 있습니다.</p>
+        <p>수입기업은 달러로 대금을 내야 하므로 환율 상승은 <strong>불리</strong>합니다. 그래서 “달러를 일부 미리 확보한다”처럼 비용을 줄이는 선택을 할 수 있습니다.</p>
       </div>
       <div class="action-row">
         <button class="primary-button" type="button" data-action="setup">모둠 설정하기</button>
@@ -451,9 +450,8 @@ function renderRoles() {
     <section class="info-panel">
       <h2 class="screen-title">역할 배정</h2>
       <p class="lead">우리 모둠이 외화를 쓰는 쪽인지, 벌어들이는 쪽인지 먼저 확인합니다.</p>
-      <div class="start-check-panel">
-        <h3>시작 전 확인</h3>
-        <p>“우리 역할은 외화를 쓰기 때문에 환율이 오르면 불리하다”처럼 역할의 기준을 먼저 말해 봅니다.</p>
+      <div class=”start-check-panel”>
+        <p>💡 우리 역할이 외화를 <strong>쓰는 쪽</strong>인지, <strong>버는 쪽</strong>인지 먼저 확인하세요. 환율 방향과 연결됩니다.</p>
       </div>
       <div class="role-grid">
         ${state.teams.map((team) => roleCardTemplate(team)).join("")}
@@ -519,7 +517,7 @@ function renderRound() {
           <article class="progress-card">
             <p class="section-label teacher-check-label">선택 완료</p>
             <strong class="progress-count">${selectedCount} / ${state.teams.length}</strong>
-            <p>환율 예측, 환율 변동의 영향, 대응 선택을 모두 입력합니다.</p>
+            <p>세 가지를 모두 입력하면 결과를 볼 수 있습니다.</p>
           </article>
           ${showTeacherStatus ? teacherPanelTemplate(round.teacherGuide) : predictionPanelTemplate()}
           ${promptPanelTemplate("뉴스 속에서 외화를 사려는 쪽과 팔려는 쪽을 찾고, 우리 역할의 비용과 수입이 어떻게 바뀔지 따져 보세요.", true)}
@@ -628,11 +626,7 @@ function renderFinal() {
               `).join("")}
             </ol>
           </article>
-          ${learningSummaryTemplate()}
-          <div class="explain-box">
-            <h3>수업 정리</h3>
-            <p>환율 변동은 모든 경제 주체에게 같은 영향을 주지 않습니다. 해외여행자, 수출기업, 수입기업, 유학생 가정처럼 자신이 어떤 경제 활동을 하는지에 따라 유리함과 불리함이 달라집니다.</p>
-          </div>
+          ${chalkboardSummaryTemplate()}
         </div>
         <aside class="final-right">
           ${moneyTrendChartTemplate()}
@@ -669,15 +663,14 @@ function wrapUpModalTemplate() {
       <section class="wrapup-panel">
         <div class="wrapup-header">
           <div>
-            <p class="wrapup-eyebrow">CLASS WRAP-UP</p>
-            <h2 class="wrapup-title">환율 배틀에서 오늘 배운 것</h2>
+              <h2 class="wrapup-title">오늘 배운 것</h2>
           </div>
           <button class="wrapup-close ghost-button" type="button" data-action="close-wrap-up">닫기</button>
         </div>
         <div class="wrapup-grid">
           <article class="wrapup-card wrapup-card-blue">
             <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-blue">▲</span>
+              <span class="wrapup-icon wrapup-icon-blue">📈</span>
               <h3>환율이 오르면</h3>
             </div>
             <ul class="wrapup-list">
@@ -688,7 +681,7 @@ function wrapUpModalTemplate() {
           </article>
           <article class="wrapup-card wrapup-card-red">
             <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-red">▼</span>
+              <span class="wrapup-icon wrapup-icon-red">📉</span>
               <h3>환율이 내리면</h3>
             </div>
             <ul class="wrapup-list">
@@ -699,7 +692,7 @@ function wrapUpModalTemplate() {
           </article>
           <article class="wrapup-card wrapup-card-green">
             <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-green">◎</span>
+              <span class="wrapup-icon wrapup-icon-green">💡</span>
               <h3>역할마다 전략이 다릅니다</h3>
             </div>
             <ul class="wrapup-list">
@@ -710,7 +703,7 @@ function wrapUpModalTemplate() {
           </article>
           <article class="wrapup-card wrapup-card-orange">
             <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-orange">?</span>
+              <span class="wrapup-icon wrapup-icon-orange">💬</span>
               <h3>토의 질문</h3>
             </div>
             <ul class="wrapup-list">
@@ -721,7 +714,7 @@ function wrapUpModalTemplate() {
           </article>
           <article class="wrapup-card wrapup-card-purple">
             <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-purple">!</span>
+              <span class="wrapup-icon wrapup-icon-purple">✅</span>
               <h3>잊지 말기</h3>
             </div>
             <ul class="wrapup-list">
@@ -862,6 +855,57 @@ function learningSummaryTemplate() {
         <p>같은 환율도<br>입장에 따라 득실이<br>달라진다</p>
       </article>
     </section>
+  `;
+}
+
+function chalkboardSummaryTemplate() {
+  return `
+    <article class="chalkboard-summary">
+      <p class="chalkboard-eyebrow">판서 정리</p>
+      <div class="chalkboard-body">
+        <div class="chalkboard-col">
+          <h4>환율의 변화 요인</h4>
+          <div class="chalk-equations">
+            <div class="chalk-eq-row">
+              <span class="chalk-cause">달러 수요 증가</span>
+              <span class="chalk-arrow">→</span>
+              <span class="chalk-result chalk-up">환율 상승 ▲</span>
+            </div>
+            <div class="chalk-eq-divider">예) 해외여행 증가, 수입 대금 지급</div>
+            <div class="chalk-eq-row">
+              <span class="chalk-cause">달러 공급 증가</span>
+              <span class="chalk-arrow">→</span>
+              <span class="chalk-result chalk-down">환율 하락 ▼</span>
+            </div>
+            <div class="chalk-eq-divider">예) 수출 대금 유입, 외국인 투자 증가</div>
+          </div>
+        </div>
+        <div class="chalkboard-divider"></div>
+        <div class="chalkboard-col">
+          <h4>환율 변동의 영향</h4>
+          <div class="chalk-table">
+            <div class="chalk-table-head">
+              <span></span>
+              <span>수출기업</span>
+              <span>수입기업</span>
+              <span>여행자·유학생</span>
+            </div>
+            <div class="chalk-table-row">
+              <span class="chalk-rate up">환율 ▲</span>
+              <span class="chalk-win">유리 ✓</span>
+              <span class="chalk-lose">불리 ✗</span>
+              <span class="chalk-lose">불리 ✗</span>
+            </div>
+            <div class="chalk-table-row">
+              <span class="chalk-rate down">환율 ▼</span>
+              <span class="chalk-lose">불리 ✗</span>
+              <span class="chalk-win">유리 ✓</span>
+              <span class="chalk-win">유리 ✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
   `;
 }
 
@@ -1443,7 +1487,7 @@ function roundConceptCardTemplate(round) {
   const direction = getRoundDirection(round);
   const directionText = direction === "up" ? "환율이 올랐습니다. (USD/KRW ▲)" : direction === "down" ? "환율이 내렸습니다. (USD/KRW ▼)" : "환율 영향이 역할별로 다르게 나타났습니다.";
   const strongText = round.strongRoles.length ? round.strongRoles.join("·") : "상황을 잘 활용한 역할";
-  const weakText = round.weakRoles.length ? round.weakRoles.join("·") : "위험 관리가 필요한 역할";
+  const weakText = round.weakRoles.length ? round.weakRoles.join("·") : "해당 없음";
   const exchangeText = exchangeResultText(round);
   if (direction === "down") {
     return `

@@ -1,30 +1,30 @@
 :root {
   --space-1: 0.25rem;
-  --color-brand: #1b6bff;
-  --color-brand-deep: #0f4fcc;
-  --color-brand-soft: #e6eeff;
-  --color-brand-ink: #0a2e7a;
-  --color-text: #111418;
-  --color-text-muted: #5a6372;
-  --color-text-faint: #9aa3b2;
+  --color-brand: #2563eb;
+  --color-brand-deep: #1d4ed8;
+  --color-brand-soft: #dbeafe;
+  --color-brand-ink: #1e3a8a;
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-faint: #94a3b8;
   --color-bg: #ffffff;
-  --color-bg-soft: #f4f6fa;
-  --color-bg-sidebar: #f7f9fc;
-  --color-border: #e3e7ee;
-  --color-border-strong: #cfd6e2;
-  --color-case-bg: #eaf5ee;
-  --color-case-border: #2e7d4f;
-  --color-case-text: #16402a;
-  --color-question-bg: #e6eeff;
-  --color-question-border: #1b6bff;
-  --color-question-text: #0a2e7a;
-  --color-concept-bg: #f4f6fa;
-  --color-concept-border: #5a6372;
-  --color-concept-text: #111418;
-  --color-warning-bg: #fff7e0;
-  --color-warning-border: #d89119;
-  --color-warning-text: #5b3a00;
-  --color-danger: #d64545;
+  --color-bg-soft: #f1f5f9;
+  --color-bg-sidebar: #f8fafc;
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-case-bg: #dcfce7;
+  --color-case-border: #16a34a;
+  --color-case-text: #14532d;
+  --color-question-bg: #dbeafe;
+  --color-question-border: #2563eb;
+  --color-question-text: #1e3a8a;
+  --color-concept-bg: #f1f5f9;
+  --color-concept-border: #64748b;
+  --color-concept-text: #0f172a;
+  --color-warning-bg: #fef9c3;
+  --color-warning-border: #ca8a04;
+  --color-warning-text: #713f12;
+  --color-danger: #dc2626;
   --font-display: "Pretendard", "Malgun Gothic", sans-serif;
   --font-serif: "Gowun Batang", "Noto Serif KR", "Nanum Myeongjo", serif;
   --font-sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
@@ -46,12 +46,12 @@
   --space-8: 1.75rem;
   --space-10: 2.1rem;
   --space-12: 2.4rem;
-  --radius: 8px;
-  --radius-lg: 12px;
-  --shadow-sm: 0 1px 2px rgba(17, 20, 24, 0.04);
-  --shadow-md: 0 4px 16px rgba(17, 20, 24, 0.06);
-  --shadow-hover: 0 10px 24px rgba(17, 20, 24, 0.08);
-  --shadow-focus-ring: 0 0 0 3px rgba(27, 107, 255, 0.12);
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 20px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.06);
+  --shadow-hover: 0 16px 40px rgba(15, 23, 42, 0.15), 0 4px 8px rgba(15, 23, 42, 0.08);
+  --shadow-focus-ring: 0 0 0 3px rgba(37, 99, 235, 0.22);
   --ease-out-smooth: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -471,7 +471,8 @@ body {
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: 17px;
-  background: linear-gradient(180deg, #f6f9ff 0%, #ffffff 42%);
+  background:
+    linear-gradient(180deg, #c7d7fd 0%, #dbeafe 8%, #eff6ff 22%, #f8faff 45%, #ffffff 75%);
 }
 
 button,
@@ -3349,6 +3350,720 @@ button:disabled {
 .round-panel .prompt-panel h3,
 .round-panel .timer-panel h3 {
   font-size: 16px;
+}
+
+/* ============================================================
+   DESIGN OVERHAUL v3 — stronger visual identity
+   ============================================================ */
+
+/* --- Header: brand blue --- */
+.top-bar {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 60%, #3b82f6 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.28);
+}
+
+.brand-block h1 {
+  color: #f0f6ff;
+  font-size: 1.28rem;
+}
+
+.subject-label {
+  color: #93c5fd;
+  letter-spacing: 0.1em;
+}
+
+.header-actions .ghost-button {
+  color: rgba(219, 234, 254, 0.88);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.header-actions .ghost-button:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.header-actions .danger-button {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+}
+
+/* --- Primary button: gradient --- */
+.primary-button {
+  background: linear-gradient(135deg, #2563eb 0%, #4f46e5 100%);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.42), 0 1px 3px rgba(37, 99, 235, 0.2);
+  color: #ffffff;
+}
+
+.primary-button:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #4338ca 100%);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.55), 0 2px 6px rgba(37, 99, 235, 0.3);
+}
+
+/* --- Secondary / ghost on white bg --- */
+.secondary-button:hover,
+.ghost-button:hover,
+.mini-button:hover {
+  background: var(--color-brand-soft);
+  border-color: var(--color-brand);
+  color: var(--color-brand);
+}
+
+/* --- Hero panel: more dramatic gradient --- */
+.hero-panel {
+  background:
+    radial-gradient(ellipse 70% 80% at 0% 0%, rgba(37, 99, 235, 0.13) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 100% 100%, rgba(16, 185, 129, 0.08) 0%, transparent 55%),
+    linear-gradient(180deg, #fafcff 0%, #ffffff 100%);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+/* --- Hero dashboard: rich blue gradient --- */
+.hero-dashboard {
+  background:
+    linear-gradient(155deg, #eff6ff 0%, #dbeafe 50%, #e0e7ff 100%);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-top: 3px solid var(--color-brand);
+}
+
+/* --- Game tag: more polish --- */
+.game-tag {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(79, 70, 229, 0.07));
+  border-color: rgba(37, 99, 235, 0.28);
+  letter-spacing: 0.1em;
+  font-weight: 900;
+}
+
+/* --- Cards: elevated shadows --- */
+.concept-card,
+.role-card,
+.team-card,
+.choice-card,
+.change-card,
+.trade-card,
+.winner-card,
+.ranking-card,
+.print-role-card,
+.teacher-panel,
+.prediction-panel,
+.prompt-panel,
+.timer-panel,
+.progress-card {
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.07), 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+
+.concept-card:hover,
+.role-card:hover,
+.team-card:hover,
+.change-card:hover,
+.trade-card:hover,
+.winner-card:hover,
+.ranking-card:hover,
+.print-role-card:hover {
+  box-shadow: 0 14px 36px rgba(15, 23, 42, 0.13), 0 4px 8px rgba(15, 23, 42, 0.07);
+  transform: translateY(-4px);
+}
+
+/* --- Flow-rail step numbers: gradient circles --- */
+.flow-rail span {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.35);
+}
+
+/* --- Section label bar: gradient accent --- */
+.section-label::before {
+  background: linear-gradient(180deg, #2563eb, #4f46e5);
+  width: 4px;
+  border-radius: 4px;
+}
+
+/* --- Sticky actions: glass style --- */
+.sticky-actions {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  box-shadow: 0 -4px 24px rgba(15, 23, 42, 0.10), 0 -1px 3px rgba(15, 23, 42, 0.05);
+}
+
+/* --- Panels: stronger base shadow --- */
+.hero-panel,
+.info-panel,
+.setup-panel,
+.round-panel,
+.result-panel,
+.summary-panel {
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.07), 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+/* --- Choice button selected: gradient --- */
+.choice-button.selected {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  border-color: #2563eb;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.38);
+}
+
+/* --- Segmented options selected: gradient --- */
+.segmented-options .mini-button.selected {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  border-color: #2563eb;
+}
+
+/* --- Submission panel: stronger brand accent --- */
+.submission-panel {
+  border-left-width: 5px;
+  background: linear-gradient(90deg, rgba(37, 99, 235, 0.03), #ffffff);
+}
+
+/* --- Rank list first: richer gold --- */
+.rank-list li:first-child {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+  border: 1px solid #f59e0b;
+  border-left: 4px solid #d97706;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+}
+
+/* --- Victory banner: more dramatic --- */
+.victory-banner {
+  background: linear-gradient(135deg, #fef9c3 0%, #fde68a 50%, #fcd34d 100%);
+  border: 2px solid #f59e0b;
+  box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25), 0 2px 6px rgba(245, 158, 11, 0.15);
+}
+
+/* --- Timer orb: gradient --- */
+.timer-orb {
+  background:
+    conic-gradient(var(--color-brand) var(--timer-progress), rgba(219, 234, 254, 0.7) 0),
+    #f8faff;
+  box-shadow: inset 0 0 0 10px rgba(255, 255, 255, 0.85), 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+/* --- Home flow: richer background --- */
+.home-flow {
+  background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+  border: 1px solid rgba(37, 99, 235, 0.12);
+}
+
+/* --- Role chips: more visual polish --- */
+.role-chip {
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.07);
+  transition: transform 0.2s var(--ease-out-smooth), box-shadow 0.2s ease;
+}
+
+.role-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+}
+
+/* --- Ticker row: stronger styling --- */
+.ticker-row {
+  background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(239,246,255,0.9));
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+/* --- Asset chart card: stronger accent --- */
+.asset-chart-card {
+  border-left-width: 5px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.07);
+}
+
+/* --- Trend card: stronger border --- */
+.trend-card {
+  border-left-width: 5px;
+  box-shadow: 0 2px 12px rgba(15, 23, 42, 0.07);
+}
+
+/* --- Round core card: stronger --- */
+.round-core-card {
+  border-left-width: 5px;
+  background: linear-gradient(90deg, #eff6ff, #f0f9ff);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);
+}
+
+/* --- Wrapup panel: elevated --- */
+.wrapup-panel {
+  box-shadow: 0 32px 80px rgba(10, 20, 50, 0.22), 0 8px 24px rgba(10, 20, 50, 0.12);
+  border-radius: var(--radius-lg);
+}
+
+/* --- Learning summary grid: stronger cards --- */
+.learning-summary-grid article {
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+  transition: transform 0.2s var(--ease-out-smooth), box-shadow 0.2s ease;
+}
+
+.learning-summary-grid article:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+/* --- News reveal button: richer gradient --- */
+.news-reveal-button {
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(30, 58, 138, 0.82));
+}
+
+/* --- Pace step active: gradient badge --- */
+.pace-step-active {
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(79, 70, 229, 0.1)) !important;
+  border-radius: 6px !important;
+  color: var(--color-brand) !important;
+}
+
+/* --- Teacher panel / Prediction panel: richer warning --- */
+.teacher-panel,
+.prediction-panel {
+  border-left-width: 5px;
+  background: linear-gradient(90deg, #fef9c3, #fffbeb);
+}
+
+/* --- Prompt panel: stronger brand --- */
+.prompt-panel {
+  border-left-width: 5px;
+  background: linear-gradient(90deg, #dbeafe, #eff6ff);
+}
+
+/* --- Timer panel: richer green --- */
+.timer-panel {
+  border-left-width: 5px;
+  background: linear-gradient(90deg, #dcfce7, #f0fdf4);
+}
+
+/* --- Material table header --- */
+.material-head {
+  background: linear-gradient(90deg, var(--color-brand-soft), #e0e7ff);
+}
+
+/* --- Score big: gradient text --- */
+.score-big {
+  background: linear-gradient(135deg, #2563eb, #4f46e5);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* --- Setup panel: glass card feel --- */
+.setup-panel {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(37, 99, 235, 0.1);
+  box-shadow: 0 8px 32px rgba(15, 23, 42, 0.10), 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+/* --- Explain box: richer green --- */
+.explain-box {
+  background: linear-gradient(90deg, #bbf7d0, #dcfce7);
+  border-left-color: #16a34a;
+  border-left-width: 6px;
+}
+
+/* --- Role advantage tags: stronger --- */
+.role-tag-weak {
+  box-shadow: 0 1px 3px rgba(220, 38, 38, 0.15);
+}
+
+/* --- Input fields: cleaner focus --- */
+.number-control input:focus,
+.number-control select:focus,
+.team-name-grid input:focus {
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline: none;
+}
+
+/* --- Wrapup backdrop: richer dark --- */
+.wrapup-backdrop {
+  background: rgba(7, 15, 40, 0.55);
+}
+
+/* ---- Whitespace reduction ---- */
+
+/* Panels: tighter padding */
+.info-panel,
+.result-panel,
+.summary-panel {
+  padding: var(--space-4);
+  gap: var(--space-3);
+}
+
+/* Screen-level gap */
+.screen {
+  gap: var(--space-3);
+}
+
+/* Flow rail in lesson screen */
+.flow-rail {
+  gap: var(--space-2);
+}
+
+.flow-rail article {
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+/* Lesson metrics */
+.lesson-metrics {
+  gap: var(--space-2);
+  padding: var(--space-3);
+}
+
+.lesson-metrics > div {
+  gap: var(--space-2);
+}
+
+.lesson-metrics article {
+  padding: var(--space-2) var(--space-3);
+}
+
+/* Lesson example */
+.lesson-example {
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+}
+
+/* Wrapup grid tighter */
+.wrapup-grid {
+  gap: var(--space-3);
+}
+
+.wrapup-panel {
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+}
+
+.wrapup-card {
+  padding: var(--space-4);
+}
+
+.wrapup-list {
+  gap: var(--space-2);
+}
+
+/* Learning summary tighter */
+.learning-summary-grid {
+  gap: var(--space-3);
+}
+
+.learning-summary-grid article {
+  padding: 14px 16px;
+}
+
+/* Dashboard section tighter */
+.dashboard-section {
+  gap: var(--space-1);
+  padding-bottom: var(--space-2);
+}
+
+/* Start screen hero-copy tighter */
+.start-screen .hero-copy {
+  gap: var(--space-3);
+}
+
+/* Role grid tighter */
+.info-grid {
+  gap: var(--space-3);
+}
+
+/* Start check panel: simpler */
+.start-check-panel {
+  border-left: 4px solid var(--color-brand);
+  background: var(--color-brand-soft);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+}
+
+.start-check-panel h3,
+.start-check-panel p {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Award grid (final screen) */
+.award-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.award-grid article {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-top: 3px solid var(--color-brand);
+  border-radius: var(--radius-lg);
+  background: #ffffff;
+  box-shadow: var(--shadow-sm);
+}
+
+.award-grid strong {
+  display: block;
+  margin-bottom: var(--space-1);
+  color: var(--color-text-muted);
+  font-size: var(--text-xs);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.award-grid span {
+  color: var(--color-brand-ink);
+  font-size: var(--text-md);
+  font-weight: 900;
+}
+
+/* Round summary banner */
+.round-summary-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, #eff6ff, #f0f9ff);
+  border-left: 4px solid var(--color-brand);
+}
+
+.round-summary-banner strong {
+  flex-shrink: 0;
+  color: var(--color-brand);
+  font-size: var(--text-xs);
+  font-weight: 900;
+  letter-spacing: 0.06em;
+}
+
+.round-summary-banner span {
+  color: var(--color-text);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* Wrapup title spacing fix */
+.wrapup-title {
+  margin-top: 0;
+}
+
+/* ---- 판서 정리 (chalkboard summary) ---- */
+.chalkboard-summary {
+  padding: var(--space-5);
+  border-radius: var(--radius-lg);
+  background: #1a2744;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.22);
+}
+
+.chalkboard-eyebrow {
+  margin: 0 0 var(--space-3);
+  color: rgba(148, 197, 253, 0.7);
+  font-size: var(--text-xs);
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.chalkboard-body {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.chalkboard-col h4 {
+  margin: 0 0 var(--space-3);
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.chalkboard-divider {
+  width: 1px;
+  min-height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  align-self: stretch;
+}
+
+/* 왼쪽: 변화 요인 */
+.chalk-equations {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.chalk-eq-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.chalk-cause {
+  color: #e2e8f0;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  min-width: 90px;
+}
+
+.chalk-arrow {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: var(--text-lg);
+  font-weight: 300;
+}
+
+.chalk-result {
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: var(--text-sm);
+  font-weight: 900;
+}
+
+.chalk-result.chalk-up {
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.18);
+}
+
+.chalk-result.chalk-down {
+  color: #86efac;
+  background: rgba(22, 163, 74, 0.18);
+}
+
+.chalk-eq-divider {
+  padding-left: 2px;
+  color: rgba(255, 255, 255, 0.28);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* 오른쪽: 영향 표 */
+.chalk-table {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.chalk-table-head,
+.chalk-table-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 1fr 1fr;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.chalk-table-head {
+  margin-bottom: var(--space-1);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chalk-table-head span {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+
+.chalk-table-row {
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.chalk-rate {
+  font-size: var(--text-sm);
+  font-weight: 900;
+}
+
+.chalk-rate.up { color: #fca5a5; }
+.chalk-rate.down { color: #86efac; }
+
+.chalk-win {
+  color: #86efac;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-align: center;
+}
+
+.chalk-lose {
+  color: #fca5a5;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ---- Start screen: fix full-height empty space ---- */
+.start-screen .hero-panel {
+  min-height: 0;
+  height: auto;
+}
+
+.start-screen .hero-copy {
+  justify-content: flex-start;
+  padding: var(--space-5) var(--space-6);
+  gap: var(--space-4);
+}
+
+.start-screen .hero-dashboard {
+  align-content: start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  margin: var(--space-3);
+}
+
+/* Role chips: color tint by role */
+.role-chip-exporter {
+  border-left: 4px solid #16a34a;
+  background: linear-gradient(90deg, #f0fdf4, #ffffff);
+}
+
+.role-chip-importer {
+  border-left: 4px solid #dc2626;
+  background: linear-gradient(90deg, #fef2f2, #ffffff);
+}
+
+.role-chip-traveler {
+  border-left: 4px solid #d97706;
+  background: linear-gradient(90deg, #fffbeb, #ffffff);
+}
+
+/* Game-tag: tighter top margin */
+.game-tag {
+  margin-bottom: var(--space-2);
+}
+
+/* Home flow: compact */
+.home-flow {
+  padding: var(--space-3);
+  gap: var(--space-2);
+}
+
+/* --- Spacing: label ↔ button gap fix --- */
+.decision-block {
+  gap: 0.3rem;
+  margin-bottom: var(--space-3);
+}
+
+.decision-block strong {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.team-card .choices-list {
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.choice-button {
+  min-height: 46px;
+  padding: var(--space-3) var(--space-3);
+  gap: var(--space-2);
+}
+
+.segmented-options {
+  gap: var(--space-2);
+}
+
+.segmented-options .mini-button {
+  min-height: 36px;
+  padding: 6px 8px;
 }
 
 .round-panel .teacher-panel p,
