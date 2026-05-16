@@ -340,22 +340,28 @@ function renderSetup() {
   const selectedRoundCount = difficultyCounts.low + difficultyCounts.medium + difficultyCounts.high;
   screen.innerHTML = `
     <section class="setup-panel">
-      <h2 class="screen-title">모둠 설정</h2>
-      <p class="lead">2~8개 모둠을 설정합니다. 이름을 비우면 1모둠, 2모둠처럼 자동 표시됩니다.</p>
-      <div class="setup-controls">
-        <div class="number-control">
-          <label for="teamCount">모둠 수</label>
-          <input id="teamCount" type="number" min="2" max="8" value="${state.teamCount}" />
-          <label for="roundCount">라운드 수</label>
-          <select id="roundCount">
-            ${Array.from({ length: Math.min(MAX_ROUND_COUNT, ROUNDS.length) }, (_, index) => index + 1)
-              .map((count) => `<option value="${count}" ${roundCount === count ? "selected" : ""}>${count}라운드</option>`)
-              .join("")}
-          </select>
+      <div class="setup-two-col">
+        <div class="setup-left">
+          <div>
+            <h2 class="screen-title">모둠 설정</h2>
+            <p class="lead">게임 조건을 설정하고 역할을 배정합니다.</p>
+          </div>
+          <div class="number-control">
+            <label for="teamCount">모둠 수</label>
+            <input id="teamCount" type="number" min="2" max="8" value="${state.teamCount}" />
+          </div>
+          <div class="number-control">
+            <label for="roundCount">라운드 수</label>
+            <select id="roundCount">
+              ${Array.from({ length: Math.min(MAX_ROUND_COUNT, ROUNDS.length) }, (_, index) => index + 1)
+                .map((count) => `<option value="${count}" ${roundCount === count ? "selected" : ""}>${count}라운드</option>`)
+                .join("")}
+            </select>
+          </div>
           <div class="difficulty-builder" aria-label="뉴스 난이도 구성">
             <div class="difficulty-builder-head">
-              <strong>뉴스 난이도</strong>
-              <span class="difficulty-total ${selectedRoundCount === roundCount ? "" : "is-mismatch"}">뉴스 ${selectedRoundCount}개 / ${roundCount}라운드</span>
+              <strong>뉴스 난이도 구성</strong>
+              <span class="difficulty-total ${selectedRoundCount === roundCount ? "" : "is-mismatch"}">합계 ${selectedRoundCount} / ${roundCount}개</span>
             </div>
             ${DIFFICULTY_CONFIG.map(({ key, label, difficulty }) => `
               <label class="difficulty-count">
@@ -365,25 +371,26 @@ function renderSetup() {
               </label>
             `).join("")}
           </div>
-          <p class="field-help">모둠 수를 바꾸면 '적용'을 눌러주세요.</p>
-          <button class="mini-button" type="button" data-action="apply-count">적용</button>
+          <p class="field-help">모둠 수 변경 후 아래 '적용'을 눌러야 이름 칸이 업데이트됩니다.</p>
+          <div class="setup-foot-row">
+            <button class="mini-button" type="button" data-action="apply-count">모둠 수 적용</button>
+            <button class="primary-button" type="button" data-action="assign">역할 배정 →</button>
+          </div>
         </div>
-        <div class="team-name-grid ${state.teamCount <= 2 ? "single-column" : ""}">
-          ${names.map((name, index) => `
-            <label>
-              ${index + 1}모둠 이름
-              <input type="text" maxlength="16" value="${escapeHtml(name)}" data-team-name="${index}" placeholder="${index + 1}모둠" />
-            </label>
-          `).join("")}
+        <div class="setup-right">
+          <p class="setup-right-label">모둠 이름 <span>(비우면 자동)</span></p>
+          <div class="team-name-grid ${state.teamCount <= 2 ? "single-column" : ""}">
+            ${names.map((name, index) => `
+              <label>
+                ${index + 1}모둠
+                <input type="text" maxlength="16" value="${escapeHtml(name)}" data-team-name="${index}" placeholder="${index + 1}모둠" />
+              </label>
+            `).join("")}
+          </div>
+          <div class="teacher-panel setup-tip">
+            <p>역할 배정을 누르면 선택한 난이도 구성 안에서 뉴스 순서가 무작위로 정해집니다.</p>
+          </div>
         </div>
-      </div>
-      <div class="teacher-panel">
-        <h3>운영 팁</h3>
-        <p>역할 자동 배정을 누르면 선택한 난이도 구성 안에서 뉴스 순서가 무작위로 정해집니다.</p>
-      </div>
-      <div class="action-row">
-        <button class="primary-button" type="button" data-action="assign">역할 자동 배정</button>
-        <span class="action-help">각 모둠에 역할(해외여행자·수출기업·수입기업 등)을 자동으로 배정합니다.</span>
       </div>
     </section>
   `;
@@ -403,7 +410,8 @@ function renderSetup() {
     state.newsDifficultyCounts = readDifficultyCounts(screen, state.roundCount);
     state.roundOrder = [];
     state.teamNames = readTeamNames(screen);
-    persistAndRender();
+    saveState();
+    updateDifficultyBadge(screen);
   });
 
   screen.querySelectorAll("[data-difficulty-count]").forEach((input) => {
@@ -412,7 +420,8 @@ function renderSetup() {
       state.newsDifficultyCounts = readDifficultyCounts(screen, state.roundCount);
       state.roundOrder = [];
       state.teamNames = readTeamNames(screen);
-      persistAndRender();
+      saveState();
+      updateDifficultyBadge(screen);
     });
   });
 
@@ -431,7 +440,7 @@ function renderSetup() {
     const difficultyCounts = readDifficultyCounts(screen, state.roundCount);
     const difficultyTotal = getDifficultyTotal(difficultyCounts);
     if (difficultyTotal !== state.roundCount) {
-      window.alert(`라운드 수와 뉴스 난이도 합계가 맞지 않습니다.\n현재 난이도 합계: ${difficultyTotal}개\n설정한 라운드 수: ${state.roundCount}개`);
+      showSetupError(screen, `난이도 합계(${difficultyTotal}개)가 라운드 수(${state.roundCount}개)와 다릅니다. 맞춰주세요.`);
       return;
     }
     state.newsDifficultyCounts = difficultyCounts;
@@ -442,6 +451,16 @@ function renderSetup() {
   });
 
   return screen;
+}
+
+function showSetupError(screen, message) {
+  let el = screen.querySelector(".setup-error");
+  if (!el) {
+    el = document.createElement("p");
+    el.className = "setup-error";
+    screen.querySelector(".action-row").before(el);
+  }
+  el.textContent = message;
 }
 
 function renderRoles() {
@@ -495,7 +514,7 @@ function renderRound() {
                 <span>▶ 클릭하여 공개</span>
               </button>
               <div class="news-card-content">
-                ${roundNewsHintTemplate()}
+                ${roundNewsHintTemplate(true)}
               </div>
               <div aria-live="polite" class="sr-only" id="newsAnnounce"></div>
             </article>
@@ -534,20 +553,41 @@ function renderRound() {
 
   screen.querySelectorAll("[data-choice-button]").forEach((button) => {
     button.addEventListener("click", () => {
-      roundLeftScrollTop = screen.querySelector(".round-left")?.scrollTop || 0;
       const teamId = button.dataset.teamId;
+      const selectType = button.dataset.selectType;
       const selection = state.selections[teamId] || {};
-      if (button.dataset.selectType === "prediction") {
-        selection.prediction = button.dataset.value;
-      }
-      if (button.dataset.selectType === "impact") {
-        selection.impact = button.dataset.value;
-      }
-      if (button.dataset.selectType === "strategy") {
-        selection.choiceIndex = Number(button.dataset.choiceIndex);
-      }
+      if (selectType === "prediction") selection.prediction = button.dataset.value;
+      if (selectType === "impact") selection.impact = button.dataset.value;
+      if (selectType === "strategy") selection.choiceIndex = Number(button.dataset.choiceIndex);
       state.selections[teamId] = selection;
-      persistAndRender();
+      saveState();
+
+      // Targeted DOM update — no full re-render, no flicker
+      screen.querySelectorAll(`[data-choice-button][data-select-type="${selectType}"][data-team-id="${teamId}"]`).forEach((btn) => {
+        const isSelected = selectType === "strategy"
+          ? Number(btn.dataset.choiceIndex) === selection.choiceIndex
+          : btn.dataset.value === selection[selectType];
+        btn.classList.toggle("selected", isSelected);
+        btn.setAttribute("aria-pressed", String(isSelected));
+        if (selectType === "strategy") btn.disabled = isSelected;
+      });
+
+      const complete = isTeamSelectionComplete(selection);
+      const cardEl = button.closest(".team-card");
+      if (cardEl) {
+        cardEl.classList.toggle("selected", complete);
+        const bannerEm = cardEl.querySelector(".team-role-banner em");
+        if (bannerEm) {
+          bannerEm.className = complete ? "done" : "pending";
+          bannerEm.textContent = complete ? "✓ 완료" : "입력 중";
+        }
+      }
+
+      const newSelectedCount = state.teams.filter((t) => isTeamSelectionComplete(state.selections[t.id])).length;
+      const progressEl = screen.querySelector(".progress-count");
+      if (progressEl) progressEl.textContent = `${newSelectedCount} / ${state.teams.length}`;
+      const showResultBtn = screen.querySelector("[data-action='show-result']");
+      if (showResultBtn) showResultBtn.disabled = newSelectedCount < state.teams.length;
     });
   });
 
@@ -626,15 +666,11 @@ function renderFinal() {
               `).join("")}
             </ol>
           </article>
-          ${chalkboardSummaryTemplate()}
+          ${chalkboardUnifiedTemplate()}
         </div>
         <aside class="final-right">
           ${moneyTrendChartTemplate()}
           ${roleSummaryPanelTemplate()}
-          <div class="teacher-panel final-teacher-note">
-            <h3>마무리 질문</h3>
-            <p>우리 모둠은 환율 방향과 역할의 유불리를 어떻게 판단했나요? 한 문장으로 정리해 보세요.</p>
-          </div>
           <div class="action-row final-actions">
             <button class="secondary-button" type="button" data-action="capture">${state.captureMode ? "일반 보기" : "인쇄하기 🖨️"}</button>
             <span class="shortcut-hint">Ctrl+P / ⌘P로 인쇄</span>
@@ -858,51 +894,81 @@ function learningSummaryTemplate() {
   `;
 }
 
-function chalkboardSummaryTemplate() {
+function chalkboardUnifiedTemplate() {
   return `
-    <article class="chalkboard-summary">
+    <article class="chalkboard-unified">
       <p class="chalkboard-eyebrow">판서 정리</p>
-      <div class="chalkboard-body">
-        <div class="chalkboard-col">
-          <h4>환율의 변화 요인</h4>
-          <div class="chalk-equations">
-            <div class="chalk-eq-row">
-              <span class="chalk-cause">달러 수요 증가</span>
-              <span class="chalk-arrow">→</span>
-              <span class="chalk-result chalk-up">환율 상승 ▲</span>
+
+      <div class="cu-def">
+        <span class="cu-def-label">환율이란?</span>
+        <span class="cu-def-body">두 나라 화폐가 교환되는 비율&nbsp;&nbsp;·&nbsp;&nbsp;<em>1달러 = ○○○원</em>이 바뀌는 것</span>
+      </div>
+
+      <div class="cu-flow">
+        <div class="cu-col">
+          <div class="cu-trigger cu-trigger-up">
+            <span>🛒</span>
+            <div>
+              <strong>달러 사려는 사람 증가</strong>
+              <small>해외여행 증가 · 수입 대금 지급</small>
             </div>
-            <div class="chalk-eq-divider">예) 해외여행 증가, 수입 대금 지급</div>
-            <div class="chalk-eq-row">
-              <span class="chalk-cause">달러 공급 증가</span>
-              <span class="chalk-arrow">→</span>
-              <span class="chalk-result chalk-down">환율 하락 ▼</span>
+          </div>
+          <div class="cu-arrow">↓</div>
+          <div class="cu-rate cu-rate-up">환율 상승 ▲</div>
+          <div class="cu-arrow">↓</div>
+          <div class="cu-outcomes">
+            <div class="cu-outcome cu-win">
+              <span>외화 버는 쪽</span>
+              <strong>유리 ✓</strong>
+              <small>수출기업 · K-pop기획사</small>
             </div>
-            <div class="chalk-eq-divider">예) 수출 대금 유입, 외국인 투자 증가</div>
+            <div class="cu-outcome cu-lose">
+              <span>외화 쓰는 쪽</span>
+              <strong>불리 ✗</strong>
+              <small>수입기업 · 해외여행자</small>
+            </div>
           </div>
         </div>
-        <div class="chalkboard-divider"></div>
-        <div class="chalkboard-col">
-          <h4>환율 변동의 영향</h4>
-          <div class="chalk-table">
-            <div class="chalk-table-head">
-              <span></span>
-              <span>수출기업</span>
-              <span>수입기업</span>
-              <span>여행자·유학생</span>
-            </div>
-            <div class="chalk-table-row">
-              <span class="chalk-rate up">환율 ▲</span>
-              <span class="chalk-win">유리 ✓</span>
-              <span class="chalk-lose">불리 ✗</span>
-              <span class="chalk-lose">불리 ✗</span>
-            </div>
-            <div class="chalk-table-row">
-              <span class="chalk-rate down">환율 ▼</span>
-              <span class="chalk-lose">불리 ✗</span>
-              <span class="chalk-win">유리 ✓</span>
-              <span class="chalk-win">유리 ✓</span>
+
+        <div class="cu-sep"></div>
+
+        <div class="cu-col">
+          <div class="cu-trigger cu-trigger-down">
+            <span>💵</span>
+            <div>
+              <strong>달러 파는 사람 증가</strong>
+              <small>수출 대금 유입 · 외국인 투자 증가</small>
             </div>
           </div>
+          <div class="cu-arrow">↓</div>
+          <div class="cu-rate cu-rate-down">환율 하락 ▼</div>
+          <div class="cu-arrow">↓</div>
+          <div class="cu-outcomes">
+            <div class="cu-outcome cu-lose">
+              <span>외화 버는 쪽</span>
+              <strong>불리 ✗</strong>
+              <small>수출기업 · K-pop기획사</small>
+            </div>
+            <div class="cu-outcome cu-win">
+              <span>외화 쓰는 쪽</span>
+              <strong>유리 ✓</strong>
+              <small>수입기업 · 해외여행자</small>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cu-table">
+        <div class="cu-table-head">
+          <span></span><span>수출기업</span><span>수입기업</span><span>여행자·유학생</span>
+        </div>
+        <div class="cu-table-row">
+          <span class="cu-rate-cell cu-rate-up">환율 ▲</span>
+          <span class="cu-win-cell">유리 ✓</span><span class="cu-lose-cell">불리 ✗</span><span class="cu-lose-cell">불리 ✗</span>
+        </div>
+        <div class="cu-table-row">
+          <span class="cu-rate-cell cu-rate-down">환율 ▼</span>
+          <span class="cu-lose-cell">불리 ✗</span><span class="cu-win-cell">유리 ✓</span><span class="cu-win-cell">유리 ✓</span>
         </div>
       </div>
     </article>
@@ -991,7 +1057,7 @@ function renderMaterials() {
             </tr>
           </thead>
           <tbody>
-            ${Array.from({ length: MAX_ROUND_COUNT }, (_, index) => index + 1).map((roundNumber) => `
+            ${Array.from({ length: getGameRounds().length || state.roundCount }, (_, index) => index + 1).map((roundNumber) => `
               <tr>
                 <th>${roundNumber}라운드</th>
                 <td></td>
@@ -1051,7 +1117,7 @@ function exchangeMoveTemplate() {
   return `<span class="exchange-move">${move}</span>`;
 }
 
-function roundNewsHintTemplate() {
+function roundNewsHintTemplate(compact = false) {
   const hints = {
     "원/달러 환율 상승": {
       title: "공항 환전소 앞 긴 줄... 달러 사려는 사람이 몰렸다",
@@ -1107,7 +1173,7 @@ function roundNewsHintTemplate() {
   const round = getCurrentRound();
   const hint = hints[round.title] || hints["원/달러 환율 상승"];
   return `
-    <h2>${state.currentRoundIndex + 1}라운드 뉴스</h2>
+    ${compact ? "" : `<h2>${state.currentRoundIndex + 1}라운드 뉴스</h2>`}
     <strong class="news-headline">${hint.title}</strong>
     <p>${hint.lead}</p>
     <p class="news-cue">${hint.cue}</p>
@@ -1242,9 +1308,17 @@ function timerPanelTemplate() {
   `;
 }
 
+function getRoleType(roleName) {
+  const earners = ["수출", "K-pop", "관광객", "가게"];
+  return earners.some((k) => roleName.includes(k)) ? "earner" : "spender";
+}
+
 function roleCardTemplate(team) {
   const visual = roleVisualTemplate(team);
-  const strongColor = team.role.strongWhen.includes("상승") ? "#16a34a" : "#1b6bff";
+  const roleType = getRoleType(team.role.name);
+  const typeLabel = roleType === "earner"
+    ? `<span class="role-type-badge role-type-earner">💰 외화 버는 쪽</span>`
+    : `<span class="role-type-badge role-type-spender">💸 외화 쓰는 쪽</span>`;
   return `
     <article class="role-card" style="border-top: 4px solid ${visual.line};">
       <div class="role-card-header" style="background: ${visual.bg};">
@@ -1253,14 +1327,16 @@ function roleCardTemplate(team) {
           <span class="role-card-team">${escapeHtml(team.name)}</span>
           <strong class="role-card-name">${team.role.name}</strong>
         </div>
+        ${typeLabel}
       </div>
       <p class="role-desc">${team.role.description}</p>
       <div class="role-advantage-row">
-        <span class="role-tag role-tag-strong" style="color: ${strongColor}; background: ${strongColor}18; border: 1px solid ${strongColor}44;">유리: ${team.role.strongWhen}</span>
-        <span class="role-tag role-tag-weak">불리: ${team.role.weakWhen}</span>
+        <span class="role-adv role-adv-good">유리: ${team.role.strongWhen}</span>
+        <span class="role-adv role-adv-bad">불리: ${team.role.weakWhen}</span>
       </div>
-      <div class="compact-stats">
-        <span><small>자금</small><strong>${team.money}</strong></span>
+      <p class="role-hint">${team.role.explanation}</p>
+      <div class="compact-stats" style="margin-top: var(--space-3)">
+        <span><small>시작 자금</small><strong>${team.money}만</strong></span>
         <span><small>대응 안전성</small><strong>${team.stability}</strong></span>
       </div>
     </article>
@@ -1269,13 +1345,13 @@ function roleCardTemplate(team) {
 function teamChoiceTemplate(team, round) {
   const selected = state.selections[team.id] || {};
   const visual = roleVisualTemplate(team);
-  const choices = roleStrategyOptions(team.role.name, round);
+  const choices = round.choices || roleStrategyOptions(team.role.name, round);
   return `
     <article class="team-card ${isTeamSelectionComplete(selected) ? "selected" : ""}">
       <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
         <span aria-hidden="true">${visual.icon}</span>
         <strong>${escapeHtml(team.name)} · ${team.role.name}</strong>
-        <em>${isTeamSelectionComplete(selected) ? "선택 완료" : "지금 결정하세요"}</em>
+        <em class="${isTeamSelectionComplete(selected) ? "done" : "pending"}">${isTeamSelectionComplete(selected) ? "✓ 완료" : "입력 중"}</em>
       </div>
       <div class="metric-row">
         <span class="metric">점수 ${team.score}</span>
@@ -1344,16 +1420,15 @@ function roleStrategyOptions(roleName, round) {
 
 function roleVisualTemplate(team) {
   const roleName = team.role.name;
-  if (roleName.includes("수출") || roleName.includes("K-pop")) {
-    return { icon: "🏭", bg: "#dcfce7", text: "#166534", line: "#16a34a" };
-  }
-  if (roleName.includes("수입") || roleName.includes("원자재")) {
-    return { icon: "📦", bg: "#fee2e2", text: "#991b1b", line: "#dc2626" };
-  }
-  if (roleName.includes("여행") || roleName.includes("직구") || roleName.includes("유학생")) {
-    return { icon: "✈️", bg: "#fef9c3", text: "#854d0e", line: "#d97706" };
-  }
-  return { icon: "💱", bg: "var(--color-brand-soft)", text: "var(--color-brand-ink)", line: "var(--color-brand)" };
+  if (roleName.includes("수출"))  return { icon: "🏭", bg: "#FFE6E1", text: "#A8331F", line: "#FF6B57" };
+  if (roleName.includes("K-pop")) return { icon: "🎤", bg: "#FFE0EF", text: "#8E1F5F", line: "#FF49A4" };
+  if (roleName.includes("수입") && !roleName.includes("원자재")) return { icon: "📦", bg: "#E9EEFD", text: "#0C2A8C", line: "#2E58E0" };
+  if (roleName.includes("원자재")) return { icon: "🏗️", bg: "#E5ECF1", text: "#22323D", line: "#4F6B7C" };
+  if (roleName.includes("여행"))  return { icon: "✈️", bg: "#D9F4EA", text: "#0A6E4F", line: "#1FBF8F" };
+  if (roleName.includes("직구"))  return { icon: "🛒", bg: "#FFF1D2", text: "#7A4E00", line: "#F4B740" };
+  if (roleName.includes("유학생")) return { icon: "🎓", bg: "#E8E3F9", text: "#3D2E8B", line: "#6E55C8" };
+  if (roleName.includes("관광") || roleName.includes("가게")) return { icon: "🏪", bg: "#FCE2E7", text: "#8A1F36", line: "#E94D6A" };
+  return { icon: "💱", bg: "#E9EEFD", text: "#0C2A8C", line: "#2E58E0" };
 }
 
 function teacherSubmissionPanelTemplate() {
@@ -1370,27 +1445,47 @@ function teacherSubmissionPanelTemplate() {
 
 function resultCardTemplate(team) {
   const last = team.history[team.history.length - 1];
+  const choiceFeedback = last.choiceFeedback || "";
   return `
     <article class="change-card">
-      <h3 class="result-card-title">${escapeHtml(team.name)} ${profitBadgeTemplate(team, last)}</h3>
-      <p class="result-choice">${team.role.name} · 예측 ${predictionLabel(last.prediction)} · 영향 ${impactLabel(last.impact)}</p>
-      <p class="result-choice">선택: ${last.choiceText}</p>
-      <p class="result-reason">${responseReasonTemplate(last)}</p>
+      <div class="result-card-head">
+        <h3 class="result-card-title">${escapeHtml(team.name)} <span class="result-role-name">${team.role.name}</span></h3>
+        ${profitBadgeTemplate(team, last)}
+      </div>
+      <div class="result-selections">
+        <span class="result-sel ${last.response.predictionScore ? "is-correct" : "is-wrong"}">
+          ${last.response.predictionScore ? "✓" : "✗"} 예측 ${predictionLabel(last.prediction)}
+        </span>
+        <span class="result-sel ${last.response.impactScore ? "is-correct" : "is-wrong"}">
+          ${last.response.impactScore ? "✓" : "✗"} 영향 ${impactLabel(last.impact)}
+        </span>
+        <span class="result-sel ${last.response.strategyScore >= 5 ? "is-correct" : last.response.strategyScore >= 3 ? "is-partial" : "is-wrong"}">
+          ${last.response.strategyScore >= 5 ? "✓" : "△"} 대응: ${last.choiceText}
+        </span>
+      </div>
+      ${choiceFeedback ? `<p class="result-feedback">${choiceFeedback}</p>` : ""}
       <div class="response-score-row">
-        <span>예측 ${last.response.predictionScore}</span>
-        <span>역할 ${last.response.impactScore}</span>
-        <span>대응 ${last.response.strategyScore}</span>
-        <strong>총 ${last.response.total}</strong>
+        <div class="score-chip ${last.response.predictionScore ? "ok" : "miss"}">
+          <span>환율 예측</span><strong>${last.response.predictionScore}점</strong>
+        </div>
+        <div class="score-chip ${last.response.impactScore ? "ok" : "miss"}">
+          <span>역할 판단</span><strong>${last.response.impactScore}점</strong>
+        </div>
+        <div class="score-chip ${last.response.strategyScore >= 5 ? "ok" : last.response.strategyScore >= 3 ? "partial" : "miss"}">
+          <span>대응 전략</span><strong>${last.response.strategyScore}점</strong>
+        </div>
+        <div class="score-chip total">
+          <span>이번 점수</span><strong>${last.response.total}점</strong>
+        </div>
       </div>
       <div class="delta-row">
-        ${deltaTemplate("점수", last.total.scoreChange)}
         ${deltaTemplate("자금", last.total.moneyChange)}
-        ${deltaTemplate("대응 안전성", last.total.stabilityChange)}
+        ${deltaTemplate("안전성", last.total.stabilityChange)}
       </div>
       <div class="metric-row">
-        <span class="metric">현재 점수 ${team.score}</span>
+        <span class="metric">누적 점수 ${team.score}</span>
         <span class="metric">자금 ${team.money}</span>
-        <span class="metric">대응 안전성 ${team.stability}</span>
+        <span class="metric">안전성 ${team.stability}</span>
       </div>
     </article>
   `;
@@ -1450,7 +1545,7 @@ function exchangeImpactBoardTemplate(round) {
   return `
     <article class="impact-board">
       <h3>판서: 같은 환율, 다른 결과</h3>
-      <div class="board-rule">
+      <div class="board-rule ${isUp ? "" : "rule-down"}">
         <strong>${isUp ? "환율 상승" : "환율 하락"}</strong>
         <span>${isUp ? "달러 가격이 오르고 원화 가치는 낮아집니다." : "달러 가격이 내리고 원화 가치는 높아집니다."}</span>
       </div>
@@ -1572,9 +1667,9 @@ function roleSummaryPanelTemplate() {
         ${ROLE_CARDS.map((role) => `
           <article class="role-card">
             <h3>${role.name}</h3>
-            <div class="tag-row">
-              <span class="tag">유리: ${role.strongWhen}</span>
-              <span class="tag">불리: ${role.weakWhen}</span>
+            <div class="role-advantage-row">
+              <span class="role-adv role-adv-good">유리: ${role.strongWhen}</span>
+              <span class="role-adv role-adv-bad">불리: ${role.weakWhen}</span>
             </div>
             <p>${role.explanation}</p>
           </article>
@@ -1586,6 +1681,16 @@ function roleSummaryPanelTemplate() {
 
 function readTeamNames(root) {
   return Array.from(root.querySelectorAll("[data-team-name]")).map((input) => input.value.trim());
+}
+
+function updateDifficultyBadge(root) {
+  const roundCount = clamp(Number(root.querySelector("#roundCount")?.value) || 5, 1, Math.min(MAX_ROUND_COUNT, ROUNDS.length));
+  const counts = readDifficultyCounts(root, roundCount);
+  const total = getDifficultyTotal(counts);
+  const badge = root.querySelector(".difficulty-total");
+  if (!badge) return;
+  badge.textContent = `합계 ${total} / ${roundCount}개`;
+  badge.classList.toggle("is-mismatch", total !== roundCount);
 }
 
 function readDifficultyCounts(root, targetRoundCount = state.roundCount) {
@@ -1616,7 +1721,8 @@ function applyRoundResults() {
   state.teams.forEach((team) => {
     const selection = state.selections[team.id] || {};
     const choiceIndex = selection.choiceIndex;
-    const choice = roleStrategyOptions(team.role.name, round)[choiceIndex];
+    const choices = round.choices || roleStrategyOptions(team.role.name, round);
+    const choice = choices[choiceIndex];
     const roleAdjust = getRoleAdjustment(team.role.name, round);
     const response = calculateResponseScore(team, round, choice, selection, roleAdjust);
     const total = addEffects(
@@ -1633,12 +1739,12 @@ function applyRoundResults() {
     team.history.push({
       roundTitle: round.title,
       choiceText: choice.text,
+      choiceFeedback: choice.feedback || "",
       prediction: selection.prediction,
       impact: selection.impact,
       expectedDirection: getRoundDirection(round),
       expectedImpact: getExpectedImpact(team.role.name, round),
       response,
-      feedback: choice.feedback,
       roleNote: roleAdjust.note,
       summary: buildResultSummary(team, choice, roleAdjust, total),
       total
@@ -1651,7 +1757,7 @@ function calculateResponseScore(team, round, choice, selection, roleAdjust) {
   const impact = getExpectedImpact(team.role.name, round);
   const predictionScore = selection.prediction === direction ? 8 : 0;
   const impactScore = selection.impact === impact ? 5 : 0;
-  const strategyScore = scoreStrategyChoice(choice.type, roleAdjust.type);
+  const strategyScore = scoreStrategyChoice(choice, team.role.name, roleAdjust.type);
   return {
     predictionScore,
     impactScore,
@@ -1676,7 +1782,15 @@ function getExpectedImpact(roleName, round) {
   return direction === "down" ? "unfavorable" : "favorable";
 }
 
-function scoreStrategyChoice(choiceType, roleEffectType) {
+function scoreStrategyChoice(choice, roleName, roleEffectType) {
+  // round.choices path: use recommendedRoles
+  if (Array.isArray(choice.recommendedRoles)) {
+    const recommended = choice.recommendedRoles.includes(roleName);
+    if (recommended) return 5;
+    return roleEffectType === "neutral" ? 3 : 2;
+  }
+  // legacy roleStrategyOptions path
+  const { type: choiceType } = choice;
   if (roleEffectType === "weak") {
     if (choiceType === "protect" || choiceType === "split" || choiceType === "lock") return 5;
     if (choiceType === "wait") return 2;

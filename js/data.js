@@ -65,8 +65,8 @@ const ROLE_CARDS = [
   {
     name: "K-pop 공연 기획사",
     description: "해외 공연과 콘텐츠 판매로 외화를 벌어들입니다.",
-    strongWhen: "K-콘텐츠 수출 증가",
-    weakWhen: "해외 비용 증가",
+    strongWhen: "환율 상승 (달러 수입 증가)",
+    weakWhen: "환율 하락 (달러 수입 가치 감소)",
     explanation: "해외 공연과 콘텐츠 판매가 늘면 달러 수입이 증가할 수 있습니다.",
     initialMoney: 115,
     initialStability: 53
