@@ -1,7 +1,6 @@
 const app = document.querySelector("#app");
 const prevButton = document.querySelector("#prevButton");
 const homeButton = document.querySelector("#homeButton");
-const wrapUpButton = document.querySelector("#wrapUpButton");
 const materialsButton = document.querySelector("#materialsButton");
 const resetButton = document.querySelector("#resetButton");
 
@@ -14,11 +13,6 @@ const initialState = {
   teams: [],
   currentRoundIndex: 0,
   roundCount: 5,
-  newsDifficultyCounts: {
-    low: 2,
-    medium: 2,
-    high: 1
-  },
   roundOrder: [],
   selections: {},
   timer: {
@@ -26,7 +20,8 @@ const initialState = {
     remaining: 45,
     running: false
   },
-  captureMode: false
+  captureMode: false,
+  teacherMode: false
 };
 
 let state = structuredClone(initialState);
@@ -34,14 +29,10 @@ let timerInterval = null;
 const revealedNewsRounds = new Set();
 let roundLeftScrollTop = 0;
 let enlargedNewsOpen = false;
-let wrapUpOpen = false;
+let enlargedBoardOpen = false;
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
-const DIFFICULTY_CONFIG = [
-  { key: "low", label: "하", difficulty: "하" },
-  { key: "medium", label: "중", difficulty: "중" },
-  { key: "high", label: "상", difficulty: "상" }
-];
+
 const MAX_ROUND_COUNT = 10;
 
 const PREDICTION_OPTIONS = [
@@ -61,29 +52,11 @@ function getGameRounds() {
       .filter(Boolean);
     if (orderedRounds.length) return orderedRounds;
   }
-  const counts = normalizeDifficultyCounts(state.newsDifficultyCounts);
-  const remaining = {
-    "하": counts.low,
-    "중": counts.medium,
-    "상": counts.high
-  };
-  const selected = [];
-  ROUNDS.forEach((round) => {
-    if (remaining[round.difficulty] > 0) {
-      selected.push(round);
-      remaining[round.difficulty] -= 1;
-    }
-  });
-  return selected;
+  return ROUNDS.slice(0, state.roundCount);
 }
 
 function buildRandomRoundOrder() {
-  const counts = normalizeDifficultyCounts(state.newsDifficultyCounts);
-  const selected = DIFFICULTY_CONFIG.flatMap(({ key, difficulty }) => {
-    const candidates = ROUNDS.filter((round) => round.difficulty === difficulty);
-    return shuffleArray(candidates).slice(0, counts[key]);
-  });
-  return shuffleArray(selected).map((round) => round.title);
+  return shuffleArray(ROUNDS).slice(0, state.roundCount).map((round) => round.title);
 }
 
 function shuffleArray(items) {
@@ -93,28 +66,6 @@ function shuffleArray(items) {
     [shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]];
   }
   return shuffled;
-}
-
-function getAvailableDifficultyCount(difficulty) {
-  return ROUNDS.filter((round) => round.difficulty === difficulty).length;
-}
-
-function normalizeDifficultyCounts(rawCounts = initialState.newsDifficultyCounts, targetRoundCount = state.roundCount) {
-  const source = rawCounts && Object.keys(rawCounts).length ? rawCounts : initialState.newsDifficultyCounts;
-  return {
-    low: clamp(Number(source.low) || 0, 0, getAvailableDifficultyCount("하")),
-    medium: clamp(Number(source.medium) || 0, 0, getAvailableDifficultyCount("중")),
-    high: clamp(Number(source.high) || 0, 0, getAvailableDifficultyCount("상"))
-  };
-}
-
-function getSelectedRoundCount() {
-  const counts = normalizeDifficultyCounts(state.newsDifficultyCounts, state.roundCount);
-  return counts.low + counts.medium + counts.high;
-}
-
-function getDifficultyTotal(counts) {
-  return counts.low + counts.medium + counts.high;
 }
 
 function getCurrentRound() {
@@ -149,10 +100,6 @@ function render() {
   };
 
   app.appendChild(renderers[state.screen]());
-  if (wrapUpOpen) {
-    app.insertAdjacentHTML("beforeend", wrapUpModalTemplate());
-    bindWrapUpControls(app);
-  }
   restoreRoundScrollPosition();
   updateTimerDisplay();
 }
@@ -241,9 +188,12 @@ function renderStart() {
             <p>💡 핵심: 자산은 재미 요소, 승부는 환율 이해</p>
           </div>
         </div>
-        <div class="asset-preview">
-          <div><span>시작 자금</span><strong>100만 원</strong></div>
-          <div><span>대응 안전성</span><strong>50점</strong><small>안전하게 대응할수록 올라갑니다</small></div>
+        <div class="asset-preview" style="grid-template-columns: 1fr;">
+          <div style="padding: var(--space-3) var(--space-4);">
+            <span>기본 시작 자금</span>
+            <strong style="font-size: 24px; color: var(--brand-2);">100만 원</strong>
+            <small style="margin-top: var(--space-1); display: block; color: var(--ink-3); line-height: 1.45;">모둠별 역할에 따라 시작 자금이 차등(95만~125만 원) 지급됩니다.</small>
+          </div>
         </div>
         <div class="dashboard-section classroom-brief">
           <p class="dashboard-label">모둠 판단 루틴</p>
@@ -313,8 +263,25 @@ function renderLesson() {
             <p>모둠이 가진 돈입니다. 선택 결과에 따라 늘거나 줄어들지만, 최종 승리의 기준은 아닙니다.</p>
           </article>
           <article>
-            <strong>대응 안전성</strong>
-            <p>환율 변화에 흔들리지 않고 안전하게 대응한 정도입니다. 무리하지 않고 나누어 거래하거나 위험을 줄이면 올라갈 수 있습니다.</p>
+            <strong>대응 점수</strong>
+            <p>모둠이 환율 변동에 맞춰 얼마나 합리적인 선택을 했는지 평가하는 최종 승리 기준입니다. 환율 예측, 유불리 판단, 대응 전략 선택에 따라 결정됩니다.</p>
+          </article>
+        </div>
+      </div>
+      <div class="concept-card lesson-result-guide">
+        <h3>📊 라운드 결과 카드 읽는 방법</h3>
+        <div class="result-guide-grid">
+          <article>
+            <strong>기호 표시 (✓, △, X)</strong>
+            <p>예측과 판단이 정확하면 <b>✓ (성공)</b>, 빗나가면 <b>X (실패)</b>로 표시됩니다. 대응 전략의 효율성은 <b>✓ (최선)</b>, <b>△ (보통)</b>, <b>X (위험)</b>로 나누어 평가합니다.</p>
+          </article>
+          <article>
+            <strong>대응 점수 구성 (합계 10점)</strong>
+            <p><b>환율 예측(5점) + 역할 판단(3점) + 대응 전략(2점)</b>의 합산 점수입니다. 모둠이 경제 원리에 맞춰 합리적으로 의사결정했는지 점수화합니다.</p>
+          </article>
+          <article>
+            <strong>자금 변동 (▲/▼ 자금)</strong>
+            <p>선택지 결과에 따라 이 라운드에 늘어나거나 깎인 자금(만 원 단위)입니다.</p>
           </article>
         </div>
       </div>
@@ -336,8 +303,6 @@ function renderSetup() {
   const screen = createScreen();
   const names = Array.from({ length: state.teamCount }, (_, index) => state.teamNames[index] || "");
   const roundCount = clamp(Number(state.roundCount) || 5, 1, Math.min(MAX_ROUND_COUNT, ROUNDS.length));
-  const difficultyCounts = normalizeDifficultyCounts(state.newsDifficultyCounts, roundCount);
-  const selectedRoundCount = difficultyCounts.low + difficultyCounts.medium + difficultyCounts.high;
   screen.innerHTML = `
     <section class="setup-panel">
       <div class="setup-two-col">
@@ -358,19 +323,6 @@ function renderSetup() {
                 .join("")}
             </select>
           </div>
-          <div class="difficulty-builder" aria-label="뉴스 난이도 구성">
-            <div class="difficulty-builder-head">
-              <strong>뉴스 난이도 구성</strong>
-              <span class="difficulty-total ${selectedRoundCount === roundCount ? "" : "is-mismatch"}">합계 ${selectedRoundCount} / ${roundCount}개</span>
-            </div>
-            ${DIFFICULTY_CONFIG.map(({ key, label, difficulty }) => `
-              <label class="difficulty-count">
-                <span>난이도 ${label}</span>
-                <input type="number" min="0" max="${getAvailableDifficultyCount(difficulty)}" value="${difficultyCounts[key]}" data-difficulty-count="${key}" />
-                <small>최대 ${getAvailableDifficultyCount(difficulty)}개</small>
-              </label>
-            `).join("")}
-          </div>
           <p class="field-help">모둠 수 변경 후 아래 '적용'을 눌러야 이름 칸이 업데이트됩니다.</p>
           <div class="setup-foot-row">
             <button class="mini-button" type="button" data-action="apply-count">모둠 수 적용</button>
@@ -388,7 +340,7 @@ function renderSetup() {
             `).join("")}
           </div>
           <div class="teacher-panel setup-tip">
-            <p>역할 배정을 누르면 선택한 난이도 구성 안에서 뉴스 순서가 무작위로 정해집니다.</p>
+            <p>역할 배정을 누르면 전체 뉴스 풀에서 설정한 라운드 수만큼 무작위로 선정되어 게임이 진행됩니다.</p>
           </div>
         </div>
       </div>
@@ -399,7 +351,6 @@ function renderSetup() {
     const countInput = screen.querySelector("#teamCount");
     state.teamCount = clamp(Number(countInput.value) || 5, 2, 8);
     state.roundCount = clamp(Number(screen.querySelector("#roundCount").value) || 5, 1, Math.min(MAX_ROUND_COUNT, ROUNDS.length));
-    state.newsDifficultyCounts = readDifficultyCounts(screen, state.roundCount);
     state.roundOrder = [];
     state.teamNames = readTeamNames(screen);
     persistAndRender();
@@ -407,29 +358,15 @@ function renderSetup() {
 
   screen.querySelector("#roundCount").addEventListener("change", (event) => {
     state.roundCount = clamp(Number(event.currentTarget.value) || 5, 1, Math.min(MAX_ROUND_COUNT, ROUNDS.length));
-    state.newsDifficultyCounts = readDifficultyCounts(screen, state.roundCount);
     state.roundOrder = [];
     state.teamNames = readTeamNames(screen);
     saveState();
-    updateDifficultyBadge(screen);
-  });
-
-  screen.querySelectorAll("[data-difficulty-count]").forEach((input) => {
-    input.addEventListener("change", () => {
-      state.roundCount = clamp(Number(screen.querySelector("#roundCount").value) || 5, 1, Math.min(MAX_ROUND_COUNT, ROUNDS.length));
-      state.newsDifficultyCounts = readDifficultyCounts(screen, state.roundCount);
-      state.roundOrder = [];
-      state.teamNames = readTeamNames(screen);
-      saveState();
-      updateDifficultyBadge(screen);
-    });
   });
 
   screen.querySelector("#teamCount").addEventListener("keydown", (event) => {
     if (event.key !== "Enter") return;
     state.teamCount = clamp(Number(event.currentTarget.value) || 5, 2, 8);
     state.roundCount = clamp(Number(screen.querySelector("#roundCount").value) || 5, 1, Math.min(MAX_ROUND_COUNT, ROUNDS.length));
-    state.newsDifficultyCounts = readDifficultyCounts(screen, state.roundCount);
     state.roundOrder = [];
     state.teamNames = readTeamNames(screen);
     persistAndRender();
@@ -437,13 +374,6 @@ function renderSetup() {
 
   screen.querySelector("[data-action='assign']").addEventListener("click", () => {
     state.roundCount = clamp(Number(screen.querySelector("#roundCount").value) || 5, 1, Math.min(MAX_ROUND_COUNT, ROUNDS.length));
-    const difficultyCounts = readDifficultyCounts(screen, state.roundCount);
-    const difficultyTotal = getDifficultyTotal(difficultyCounts);
-    if (difficultyTotal !== state.roundCount) {
-      showSetupError(screen, `난이도 합계(${difficultyTotal}개)가 라운드 수(${state.roundCount}개)와 다릅니다. 맞춰주세요.`);
-      return;
-    }
-    state.newsDifficultyCounts = difficultyCounts;
     state.roundOrder = buildRandomRoundOrder();
     state.teamNames = readTeamNames(screen);
     createTeams();
@@ -453,15 +383,6 @@ function renderSetup() {
   return screen;
 }
 
-function showSetupError(screen, message) {
-  let el = screen.querySelector(".setup-error");
-  if (!el) {
-    el = document.createElement("p");
-    el.className = "setup-error";
-    screen.querySelector(".action-row").before(el);
-  }
-  el.textContent = message;
-}
 
 function renderRoles() {
   const screen = createScreen();
@@ -498,7 +419,7 @@ function renderRound() {
   const isRevealed = revealedNewsRounds.has(state.currentRoundIndex);
   const newsTone = getNewsTone(round);
   const currentStep = !isRevealed ? 1 : selectedCount < state.teams.length ? 2 : 3;
-  const showTeacherStatus = new URLSearchParams(window.location.search).get("teacher") === "true";
+  const showTeacherStatus = true;
   const screen = createScreen();
   screen.innerHTML = `
     <section class="round-panel">
@@ -528,15 +449,13 @@ function renderRound() {
           <div class="team-grid">
             ${state.teams.map((team) => teamChoiceTemplate(team, round)).join("")}
           </div>
-          <div class="action-row sticky-actions">
-            <button class="primary-button" type="button" data-action="show-result" ${selectedCount === state.teams.length ? "" : "disabled"}>결과 보기</button>
-          </div>
         </div>
         <aside class="round-side">
           <article class="progress-card">
             <p class="section-label teacher-check-label">선택 완료</p>
             <strong class="progress-count">${selectedCount} / ${state.teams.length}</strong>
-            <p>세 가지를 모두 입력하면 결과를 볼 수 있습니다.</p>
+            <p style="margin-bottom: var(--space-3)">세 가지를 모두 입력하면 결과를 볼 수 있습니다.</p>
+            <button class="primary-button" type="button" data-action="show-result" ${selectedCount === state.teams.length ? "" : "disabled"} style="width: 100%; height: 44px;">결과 보기 →</button>
           </article>
           ${showTeacherStatus ? teacherPanelTemplate(round.teacherGuide) : predictionPanelTemplate()}
           ${promptPanelTemplate("뉴스 속에서 외화를 사려는 쪽과 팔려는 쪽을 찾고, 우리 역할의 비용과 수입이 어떻게 바뀔지 따져 보세요.", true)}
@@ -628,9 +547,14 @@ function renderResult() {
         </aside>
       </div>
       ${enlargedNewsOpen ? newsLargeViewTemplate() : ""}
+      ${enlargedBoardOpen ? boardLargeViewTemplate(round) : ""}
     </section>
   `;
   bindLargeNewsControls(screen);
+  bindLargeBoardToggleControls(screen);
+  if (enlargedBoardOpen) {
+    bindLargeBoardControls(screen);
+  }
   screen.querySelector("[data-action='next']").addEventListener("click", () => {
     if (isLastRound) {
       go("final");
@@ -644,24 +568,40 @@ function renderResult() {
   return screen;
 }
 
+function confettiEffectTemplate() {
+  let confettiHtml = '<div class="confetti-container" aria-hidden="true">';
+  for (let i = 0; i < 40; i++) {
+    const left = Math.random() * 100;
+    const delay = Math.random() * 3;
+    const duration = 2.5 + Math.random() * 2;
+    const scale = 0.5 + Math.random() * 0.8;
+    const rotate = Math.random() * 360;
+    const colorClass = ["color-1", "color-2", "color-3", "color-4", "color-5"][Math.floor(Math.random() * 5)];
+    confettiHtml += `<span class="confetti-particle ${colorClass}" style="left: ${left}%; animation-delay: ${delay}s; animation-duration: ${duration}s; transform: scale(${scale}) rotate(${rotate}deg);"></span>`;
+  }
+  confettiHtml += '</div>';
+  return confettiHtml;
+}
+
 function renderFinal() {
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
   const best = sorted[0];
   const screen = createScreen();
   screen.innerHTML = `
+    ${confettiEffectTemplate()}
     <section class="summary-panel capture-target">
       <div class="final-workspace">
         <div class="final-left">
           ${finalVictoryBannerTemplate(sorted)}
           ${awardSummaryTemplate()}
           <article class="ranking-card">
-            <h3>모둠별 대응 점수</h3>
+            <h3>🏆 모둠별 최종 순위</h3>
             <ol class="rank-list">
               ${sorted.map((team, index) => `
                 <li>
                   <span>${index + 1}위</span>
                   <span>${escapeHtml(team.name)} · ${team.role.name}</span>
-                  <span>${team.score}점 · 자금 ${team.money} · 대응 안전성 ${team.stability}</span>
+                  <span>누적 ${team.score}점 (최종 자금: ${team.money}만 원)</span>
                 </li>
               `).join("")}
             </ol>
@@ -674,98 +614,32 @@ function renderFinal() {
           <div class="action-row final-actions">
             <button class="secondary-button" type="button" data-action="capture">${state.captureMode ? "일반 보기" : "인쇄하기 🖨️"}</button>
             <span class="shortcut-hint">Ctrl+P / ⌘P로 인쇄</span>
-            <button class="secondary-button" type="button" data-action="wrap-up">수업 마무리</button>
             <button class="primary-button" type="button" data-action="restart">새 게임 시작</button>
           </div>
         </aside>
       </div>
     </section>
   `;
+
+  // Confetti auto-removal after 3 seconds with smooth transition
+  setTimeout(() => {
+    const container = screen.querySelector('.confetti-container');
+    if (container) {
+      container.style.transition = 'opacity 1s ease';
+      container.style.opacity = '0';
+      setTimeout(() => container.remove(), 1000);
+    }
+  }, 3000);
+
   screen.querySelector("[data-action='restart']").addEventListener("click", resetGame);
   screen.querySelector("[data-action='capture']").addEventListener("click", () => {
     state.captureMode = !state.captureMode;
     persistAndRender();
   });
-  screen.querySelector("[data-action='wrap-up']").addEventListener("click", () => {
-    wrapUpOpen = true;
-    render();
-  });
   return screen;
 }
 
-function wrapUpModalTemplate() {
-  return `
-    <div class="wrapup-backdrop" role="dialog" aria-modal="true" aria-label="수업 마무리" id="wrapUpModal">
-      <section class="wrapup-panel">
-        <div class="wrapup-header">
-          <div>
-              <h2 class="wrapup-title">오늘 배운 것</h2>
-          </div>
-          <button class="wrapup-close ghost-button" type="button" data-action="close-wrap-up">닫기</button>
-        </div>
-        <div class="wrapup-grid">
-          <article class="wrapup-card wrapup-card-blue">
-            <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-blue">📈</span>
-              <h3>환율이 오르면</h3>
-            </div>
-            <ul class="wrapup-list">
-              <li>수출기업은 받은 달러를 원화로 바꿀 때 더 많은 원화를 받을 수 있어 유리합니다.</li>
-              <li>수입기업은 달러 결제 비용이 커져 불리합니다.</li>
-              <li>해외여행자와 유학생 가정은 같은 달러를 사는 데 더 많은 원화가 필요합니다.</li>
-            </ul>
-          </article>
-          <article class="wrapup-card wrapup-card-red">
-            <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-red">📉</span>
-              <h3>환율이 내리면</h3>
-            </div>
-            <ul class="wrapup-list">
-              <li>수입기업과 해외여행자는 달러 비용 부담이 줄어 유리합니다.</li>
-              <li>수출기업은 달러 수입을 원화로 바꿀 때 받을 금액이 줄어 불리할 수 있습니다.</li>
-              <li>원화 가치가 오르면 해외 상품과 서비스의 체감 비용이 낮아질 수 있습니다.</li>
-            </ul>
-          </article>
-          <article class="wrapup-card wrapup-card-green">
-            <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-green">💡</span>
-              <h3>역할마다 전략이 다릅니다</h3>
-            </div>
-            <ul class="wrapup-list">
-              <li>먼저 우리 역할이 외화를 쓰는 쪽인지, 벌어들이는 쪽인지 판단합니다.</li>
-              <li>그다음 뉴스가 환율 상승을 암시하는지 하락을 암시하는지 근거를 찾습니다.</li>
-              <li>마지막으로 손실을 줄이거나 이익을 키우는 선택을 고릅니다.</li>
-            </ul>
-          </article>
-          <article class="wrapup-card wrapup-card-orange">
-            <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-orange">💬</span>
-              <h3>토의 질문</h3>
-            </div>
-            <ul class="wrapup-list">
-              <li>우리 모둠은 어떤 뉴스 단서를 보고 환율 방향을 예측했나요?</li>
-              <li>우리 역할에 유리하거나 불리하다고 판단한 근거는 무엇인가요?</li>
-              <li>큰 이익을 노리는 선택과 안전한 대응 중 무엇이 더 적절했나요?</li>
-            </ul>
-          </article>
-          <article class="wrapup-card wrapup-card-purple">
-            <div class="wrapup-card-header">
-              <span class="wrapup-icon wrapup-icon-purple">✅</span>
-              <h3>잊지 말기</h3>
-            </div>
-            <ul class="wrapup-list">
-              <li>환율 변동은 모든 경제 주체에게 같은 영향을 주지 않습니다.</li>
-              <li>좋은 대응은 예측, 역할 판단, 선택 이유가 서로 연결될 때 만들어집니다.</li>
-            </ul>
-          </article>
-        </div>
-        <div class="wrapup-footer">
-          <p class="wrapup-quote">“환율은 숫자만이 아니라, 경제 주체의 선택을 바꾸는 신호입니다.”</p>
-        </div>
-      </section>
-    </div>
-  `;
-}
+
 
 function finalVictoryBannerTemplate(sortedTeams) {
   const winner = sortedTeams[0];
@@ -993,8 +867,8 @@ function renderMaterials() {
               <h3>${role.name}</h3>
               <p>${role.description}</p>
               <div class="tag-row">
-                <span class="tag">유리: ${role.strongWhen}</span>
-                <span class="tag">불리: ${role.weakWhen}</span>
+                <span class="tag mint">유리: ${role.strongWhen}</span>
+                <span class="tag coral">불리: ${role.weakWhen}</span>
               </div>
               <p><strong>생각할 점</strong><br>${role.explanation}</p>
             </article>
@@ -1269,17 +1143,134 @@ function newsLargeViewTemplate() {
   `;
 }
 
+function bindLargeBoardToggleControls(root) {
+  const openBtn = root.querySelector("[data-action='open-board-large']");
+  if (openBtn) {
+    openBtn.addEventListener("click", () => {
+      enlargedBoardOpen = true;
+      render();
+    });
+  }
+}
+
+function bindLargeBoardControls(root) {
+  const closeBtn = root.querySelector("[data-action='close-board-large']");
+  const backdrop = root.querySelector(".board-large-backdrop");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      enlargedBoardOpen = false;
+      render();
+    });
+  }
+  if (backdrop) {
+    backdrop.addEventListener("click", (event) => {
+      if (event.target === backdrop) {
+        enlargedBoardOpen = false;
+        render();
+      }
+    });
+  }
+}
+
+function boardLargeViewTemplate(round) {
+  const direction = getRoundDirection(round);
+  const isUp = direction === "up";
+  const earners = round.strongRoles.length ? round.strongRoles.join(" · ") : "외화를 벌어들이는 역할";
+  const spenders = round.weakRoles.length ? round.weakRoles.join(" · ") : "외화를 써야 하는 역할";
+  const favorableReason = isUp
+    ? "달러를 벌어들이는 쪽은 받은 달러를 원화로 바꿀 때 더 많은 원화를 받을 수 있습니다."
+    : "달러를 써야 하는 쪽은 같은 달러를 사는 데 필요한 원화가 줄어 비용 부담이 낮아집니다.";
+  const unfavorableReason = isUp
+    ? "달러를 써야 하는 쪽은 같은 달러를 사는 데 더 많은 원화가 필요해 비용 부담이 커집니다."
+    : "달러를 벌어들이는 쪽은 받은 달러를 원화로 바꿀 때 받을 수 있는 원화가 줄어듭니다.";
+  return `
+    <div class="board-large-backdrop" role="dialog" aria-modal="true" aria-label="판서 크게 보기">
+      <article class="board-large-panel">
+        <div class="board-large-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: var(--space-2)">
+          <span style="font-size: 16px; font-weight: 800; color: #7DD3FC">📝 오늘의 판서 학습</span>
+          <button class="mini-button" type="button" data-action="close-board-large" style="background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2)">닫기</button>
+        </div>
+        <div class="board-large-content" style="display: grid; gap: var(--space-5)">
+          <h2 style="font-size: 32px; font-weight: 800; color: #fff; margin: 0">같은 환율, 다른 결과</h2>
+          <div class="board-large-rule ${isUp ? "" : "rule-down"}" style="display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4); background: rgba(255,255,255,0.06); border-radius: var(--r-lg)">
+            <strong style="font-size: 26px; font-weight: 900; color: ${isUp ? '#FCA5A5' : '#86EFAC'}">${isUp ? "📈 환율 상승" : "📉 환율 하락"}</strong>
+            <span style="font-size: 20px; color: rgba(255,255,255,0.8)">${isUp ? "달러 가격이 오르고 원화 가치는 낮아집니다. (원화 가치 하락)" : "달러 가격이 내리고 원화 가치는 높아집니다. (원화 가치 상승)"}</span>
+          </div>
+          <div class="board-large-columns" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-2)">
+            <section style="background: rgba(34,197,94,0.08); padding: var(--space-4); border-radius: var(--r-lg); border: 1.5px solid rgba(34,197,94,0.2)">
+              <h4 style="font-size: 20px; color: #86EFAC; margin: 0 0 var(--space-2); border-bottom: 2px solid rgba(134,239,172,0.2); padding-bottom: 8px">👍 유리한 역할</h4>
+              <p style="font-size: 24px; font-weight: 800; color: #fff; margin: 12px 0">${earners}</p>
+              <span style="font-size: 18px; color: rgba(255,255,255,0.7); line-height: 1.6; display: block">${favorableReason}</span>
+            </section>
+            <section style="background: rgba(239,68,68,0.08); padding: var(--space-4); border-radius: var(--r-lg); border: 1.5px solid rgba(239,68,68,0.2)">
+              <h4 style="font-size: 20px; color: #FCA5A5; margin: 0 0 var(--space-2); border-bottom: 2px solid rgba(252,165,165,0.2); padding-bottom: 8px">👎 불리한 역할</h4>
+              <p style="font-size: 24px; font-weight: 800; color: #fff; margin: 12px 0">${spenders}</p>
+              <span style="font-size: 18px; color: rgba(255,255,255,0.7); line-height: 1.6; display: block">${unfavorableReason}</span>
+            </section>
+          </div>
+          <div class="board-large-summary" style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); margin-top: var(--space-2); padding-top: var(--space-4); border-top: 1px dashed rgba(255,255,255,0.2)">
+            <div style="background: rgba(255,255,255,0.04); padding: var(--space-4); border-radius: var(--r-lg)">
+              <h4 style="font-size: 18px; color: #7DD3FC; margin: 0 0 10px">💡 환율 변동과 경제 주체</h4>
+              <ul style="font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.6; margin: 0; padding-left: 20px">
+                <li>환율 변동은 모든 경제 주체에게 같은 영향을 주지 않고, 역할에 따라 유리함과 불리함이 다르게 나타납니다.</li>
+                <li><strong>환율 상승 시:</strong> 외화 버는 쪽(수출 등) 유리, 외화 쓰는 쪽(수입/유학 등) 불리</li>
+                <li><strong>환율 하락 시:</strong> 외화 쓰는 쪽(수입/유학 등) 유리, 외화 버는 쪽(수출 등) 불리</li>
+              </ul>
+            </div>
+            <div style="background: rgba(255,255,255,0.04); padding: var(--space-4); border-radius: var(--r-lg)">
+              <h4 style="font-size: 18px; color: #C084FC; margin: 0 0 10px">🎯 현명한 외환 대응 전략</h4>
+              <ul style="font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.6; margin: 0; padding-left: 20px">
+                <li>예측에만 의존하는 도박성 대기 전략보다는, 분할 환전이나 계약 고정 등 리스크를 분산하고 안정을 확보하는 전략이 합리적입니다.</li>
+                <li>"환율은 단순한 숫자만이 아니라, 경제 주체들이 합리적으로 선택하도록 이끄는 중요한 신호입니다."</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  `;
+}
+
+function bindLargeBoardToggleControls(root) {
+  const openBtn = root.querySelector("[data-action='open-board-large']");
+  if (openBtn) {
+    openBtn.addEventListener("click", () => {
+      enlargedBoardOpen = true;
+      render();
+    });
+  }
+}
+
+function bindLargeBoardControls(root) {
+  const closeBtn = root.querySelector("[data-action='close-board-large']");
+  const backdrop = root.querySelector(".board-large-backdrop");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      enlargedBoardOpen = false;
+      render();
+    });
+  }
+  if (backdrop) {
+    backdrop.addEventListener("click", (event) => {
+      if (event.target === backdrop) {
+        enlargedBoardOpen = false;
+        render();
+      }
+    });
+  }
+}
+
 function promptPanelTemplate(text, includeFrame = false) {
   return `
     <article class="prompt-panel">
-      <h3>모둠 토의 질문</h3>
+      <h3>🗣️ 모둠 토의 질문</h3>
       <p>${text}</p>
       ${includeFrame ? `
         <div class="discussion-frame">
-          <strong>발표 문장 틀</strong>
-          <span>우리 역할은 환율이 ___하면 유리/불리합니다.</span>
-          <span>이번 뉴스는 환율 ___을 암시합니다.</span>
-          <span>그래서 우리는 ___을 선택했습니다.</span>
+          <strong>📣 발표 문장 틀 (이대로 읽어보세요)</strong>
+          <span>"우리 역할은 환율이 <b>[상승/하락]</b>하면 <b>[유리/불리]</b>합니다. 왜냐하면..."</span>
+          <span>"이번 뉴스는 달러 <b>[수요/공급]</b>의 변화로 환율 <b>[상승/하락]</b>을 암시합니다."</span>
+          <span>"따라서 우리는 위험을 분산하기 위해 <b>[선택 전략]</b>을 선택했습니다."</span>
         </div>
       ` : ""}
     </article>
@@ -1336,16 +1327,20 @@ function roleCardTemplate(team) {
       </div>
       <p class="role-hint">${team.role.explanation}</p>
       <div class="compact-stats" style="margin-top: var(--space-3)">
-        <span><small>시작 자금</small><strong>${team.money}만</strong></span>
-        <span><small>대응 안전성</small><strong>${team.stability}</strong></span>
+        <span><small>시작 자금</small><strong>${team.money}만 원</strong></span>
       </div>
     </article>
   `;
 }
+
 function teamChoiceTemplate(team, round) {
   const selected = state.selections[team.id] || {};
   const visual = roleVisualTemplate(team);
-  const choices = round.choices || roleStrategyOptions(team.role.name, round);
+  const choices = roleStrategyOptions(team.role.name, round);
+  const roleType = getRoleType(team.role.name);
+  const typeBadge = roleType === "earner"
+    ? `<span class="role-type-badge role-type-earner">💰 외화 수입 모둠</span>`
+    : `<span class="role-type-badge role-type-spender">💸 외화 지출 모둠</span>`;
   return `
     <article class="team-card ${isTeamSelectionComplete(selected) ? "selected" : ""}">
       <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
@@ -1353,10 +1348,12 @@ function teamChoiceTemplate(team, round) {
         <strong>${escapeHtml(team.name)} · ${team.role.name}</strong>
         <em class="${isTeamSelectionComplete(selected) ? "done" : "pending"}">${isTeamSelectionComplete(selected) ? "✓ 완료" : "입력 중"}</em>
       </div>
-      <div class="metric-row">
-        <span class="metric">점수 ${team.score}</span>
-        <span class="metric">자금 ${team.money}</span>
-        <span class="metric">대응 안전성 ${team.stability}</span>
+      <div class="team-role-type-row">
+        ${typeBadge}
+      </div>
+      <div class="team-stats-row">
+        <span class="metric">대응 점수 ${team.score}점</span>
+        <span class="metric">자금 ${team.money}만 원</span>
       </div>
       <div class="decision-block">
         <strong>환율 예측</strong>
@@ -1390,34 +1387,308 @@ function teamChoiceTemplate(team, round) {
   `;
 }
 
-function roleStrategyOptions(roleName, round) {
-  const direction = getRoundDirection(round);
-  const spender = roleName.includes("여행") || roleName.includes("수입") || roleName.includes("직구") || roleName.includes("유학생") || roleName.includes("원자재");
-  const earner = roleName.includes("수출") || roleName.includes("K-pop") || roleName.includes("관광객");
-  if (spender) {
-    return [
-      { text: "필요한 달러를 일부 미리 확보한다", type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "일부만 먼저 처리하면 환율이 불리하게 움직일 때 손실을 줄일 수 있습니다." },
-      { text: "환전을 미루고 환율 하락을 기다린다", type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "예상이 맞으면 비용을 줄이지만, 틀리면 부담이 커질 수 있습니다." },
-      { text: "비용을 줄이고 계획을 조정한다", type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "불리한 환율 상황에서 지출 규모를 줄이는 방어 전략입니다." },
-      { text: "지금 전액 환전해 불확실성을 없앤다", type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "큰 이익 기회는 줄지만 앞으로의 불확실성을 낮출 수 있습니다." }
-    ];
+const STRATEGY_VARIATIONS = {
+  traveler: {
+    split: [
+      "여행 경비를 한 번에 환전하지 않고 분할 환전한다",
+      "환율 변동에 대응하기 위해 여행 경비를 며칠로 나누어 조금씩 환전한다",
+      "평균 환율 리스크를 낮추기 위해 여행 자금을 여러 차례 분할 환전한다"
+    ],
+    wait: [
+      "환전 시점을 늦추며 환율이 떨어지기를 기다린다",
+      "환율 추가 하락을 기대하며 우선은 환전 결정을 미루고 지켜본다",
+      "환율 흐름이 더 유리해질 때까지 일단 환전 시기를 뒤로 늦춘다"
+    ],
+    protect: [
+      "여행 예산을 축소하거나 국내 여행으로 일부 대체한다",
+      "환율 상승 부담을 줄이기 위해 현지 쇼핑 지출을 아끼고 예산을 조정한다",
+      "해외 지출을 절감하고자 일정을 일부 단축하거나 국내 대체 여행을 계획한다"
+    ],
+    lock: [
+      "지금 전액 환전하여 앞으로의 추가 환율 불안을 없낸다",
+      "더 큰 환율 불안이 닥치기 전에 필요한 경비 전액을 지금 즉시 환전한다",
+      "추가적인 환율 상승 위험을 선제적으로 차단하고자 현 시점에 일괄 환전한다"
+    ]
+  },
+  exporter: {
+    expand: [
+      "바이어 대상 마케팅을 확대하고 수출 선적을 서두른다",
+      "해외 홍보를 공격적으로 강화하고 수출 선적 물량을 신속히 출고한다",
+      "바이어 마케팅을 강화하는 동시에 제품 수출 선적 일정을 최대한 앞당긴다"
+    ],
+    split: [
+      "수출 대금으로 받은 달러를 날짜별로 나누어 원화로 환전한다",
+      "해외 수령 달러 대금을 주 단위로 쪼개어 차례대로 원화로 바꾼다",
+      "한꺼번에 바꾸는 리스크를 피하도록 수출 대금 환전을 여러 번 분배하여 실행한다"
+    ],
+    protect: [
+      "수출 가격이나 정산 통화를 안정적인 방식으로 재조정한다",
+      "급격한 외환 변동 리스크에 대비하여 계약 결제 및 정산 조건을 재조정한다",
+      "환리스크가 낮은 결제 통화 비중을 조절하여 수출 거래 조건을 재정비한다"
+    ],
+    wait: [
+      "원화 환산 이익을 높이기 위해 달러 환전을 최대한 미룬다",
+      "환율 상승으로 인한 이익 극대화를 위해 환전 시점을 가능한 뒤로 미룬다",
+      "수출 달러 대금 환전을 뒤로 보류하여 원화 환산 가치가 최고일 때 바꾼다"
+    ]
+  },
+  importer: {
+    split: [
+      "수입 결제용 달러를 분할 구매하여 환율 변동 위험을 낮춘다",
+      "결제할 외화를 며칠에 나누어 사들여 달러 평균 매입 단가를 안정화한다",
+      "수입 대금 결제용 달러를 수차례 분산 구매하여 환리스크를 고르게 나눈다"
+    ],
+    wait: [
+      "수입 대금 결제일을 최대한 연기하고 환율 하락을 기다린다",
+      "대금 결제 기한을 뒤로 미루며 환율이 더 떨어질 때까지 지켜본다",
+      "외화 송금을 가능한 늦추면서 시장의 환율 하락 안정에 대기한다"
+    ],
+    protect: [
+      "수입 물량을 긴급 감축하고 국내 대체 거래처를 확보한다",
+      "수입 단가가 오른 품목의 공급량을 조절하고 대체 국내 거래처를 물색한다",
+      "비싼 수입 원가를 방어하기 위해 국내 유통망을 통해 유사 품목 대체재를 수급한다"
+    ],
+    lock: [
+      "선물환 계약 등을 통해 결제 환율을 현재 시점에 고정한다",
+      "은행 선물환 서비스를 신청하여 장래의 결제 환율을 미리 고정해 둔다",
+      "미래의 환율 변동 부담을 원천 차단하기 위해 지금 결제 환율을 확정 계약한다"
+    ]
+  },
+  buyer: {
+    split: [
+      "직구 결제 시 여러 품목의 구매 시점을 분산한다",
+      "장바구니 직구 상품 결제 요일을 나누어 분할 구매를 진행한다",
+      "구매 시점을 며칠 간격으로 쪼개서 결제해 환율 변동 위험을 분배한다"
+    ],
+    wait: [
+      "장바구니 상품 결제를 보류하고 할인 시즌이나 환율 하락을 대기한다",
+      "주문을 잠시 멈추고 블랙프라이데이나 환율이 내릴 시기를 모니터링한다",
+      "환율 상황이 비교적 잠잠해질 때까지 장바구니 결제 진행을 일시 대기한다"
+    ],
+    protect: [
+      "해외직구 대신 국내 쇼핑몰이나 대체 국산 브랜드를 이용한다",
+      "직구 메리트가 낮아진 상황이므로 가성비 좋은 국산 브랜드로 소비를 전환한다",
+      "환율 변동 부담이 없는 국내 쇼핑몰이나 대체 상품 구매로 눈을 돌린다"
+    ],
+    lock: [
+      "더 오르기 전에 꼭 필요한 직구 상품은 즉시 결제한다",
+      "나중에 환율이 더 오기 전에 필요 수준의 직구 제품을 곧바로 결제한다",
+      "추가 환율 상승으로 인한 손해를 방지하고자 필요한 물품을 지금 즉시 구매한다"
+    ]
+  },
+  student: {
+    split: [
+      "학비와 생활비용 달러 송금액을 분기별로 나누어 송금한다",
+      "거액 송금에 따른 리스크를 관리하도록 생활비와 등록금을 주기적으로 분할 송금한다",
+      "송금 시기를 고르게 쪼개 보냄으로써 환율 급변 위험을 평준화한다"
+    ],
+    wait: [
+      "학비 마감일까지 송금을 연기하며 달러 가격이 하락하기를 대기한다",
+      "학비 납기일 직전까지 달러 가격 추이를 살피며 외화 송금을 늦춘다",
+      "송금 마감일 한도 안에서 달러가 더 저렴해지기를 기다렸다가 보낸다"
+    ],
+    protect: [
+      "현지 유학 생활비를 절약하도록 유학생 자녀에게 지출 감축을 요청한다",
+      "송금 부담이 늘었으므로 현지 체류 중인 자녀에게 불필요한 소비를 줄이도록 알린다",
+      "환율 상승 고려해 자녀에게 지출을 아껴 쓰고 소비를 조절할 것을 요청한다"
+    ],
+    lock: [
+      "미리 1년 치 학비를 전액 환전 및 송금하여 등록금 변동 위험을 제거한다",
+      "추가적인 환율 폭등 위험에 대비해 1년 동안 쓸 유학 비용을 지금 선송금한다",
+      "나중에 원화 가치가 더 떨어질 것에 대비해 현시점에 학비 전액을 먼저 송금한다"
+    ]
+  },
+  shop: {
+    expand: [
+      "외국인 대상 온라인 프로모션을 늘리고 안내 서비스를 강화한다",
+      "해외 SNS 홍보를 늘리고 외국인 관광객 맞춤 다국어 서비스를 보강한다",
+      "해외 여행객 유치를 위해 타겟 프로모션을 개시하고 매장 서비스를 강화한다"
+    ],
+    split: [
+      "결제 대금으로 들어온 달러 및 모바일 페이 환전 시점을 주 단위로 분산한다",
+      "방문객들이 지불한 외화 및 간편결제 환전을 여러 날짜에 나누어 실행한다",
+      "외국인 결제 대금을 모아서 한 번에 환전하지 않고 일정 주기로 쪼개어 환전한다"
+    ],
+    protect: [
+      "내수 고객용 신메뉴를 개발하고 국내 관광객 유치 이벤트를 강화한다",
+      "해외 관광객에만 쏠리지 않도록 국내 로컬 고객 전용 신상품과 행사를 추진한다",
+      "매장의 안정적 매출을 지키기 위해 국내 거주 소비자를 위한 행사를 확대한다"
+    ],
+    wait: [
+      "환율이 최고점에 도달할 때까지 달러 대금 환전을 보류하고 보관한다",
+      "추가 환율 상승 시기에 맞춘 환전 차익을 얻으려고 달러화 환전을 홀딩한다",
+      "더 많은 원화를 확보할 수 있도록 보유한 외화 대금의 환전을 당분간 보류한다"
+    ]
+  },
+  factory: {
+    split: [
+      "원자재 수입 물량을 주 단위로 잘게 나누어 구매 계약을 맺는다",
+      "대량의 원자재 매입 계약을 주 단위 또는 월 단위 분할 형태로 분산 체결한다",
+      "수입 원자재 물량을 분할 발주함으로써 단가 변동과 환리스크를 분해한다"
+    ],
+    wait: [
+      "재고 잔량을 최대한 사용하며 가격과 환율이 하락하기를 대기한다",
+      "공장에 쌓인 원자재 재고를 소진해 가면서 가격 및 환율 하락을 관망한다",
+      "비축한 자재 재고로 공장을 우선 가동하고 수입 시기는 최대한 연기한다"
+    ],
+    protect: [
+      "생산 공정을 효율화하여 원료 손실을 줄이고 국산 원료 대체 비율을 높인다",
+      "원료 소모량을 최소화하는 혁신 공정을 가동하고 국산 자재 비율을 보강한다",
+      "생산 손실률을 줄여 원가를 절감하고 가격이 비교적 싼 국산 대체 자재를 도입한다"
+    ],
+    lock: [
+      "원자재 공급사와 장기 고정 환율 계약을 체결해 가격 안정성을 최우선 확보한다",
+      "원자재 매입 거래처와 중장기 고정 계약을 맺어 원가 변동 위험을 묶어둔다",
+      "환율의 극심한 요동 속에서 안정을 도모하기 위해 장기 고정단가 환율을 설정한다"
+    ]
+  },
+  kpop: {
+    expand: [
+      "글로벌 월드투어 일정을 확대하고 해외 굿즈 판매를 적극 개시한다",
+      "해외 콘서트 투어를 전격 확대하고 글로벌 타겟 MD 마케팅을 본격화한다",
+      "달러 수익 기회를 넓히기 위해 월드투어 개최지와 굿즈 판매처를 확장한다"
+    ],
+    split: [
+      "해외 티켓 대금과 로열티로 들어온 달러 수익을 월별로 분할 환전한다",
+      "해외 로열티 정산 및 투어 수입 달러를 매월 일정 주기별로 나누어 환전한다",
+      "한꺼번에 바꾸는 리스크를 방지하고자 수령한 외화 수익금을 일정 기간 나누어 원화로 환전한다"
+    ],
+    protect: [
+      "해외 공연 출연 정산 조건을 안정적인 통화 고정 방식으로 조정한다",
+      "급격한 외환 불안정성에 대응해 기획사 정산 방식을 계약 고정 환율로 조율한다",
+      "파트너사들과의 공연/유통 계약 시 원화 혹은 통화 고정 비율 정산 방식을 취한다"
+    ],
+    wait: [
+      "환율 상승의 수혜를 극대화하기 위해 달러 대금 환전하는 시기를 전면 대기한다",
+      "달러 가치 상승에 맞춘 환산 이익을 보기 위해 외화 정산금 환전을 늦춘다",
+      "기획사의 달러 수입금 환전을 당분간 보류하고 외화로 보관하며 시기를 조율한다"
+    ]
+  },
+  default: {
+    split: [
+      "거래 시점을 나누어 위험을 분산한다",
+      "환율 급변에 대비해 자금 거래 일정을 여러 차례로 쪼갠다",
+      "외환 거래 횟수를 나누어서 평균 리스크 분산을 유도한다"
+    ],
+    protect: [
+      "비용과 계약 조건을 다시 점검한다",
+      "계약 조건을 세심히 조정하여 환율 영향으로부터 자산을 보호한다",
+      "급박한 환율 변동을 이겨내도록 내부 원가와 협의 조건을 긴급 점검한다"
+    ],
+    expand: [
+      "해외 거래를 적극적으로 늘린다",
+      "해외 파트너십 유치 마케팅을 통해 기회를 늘린다",
+      "글로벌 시장의 문을 더 두드리며 해외 판로 및 유입을 대폭 늘린다"
+    ],
+    wait: [
+      "아무것도 하지 않고 지켜본다",
+      "일단 어떤 행동도 취하지 않고 환율 상황이 바뀔 때까지 관망한다",
+      "시장에 섣불리 대응하기보다 추가 정보를 파악하며 추이를 대기한다"
+    ]
   }
-  if (earner) {
-    return [
-      { text: "해외 판매와 홍보를 확대한다", type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: "외화를 벌어들이는 역할은 유리한 환율에서 이익을 키울 수 있습니다." },
-      { text: "받은 달러를 나누어 환전한다", type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: "환전 시점을 나누면 환율 변동 위험을 줄일 수 있습니다." },
-      { text: "가격과 계약 조건을 조정한다", type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: "불리한 환율에서도 가격·계약 조건을 조정해 피해를 줄일 수 있습니다." },
-      { text: "환율이 더 좋아질 때까지 모두 보유한다", type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: "기다리기는 이익 기회가 있지만 예상이 틀리면 위험이 커집니다." }
-    ];
-  }
-  return [
-    { text: "거래 시점을 나누어 위험을 분산한다", type: "split", effect: { moneyChange: 3, stabilityChange: 6 }, feedback: "상황이 불확실할 때는 나누어 결정하는 전략이 안정적입니다." },
-    { text: "비용과 계약 조건을 다시 점검한다", type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "계약 조건을 점검하면 환율 변동 위험을 줄일 수 있습니다." },
-    { text: "해외 거래를 적극적으로 늘린다", type: "expand", effect: { moneyChange: 5, stabilityChange: 0 }, feedback: "기회를 키울 수 있지만 부담도 함께 커질 수 있습니다." },
-    { text: "아무것도 하지 않고 지켜본다", type: "wait", effect: { moneyChange: 0, stabilityChange: -3 }, feedback: "기다리는 선택도 가능하지만 근거 없는 대기는 위험합니다." }
-  ];
+};
+
+function getRoleCategory(roleName) {
+  if (roleName.includes("여행") || roleName.includes("관광객")) return "traveler";
+  if (roleName.includes("수출기업")) return "exporter";
+  if (roleName.includes("수입기업") && !roleName.includes("원자재")) return "importer";
+  if (roleName.includes("직구")) return "buyer";
+  if (roleName.includes("유학생")) return "student";
+  if (roleName.includes("관광") || roleName.includes("가게")) return "shop";
+  if (roleName.includes("원자재") || roleName.includes("공장")) return "factory";
+  if (roleName.includes("K-pop") || roleName.includes("공연")) return "kpop";
+  return "default";
 }
 
+function roleStrategyOptions(roleName, round) {
+  const direction = getRoundDirection(round);
+  const category = getRoleCategory(roleName);
+  const roundIdx = state.currentRoundIndex || 0;
+  
+  const getParaphrase = (type) => {
+    const list = STRATEGY_VARIATIONS[category]?.[type] || STRATEGY_VARIATIONS.default[type] || [];
+    return list[roundIdx % list.length] || "";
+  };
+
+  if (category === "traveler") {
+    return [
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "여행 경비를 쪼개서 환전하면 평균 환율을 낮춰 리스크를 줄일 수 있습니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "환율이 떨어지길 마냥 기다리는 것은 예측이 맞으면 이득이지만, 더 오르면 여행 경비 부담이 매우 커집니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "환율 부담이 클 때 여행 일정을 조정하거나 예산을 아끼는 것은 확실한 방어책입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "불확실성이 높을 때 즉시 환전하면 추가 환율 상승 위험은 차단하지만 더 싸게 살 기회는 잃게 됩니다." }
+    ];
+  }
+  
+  if (category === "exporter") {
+    return [
+      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: "환율 상승기에 수출 물량을 늘리면 매출 극대화가 가능하지만 해외 수요 변동도 고려해야 합니다." },
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: "수출 달러 대금을 나누어 원화로 바꾸면 환율 하락 변동에 대한 안전성을 확보할 수 있습니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: "수출 가격이나 결제 통화를 조절하는 것은 급격한 환율 변화 속에서 회사 안정을 도모합니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: "환율 상승을 기대하고 환전을 미루는 것은 큰 이익 기회도 되지만 환율이 반대로 꺾일 때 큰 타격을 받습니다." }
+    ];
+  }
+  
+  if (category === "importer") {
+    return [
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "수입 대금용 달러를 나누어 확보하면 평균 매입 단가를 안정화할 수 있습니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "환전 결정을 무작정 미루다가 환율이 더 오르면 수입 단가 부담이 이중으로 커집니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "수입 단가가 치솟을 때 국내 유통 대체품을 찾아 원가 상승을 막는 것은 현명한 대응입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "환율이 불리할 때 현재 시점에서 환율을 고정해두면 안정적인 예산 수립이 가능해집니다." }
+    ];
+  }
+  
+  if (category === "buyer") {
+    return [
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "분할하여 구매 시점을 쪼개면 일시적인 환율 급등 위험에 노출되는 것을 방지합니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "환율 변동 폭이 클 때는 직구를 잠시 미루고 모니터링하는 것이 합리적인 소비입니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "환율 상승으로 직구 메리트가 사라졌을 때 국산 대체품으로 선회하는 것은 훌륭한 대처입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "환율 추가 급등을 우려해 서둘러 결제할 수 있으나, 환율이 떨어지면 손해를 봅니다." }
+    ];
+  }
+  
+  if (category === "student") {
+    return [
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "거액의 송금을 쪼개서 하면 환율이 급변할 때의 평균 리스크를 상쇄하는 안전한 유학 자금 관리법이 됩니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "학비 납부 기한까지 기다리는 전략은 도박성이 짙어, 환율이 급상승하면 엄청난 비용 증가를 겪습니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "달러 가치가 비쌀 때 현지 소비를 줄이도록 유도하는 방어 행동은 현실적인 대책입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "학비 일시에 미리 처리하면 추가 인상 위험은 사라지지만, 송금 후 환율이 급락할 경우 기회비용 손실이 큽니다." }
+    ];
+  }
+  
+  if (category === "shop") {
+    return [
+      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: "원화 가치가 약해졌을 때(환율 상승) 외국인 관광객 마케팅을 공격적으로 확대하면 효과적인 낙수 효과를 얻습니다." },
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: "외화 현찰이나 디지털 대금을 나눠서 환전하는 습관은 환율 역방향 리스크를 줄입니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: "해외 변수에만 기댈 수 없으므로 국내 내수 소비자 수요도 챙겨 균형을 잡는 것이 현명합니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: "환전 차익을 얻기 위해 달러 현금을 쌓아두는 것은 도박적인 환차익 노리기로, 안전성이 급격히 떨어집니다." }
+    ];
+  }
+  
+  if (category === "factory") {
+    return [
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "대량의 원료를 나누어 수입하면 환율 등락에 따른 리스크 평준화가 이루어집니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "공장 가동을 멈출 수 없는 상황에서 무작정 대기하는 것은 납기 불이행 및 비용 급증 위험이 매우 높습니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "생산성 혁신과 국산 대체재 투자는 환율 고공행진 시 공장의 든든한 보호막이 됩니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "장기 고정 환율 계약은 추가 가격 폭등을 예방해 주어 공장 가동 안정성을 확 올려줍니다." }
+    ];
+  }
+  
+  if (category === "kpop") {
+    return [
+      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: "원화 가치 하락기(환율 상승)에 달러 수입을 안겨다 줄 해외 투어를 늘리는 것은 탁월한 이익 극대화 전략입니다." },
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: "글로벌 비즈니스의 티켓/음원 수익 환전 시기를 쪼개 가져가는 것은 외환 리스크 관리의 기본입니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: "수익 정산 조건을 안정적인 고정 방식으로 전환하는 것은 글로벌 시장의 급격한 변화에서 회사 자금을 지키는 훌륭한 방패가 됩니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: "환율 피크를 예상하고 환전을 장기간 미루는 행동은 외화 운전자금 동결과 급격한 하락 시 큰 위험을 동반합니다." }
+    ];
+  }
+
+  return [
+    { text: getParaphrase("split"), type: "split", effect: { moneyChange: 3, stabilityChange: 6 }, feedback: "상황이 불확실할 때는 나누어 결정하는 전략이 안정적입니다." },
+    { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "계약 조건을 점검하면 환율 변동 위험을 줄일 수 있습니다." },
+    { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: 5, stabilityChange: 0 }, feedback: "기회를 키울 수 있지만 부담도 함께 커질 수 있습니다." },
+    { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: 0, stabilityChange: -3 }, feedback: "기다리는 선택도 가능하지만 근거 없는 대기는 위험합니다." }
+  ];
+}
 function roleVisualTemplate(team) {
   const roleName = team.role.name;
   if (roleName.includes("수출"))  return { icon: "🏭", bg: "#FFE6E1", text: "#A8331F", line: "#FF6B57" };
@@ -1459,33 +1730,29 @@ function resultCardTemplate(team) {
         <span class="result-sel ${last.response.impactScore ? "is-correct" : "is-wrong"}">
           ${last.response.impactScore ? "✓" : "✗"} 영향 ${impactLabel(last.impact)}
         </span>
-        <span class="result-sel ${last.response.strategyScore >= 5 ? "is-correct" : last.response.strategyScore >= 3 ? "is-partial" : "is-wrong"}">
-          ${last.response.strategyScore >= 5 ? "✓" : "△"} 대응: ${last.choiceText}
+        <span class="result-sel ${last.response.strategyScore === 2 ? "is-correct" : last.response.strategyScore === 1 ? "is-partial" : "is-wrong"}">
+          ${last.response.strategyScore === 2 ? "✓" : last.response.strategyScore === 1 ? "△" : "✗"} 대응: ${last.choiceText}
         </span>
       </div>
       ${choiceFeedback ? `<p class="result-feedback">${choiceFeedback}</p>` : ""}
       <div class="response-score-row">
-        <div class="score-chip ${last.response.predictionScore ? "ok" : "miss"}">
+        <div class="score-chip ${last.response.predictionScore ? "ok" : "miss"}" data-tooltip="${last.response.predictionScore ? '환율 변동 방향 예측 성공 (+5점)' : '환율 변동 방향 예측 실패 (+0점)'}">
           <span>환율 예측</span><strong>${last.response.predictionScore}점</strong>
         </div>
-        <div class="score-chip ${last.response.impactScore ? "ok" : "miss"}">
+        <div class="score-chip ${last.response.impactScore ? "ok" : "miss"}" data-tooltip="${last.response.impactScore ? '우리 역할에 미치는 유불리 분석 성공 (+3점)' : '우리 역할에 미치는 유불리 분석 실패 (+0점)'}">
           <span>역할 판단</span><strong>${last.response.impactScore}점</strong>
         </div>
-        <div class="score-chip ${last.response.strategyScore >= 5 ? "ok" : last.response.strategyScore >= 3 ? "partial" : "miss"}">
+        <div class="score-chip ${last.response.strategyScore === 2 ? "ok" : last.response.strategyScore === 1 ? "partial" : "miss"}" data-tooltip="${last.response.strategyScore === 2 ? '역할과 상황에 가장 적절한 추천 전략 선택 (+2점)' : last.response.strategyScore === 1 ? '상황에 부분적으로 적절한 대안 전략 선택 (+1점)' : '우리 역할에 리스크가 크거나 부적절한 전략 선택 (+0점)'}">
           <span>대응 전략</span><strong>${last.response.strategyScore}점</strong>
         </div>
-        <div class="score-chip total">
+        <div class="score-chip total" data-tooltip="환율 예측(${last.response.predictionScore}점) + 역할 판단(${last.response.impactScore}점) + 대응 전략(${last.response.strategyScore}점) = 총 ${last.response.total}점">
           <span>이번 점수</span><strong>${last.response.total}점</strong>
         </div>
       </div>
-      <div class="delta-row">
-        ${deltaTemplate("자금", last.total.moneyChange)}
-        ${deltaTemplate("안전성", last.total.stabilityChange)}
-      </div>
       <div class="metric-row">
-        <span class="metric">누적 점수 ${team.score}</span>
-        <span class="metric">자금 ${team.money}</span>
-        <span class="metric">안전성 ${team.stability}</span>
+        ${deltaTemplate("자금", last.total.moneyChange)}
+        <span class="metric">누적 점수 ${team.score}점</span>
+        <span class="metric">자금 ${team.money}만 원</span>
       </div>
     </article>
   `;
@@ -1494,7 +1761,7 @@ function resultCardTemplate(team) {
 function responseReasonTemplate(last) {
   const prediction = last.response.predictionScore ? "환율 방향을 맞혔고" : "환율 방향 예측은 빗나갔고";
   const impact = last.response.impactScore ? "우리 역할의 유불리도 정확히 판단했습니다" : "우리 역할의 유불리 판단은 다시 확인해야 합니다";
-  const strategy = last.response.strategyScore >= 5 ? "대응 선택도 역할에 잘 맞았습니다." : last.response.strategyScore >= 3 ? "대응 선택은 부분적으로 적절했습니다." : "대응 선택은 위험이 컸습니다.";
+  const strategy = last.response.strategyScore === 2 ? "대응 선택도 역할에 잘 맞았습니다." : last.response.strategyScore === 1 ? "대응 선택은 부분적으로 적절했습니다." : "대응 선택은 위험이 컸습니다.";
   return `${prediction}, ${impact}. ${strategy}`;
 }
 
@@ -1544,7 +1811,10 @@ function exchangeImpactBoardTemplate(round) {
     : "달러를 벌어들이는 쪽은 받은 달러를 원화로 바꿀 때 받을 수 있는 원화가 줄어듭니다.";
   return `
     <article class="impact-board">
-      <h3>판서: 같은 환율, 다른 결과</h3>
+      <div class="impact-board-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-3)">
+        <h3 style="margin: 0">판서: 같은 환율, 다른 결과</h3>
+        <button class="mini-button" type="button" data-action="open-board-large" style="font-size: 11.5px; height: 28px; padding: 0 10px">크게 보기</button>
+      </div>
       <div class="board-rule ${isUp ? "" : "rule-down"}">
         <strong>${isUp ? "환율 상승" : "환율 하락"}</strong>
         <span>${isUp ? "달러 가격이 오르고 원화 가치는 낮아집니다." : "달러 가격이 내리고 원화 가치는 높아집니다."}</span>
@@ -1562,7 +1832,7 @@ function exchangeImpactBoardTemplate(round) {
         </section>
       </div>
       <div class="board-note">
-        대응 점수는 “방향을 맞혔는가”만 보지 않습니다. 역할에 맞는 안전한 대응은 높게, 큰 이익을 노린 선택은 자금 변동은 커도 대응 안전성이 낮을 수 있습니다.
+        💡 <strong>배움 핵심:</strong> 환율 변동은 역할(수출/수입 등)에 따라 영향이 정반대로 나타납니다. 예측에만 의존하기보다는 리스크를 분산(분할 환전 등)하고 안정을 확보하는 대응 전략이 합리적입니다.
       </div>
     </article>
   `;
@@ -1683,23 +1953,6 @@ function readTeamNames(root) {
   return Array.from(root.querySelectorAll("[data-team-name]")).map((input) => input.value.trim());
 }
 
-function updateDifficultyBadge(root) {
-  const roundCount = clamp(Number(root.querySelector("#roundCount")?.value) || 5, 1, Math.min(MAX_ROUND_COUNT, ROUNDS.length));
-  const counts = readDifficultyCounts(root, roundCount);
-  const total = getDifficultyTotal(counts);
-  const badge = root.querySelector(".difficulty-total");
-  if (!badge) return;
-  badge.textContent = `합계 ${total} / ${roundCount}개`;
-  badge.classList.toggle("is-mismatch", total !== roundCount);
-}
-
-function readDifficultyCounts(root, targetRoundCount = state.roundCount) {
-  const counts = {};
-  root.querySelectorAll("[data-difficulty-count]").forEach((input) => {
-    counts[input.dataset.difficultyCount] = Number(input.value) || 0;
-  });
-  return normalizeDifficultyCounts(counts, targetRoundCount);
-}
 
 function createTeams() {
   state.teams = Array.from({ length: state.teamCount }, (_, index) => {
@@ -1710,7 +1963,6 @@ function createTeams() {
       role,
       score: 0,
       money: role.initialMoney,
-      stability: role.initialStability,
       history: []
     };
   });
@@ -1721,7 +1973,7 @@ function applyRoundResults() {
   state.teams.forEach((team) => {
     const selection = state.selections[team.id] || {};
     const choiceIndex = selection.choiceIndex;
-    const choices = round.choices || roleStrategyOptions(team.role.name, round);
+    const choices = roleStrategyOptions(team.role.name, round);
     const choice = choices[choiceIndex];
     const roleAdjust = getRoleAdjustment(team.role.name, round);
     const response = calculateResponseScore(team, round, choice, selection, roleAdjust);
@@ -1734,7 +1986,6 @@ function applyRoundResults() {
 
     team.score += total.scoreChange;
     team.money = Math.max(0, team.money + total.moneyChange);
-    team.stability = clamp(team.stability + total.stabilityChange, 0, 100);
 
     team.history.push({
       roundTitle: round.title,
@@ -1755,8 +2006,8 @@ function applyRoundResults() {
 function calculateResponseScore(team, round, choice, selection, roleAdjust) {
   const direction = getRoundDirection(round);
   const impact = getExpectedImpact(team.role.name, round);
-  const predictionScore = selection.prediction === direction ? 8 : 0;
-  const impactScore = selection.impact === impact ? 5 : 0;
+  const predictionScore = selection.prediction === direction ? 5 : 0;
+  const impactScore = selection.impact === impact ? 3 : 0;
   const strategyScore = scoreStrategyChoice(choice, team.role.name, roleAdjust.type);
   return {
     predictionScore,
@@ -1786,24 +2037,23 @@ function scoreStrategyChoice(choice, roleName, roleEffectType) {
   // round.choices path: use recommendedRoles
   if (Array.isArray(choice.recommendedRoles)) {
     const recommended = choice.recommendedRoles.includes(roleName);
-    if (recommended) return 5;
-    return roleEffectType === "neutral" ? 3 : 2;
+    if (recommended) return 2;
+    return roleEffectType === "neutral" ? 1 : 0;
   }
   // legacy roleStrategyOptions path
   const { type: choiceType } = choice;
   if (roleEffectType === "weak") {
-    if (choiceType === "protect" || choiceType === "split" || choiceType === "lock") return 5;
-    if (choiceType === "wait") return 2;
-    return 1;
+    if (choiceType === "protect" || choiceType === "split" || choiceType === "lock") return 2;
+    if (choiceType === "wait") return 1;
+    return 0;
   }
   if (roleEffectType === "strong") {
-    if (choiceType === "split") return 5;
-    if (choiceType === "expand") return 4;
-    if (choiceType === "protect" || choiceType === "lock") return 3;
-    return 2;
+    if (choiceType === "split" || choiceType === "expand") return 2;
+    if (choiceType === "protect" || choiceType === "lock") return 1;
+    return 0;
   }
-  if (choiceType === "split" || choiceType === "protect") return 5;
-  return 2;
+  if (choiceType === "split" || choiceType === "protect") return 2;
+  return 1;
 }
 
 function getRoleAdjustment(roleName, round) {
@@ -1842,12 +2092,7 @@ function buildResultSummary(team, choice, roleAdjust, total) {
     weak: "이 역할은 이번 상황에서 기본적으로 불리했습니다.",
     neutral: "이 역할은 이번 상황의 직접 영향이 크지 않았습니다."
   }[roleAdjust.type];
-  const safetyText = total.stabilityChange > 0
-    ? "대응 안전성이 올라 계획적인 선택으로 볼 수 있습니다."
-    : total.stabilityChange < 0
-      ? "대응 안전성이 낮아져 다음 선택에서는 더 신중한 판단이 필요합니다."
-      : "대응 안전성 변화는 크지 않았습니다.";
-  return `${team.role.name}${subjectParticle(team.role.name)} “${choice.text}”를 선택했습니다. ${roleText} ${safetyText}`;
+  return `${team.role.name}${subjectParticle(team.role.name)} “${choice.text}”를 선택했습니다. ${roleText}`;
 }
 
 function subjectParticle(text) {
@@ -1975,6 +2220,7 @@ function go(screen) {
   state.screen = screen;
   state.captureMode = false;
   enlargedNewsOpen = false;
+  enlargedBoardOpen = false;
   wrapUpOpen = false;
   if (screen !== "round") {
     roundLeftScrollTop = 0;
@@ -2057,7 +2303,6 @@ function undoCurrentRoundResults() {
     if (!last || last.roundTitle !== round.title) return;
     team.score -= last.total.scoreChange;
     team.money = Math.max(0, team.money - last.total.moneyChange);
-    team.stability = clamp(team.stability - last.total.stabilityChange, 0, 100);
     team.history.pop();
   });
 }
@@ -2110,7 +2355,6 @@ function loadState() {
 function resetGame() {
   stopTimer(false);
   revealedNewsRounds.clear();
-  wrapUpOpen = false;
   state = structuredClone(initialState);
   try {
     localStorage.removeItem(STORAGE_KEY);
@@ -2129,11 +2373,6 @@ function escapeHtml(value) {
 }
 
 prevButton.addEventListener("click", goPreviousStep);
-
-wrapUpButton.addEventListener("click", () => {
-  wrapUpOpen = true;
-  render();
-});
 
 homeButton.addEventListener("click", () => {
   state.screen = "start";
