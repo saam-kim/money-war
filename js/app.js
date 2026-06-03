@@ -264,7 +264,7 @@ function renderLesson() {
           </article>
           <article>
             <strong>대응 점수</strong>
-            <p>모둠이 환율 변동에 맞춰 얼마나 합리적인 선택을 했는지 평가하는 최종 승리 기준입니다. 환율 예측, 유불리 판단, 대응 전략 선택에 따라 결정됩니다.</p>
+            <p>모둠이 환율 변동에 맞춰 얼마나 합리적인 선택을 했는지 평가하는 최종 승리 기준입니다. 환율 예측과 역할 판단에 따라 결정됩니다.</p>
           </article>
         </div>
       </div>
@@ -272,12 +272,12 @@ function renderLesson() {
         <h3>📊 라운드 결과 카드 읽는 방법</h3>
         <div class="result-guide-grid">
           <article>
-            <strong>기호 표시 (✓, △, X)</strong>
-            <p>예측과 판단이 정확하면 <b>✓ (성공)</b>, 빗나가면 <b>X (실패)</b>로 표시됩니다. 대응 전략의 효율성은 <b>✓ (최선)</b>, <b>△ (보통)</b>, <b>X (위험)</b>로 나누어 평가합니다.</p>
+            <strong>기호 표시 (✓, X)</strong>
+            <p>예측과 판단이 정확하면 <b>✓ (성공)</b>, 빗나가면 <b>X (실패)</b>로 표시됩니다.</p>
           </article>
           <article>
-            <strong>대응 점수 구성 (합계 10점)</strong>
-            <p><b>환율 예측(5점) + 역할 판단(3점) + 대응 전략(2점)</b>의 합산 점수입니다. 모둠이 경제 원리에 맞춰 합리적으로 의사결정했는지 점수화합니다.</p>
+            <strong>대응 점수 구성 (합계 8점)</strong>
+            <p><b>환율 예측(5점) + 역할 판단(3점)</b>의 합산 점수입니다. 모둠이 경제 원리에 맞춰 합리적으로 의사결정했는지 점수화합니다.</p>
           </article>
           <article>
             <strong>자금 변동 (▲/▼ 자금)</strong>
@@ -1212,16 +1212,16 @@ function boardLargeViewTemplate(round) {
             <div style="background: rgba(255,255,255,0.04); padding: var(--space-4); border-radius: var(--r-lg)">
               <h4 style="font-size: 18px; color: #7DD3FC; margin: 0 0 10px">💡 환율 변동과 경제 주체</h4>
               <ul style="font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.6; margin: 0; padding-left: 20px">
-                <li>환율 변동은 모든 경제 주체에게 같은 영향을 주지 않고, 역할에 따라 유리함과 불리함이 다르게 나타납니다.</li>
-                <li><strong>환율 상승 시:</strong> 외화 버는 쪽(수출 등) 유리, 외화 쓰는 쪽(수입/유학 등) 불리</li>
-                <li><strong>환율 하락 시:</strong> 외화 쓰는 쪽(수입/유학 등) 유리, 외화 버는 쪽(수출 등) 불리</li>
+                <li>환율이 변하면 모든 사람에게 똑같은 영향이 가지 않고, 각자 하는 일(역할)에 따라 유리하거나 불리해집니다.</li>
+                <li><strong>환율 상승 시:</strong> 외화 버는 쪽(수출, 관광 매장 등) 유리 / 외화 쓰는 쪽(유학, 수입 등) 불리</li>
+                <li><strong>환율 하락 시:</strong> 외화 쓰는 쪽(유학, 수입 등) 유리 / 외화 버는 쪽(수출, 관광 매장 등) 불리</li>
               </ul>
             </div>
             <div style="background: rgba(255,255,255,0.04); padding: var(--space-4); border-radius: var(--r-lg)">
               <h4 style="font-size: 18px; color: #C084FC; margin: 0 0 10px">🎯 현명한 외환 대응 전략</h4>
               <ul style="font-size: 15px; color: rgba(255,255,255,0.8); line-height: 1.6; margin: 0; padding-left: 20px">
-                <li>예측에만 의존하는 도박성 대기 전략보다는, 분할 환전이나 계약 고정 등 리스크를 분산하고 안정을 확보하는 전략이 합리적입니다.</li>
-                <li>"환율은 단순한 숫자만이 아니라, 경제 주체들이 합리적으로 선택하도록 이끄는 중요한 신호입니다."</li>
+                <li>환율이 오를지 내릴지 짐작해서 한 번에 돈을 바꾸는 것은 위험합니다. 조금씩 나누어 바꾸거나 미리 고정된 환율로 약속하는 것이 손해를 막는 현명한 전략입니다.</li>
+                <li>"환율은 단순한 숫자가 아니라, 우리가 돈을 아끼거나 수출을 늘리는 등 현명하게 선택할 수 있게 돕는 신호등 역할을 합니다."</li>
               </ul>
             </div>
           </div>
@@ -1345,11 +1345,8 @@ function teamChoiceTemplate(team, round) {
     <article class="team-card ${isTeamSelectionComplete(selected) ? "selected" : ""}">
       <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
         <span aria-hidden="true">${visual.icon}</span>
-        <strong>${escapeHtml(team.name)} · ${team.role.name}</strong>
+        <strong>${escapeHtml(team.name)} · ${team.role.name} ${typeBadge}</strong>
         <em class="${isTeamSelectionComplete(selected) ? "done" : "pending"}">${isTeamSelectionComplete(selected) ? "✓ 완료" : "입력 중"}</em>
-      </div>
-      <div class="team-role-type-row">
-        ${typeBadge}
       </div>
       <div class="team-stats-row">
         <span class="metric">대응 점수 ${team.score}점</span>
@@ -1422,9 +1419,9 @@ const STRATEGY_VARIATIONS = {
       "한꺼번에 바꾸는 리스크를 피하도록 수출 대금 환전을 여러 번 분배하여 실행한다"
     ],
     protect: [
-      "수출 가격이나 정산 통화를 안정적인 방식으로 재조정한다",
-      "급격한 외환 변동 리스크에 대비하여 계약 결제 및 정산 조건을 재조정한다",
-      "환리스크가 낮은 결제 통화 비중을 조절하여 수출 거래 조건을 재정비한다"
+      "수출 계약 시 결제 대금을 원화(KRW)로 고정하거나 고정 환율 계약을 맺는다",
+      "바이어와 사전에 고정된 환율로 결제하도록 계약 조건을 체결하여 환리스크를 회피한다",
+      "환율 변동에 흔들리지 않도록 결제 대금을 원화로 확정하거나 고정 환율 계약을 맺는다"
     ],
     wait: [
       "원화 환산 이익을 높이기 위해 달러 환전을 최대한 미룬다",
@@ -1488,9 +1485,9 @@ const STRATEGY_VARIATIONS = {
       "송금 마감일 한도 안에서 달러가 더 저렴해지기를 기다렸다가 보낸다"
     ],
     protect: [
-      "현지 유학 생활비를 절약하도록 유학생 자녀에게 지출 감축을 요청한다",
-      "송금 부담이 늘었으므로 현지 체류 중인 자녀에게 불필요한 소비를 줄이도록 알린다",
-      "환율 상승 고려해 자녀에게 지출을 아껴 쓰고 소비를 조절할 것을 요청한다"
+      "환율이 저렴할 때 미리 외화예금(달러 통장)에 저축해 둔 달러를 찾아서 송금한다",
+      "갑작스러운 환율 상승에 대비해 평소 조금씩 사두었던 외화 통장의 달러로 등록금을 낸다",
+      "과거 환율이 안정적일 때 외화 적금으로 적립해 둔 달러 자금을 인출하여 송금한다"
     ],
     lock: [
       "미리 1년 치 학비를 전액 환전 및 송금하여 등록금 변동 위험을 제거한다",
@@ -1612,83 +1609,84 @@ function roleStrategyOptions(roleName, round) {
 
   if (category === "traveler") {
     return [
-      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "여행 경비를 쪼개서 환전하면 평균 환율을 낮춰 리스크를 줄일 수 있습니다." },
-      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "환율이 떨어지길 마냥 기다리는 것은 예측이 맞으면 이득이지만, 더 오르면 여행 경비 부담이 매우 커집니다." },
-      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "환율 부담이 클 때 여행 일정을 조정하거나 예산을 아끼는 것은 확실한 방어책입니다." },
-      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "불확실성이 높을 때 즉시 환전하면 추가 환율 상승 위험은 차단하지만 더 싸게 살 기회는 잃게 됩니다." }
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: direction === "up" ? "환율 상승기에는 분할 환전을 통해 달러가 가장 비쌀 때 올인해 환전하는 위험을 피할 수 있습니다." : "환율 하락기에는 분할 환전을 통해 달러 가격이 점차 내려가는 이점을 분산해 챙길 수 있습니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: direction === "down" ? "환율 하락기에는 달러가 계속 저렴해지므로 환전 시점을 늦추는 대기 전략이 매우 유리하게 작용합니다." : "환율 상승기에는 환전을 미루는 대기가 독이 됩니다. 달러 가격이 계속 올라 여행 비용 부담이 크게 증가합니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: direction === "up" ? "환율이 크게 올라 예산이 부담될 때 해외 지출을 줄이거나 일정을 축소하는 것이 확실한 비용 방어 전략입니다." : "환율이 내려 지출 부담이 적은 시기지만, 과소비를 막기 위해 합리적으로 여행 예산을 조정하는 행동입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: direction === "up" ? "환율 추가 상승 위험을 빠르게 회피하기 위해 현 시점에 일괄 환전하여 불안 요소를 제거하는 판단입니다." : "달러 가격이 하락하는 시기인데 한꺼번에 즉시 환전해버려, 향후 더 싸게 달러를 매입할 기회를 잃었습니다." }
     ];
   }
   
   if (category === "exporter") {
     return [
-      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: "환율 상승기에 수출 물량을 늘리면 매출 극대화가 가능하지만 해외 수요 변동도 고려해야 합니다." },
-      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: "수출 달러 대금을 나누어 원화로 바꾸면 환율 하락 변동에 대한 안전성을 확보할 수 있습니다." },
-      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: "수출 가격이나 결제 통화를 조절하는 것은 급격한 환율 변화 속에서 회사 안정을 도모합니다." },
-      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: "환율 상승을 기대하고 환전을 미루는 것은 큰 이익 기회도 되지만 환율이 반대로 꺾일 때 큰 타격을 받습니다." }
+      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: direction === "up" ? "환율 상승기에는 달러 가치가 높으므로, 수출 물량을 대폭 늘려 원화 환산 이익을 극대화하는 최고의 선택입니다." : "환율 하락기(원화 강세)에는 달러 가치가 떨어지므로, 수출 물량을 무리하게 늘려도 원화로 바꿀 때 손해를 보거나 마진이 크게 감소합니다." },
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: direction === "up" ? "수출 대금을 나누어 원화로 환전해 평균 환율을 확보하고, 혹시 모를 환율 꺾임 위험에 대비합니다." : "환율 하락기에는 대금을 분할 환전하여 환율이 계속 하락할 때 발생할 수 있는 원화 수입 감소 피해를 고르게 분산하여 방어합니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: direction === "up" ? "달러 가치가 오르는 시기인데 원화 결제로 고정해 두면, 환율 상승으로 얻을 수 있는 원화 환산 이익 기회를 놓치게 됩니다." : "환율 하락기에는 원화 결제 고정이나 고정 환율 계약을 통해 환율 하락으로 인한 달러 대금의 원화 가치 급락 위험을 확실히 차단할 수 있습니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: direction === "up" ? "달러 가격이 계속 오르고 있으므로 환전 시점을 최대한 늦추어 원화 환산 가치를 극대화하는 영리한 전략입니다." : "환율이 떨어지는 중인데 환전을 계속 미루면 달러 가치가 더 하락해 원화 환산액이 눈덩이처럼 줄어드는 큰 피해를 입습니다." }
     ];
   }
   
   if (category === "importer") {
     return [
-      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "수입 대금용 달러를 나누어 확보하면 평균 매입 단가를 안정화할 수 있습니다." },
-      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "환전 결정을 무작정 미루다가 환율이 더 오르면 수입 단가 부담이 이중으로 커집니다." },
-      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "수입 단가가 치솟을 때 국내 유통 대체품을 찾아 원가 상승을 막는 것은 현명한 대응입니다." },
-      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "환율이 불리할 때 현재 시점에서 환율을 고정해두면 안정적인 예산 수립이 가능해집니다." }
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: direction === "up" ? "환율이 오르고 있을 때 달러를 쪼개서 매입하면, 달러 평균 매입 단가를 낮추어 한 번에 비싸게 사는 위험을 방어합니다." : "환율 하락기에는 달러를 쪼개서 구매해 환율 하락 이득을 분산 챙기면서 자금의 안정성을 확보합니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: direction === "down" ? "환율 하락기에는 달러 가치가 계속 떨어지므로 결제 시점을 미룰수록 더 적은 원화 비용으로 대금을 지불할 수 있어 유리합니다." : "환율 상승기에는 결제를 미루는 대기가 치명적입니다. 대금 결제일이 다가올수록 더 비싼 환율로 달러를 사야 하므로 비용이 폭증합니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: direction === "up" ? "환율이 올라 수입 비용이 치솟을 때 국내 대체 거래처로 눈을 돌려 원가 상승 압박을 피하는 현명한 방어책입니다." : "달러가 저렴해져 수입에 유리한 시기지만, 장기적 비용 관리와 안정성을 위해 국내 대체 공급망을 확보해 두는 대안입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: direction === "up" ? "환율 상승세가 지속되어 수입 원가 부담이 커질 때, 미리 고정한 환율로 결제해 장래의 비용 불안정성을 차단하는 적절한 방어책입니다." : "달러 가격이 계속 떨어지는 시기인데 환율을 높은 시점에 미리 묶어버리면, 추가 하락으로 얻을 수 있는 원가 절감 기회를 상실합니다." }
     ];
   }
   
   if (category === "buyer") {
     return [
-      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "분할하여 구매 시점을 쪼개면 일시적인 환율 급등 위험에 노출되는 것을 방지합니다." },
-      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "환율 변동 폭이 클 때는 직구를 잠시 미루고 모니터링하는 것이 합리적인 소비입니다." },
-      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "환율 상승으로 직구 메리트가 사라졌을 때 국산 대체품으로 선회하는 것은 훌륭한 대처입니다." },
-      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "환율 추가 급등을 우려해 서둘러 결제할 수 있으나, 환율이 떨어지면 손해를 봅니다." }
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: direction === "up" ? "환율 상승으로 직구 단가가 오를 때 장바구니 결제 시점을 분산하여 달러 고점 매수의 위험을 분산합니다." : "환율 하락기에는 달러가 계속 싸지므로 분할 구매를 통해 점차 저렴해지는 혜택을 고르게 누릴 수 있습니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: direction === "down" ? "환율 하락기에는 달러 가격이 계속 내려가므로 직구 결제를 미루고 대기하면 나중에 훨씬 싼 가격에 구매할 수 있습니다." : "환율 상승기에는 직구 결제를 미루다가는 달러가 계속 올라 결국 제품 가격이 더 비싸지거나 구매를 포기하게 됩니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: direction === "up" ? "환율이 올라 해외 제품이 비싸졌을 때, 가격 부담이 없는 국내 쇼핑몰이나 국산 대체품으로 빠르게 소비를 전환하는 현명한 선택입니다." : "달러가 저렴해서 직구가 유리해진 시기지만, 불필요한 해외 배송 대기 대신 신속한 국내 배송 제품으로 대체하는 판단입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: direction === "up" ? "환율 추가 급등이 우려될 때 필요한 제품을 지금 가격으로 즉시 구매하여 가격 인상 부담을 회피하는 전략입니다." : "달러 가격이 내려가는 하락기인데 바로 구매해버려, 향후 더 저렴한 가격에 구매할 기회를 놓쳤습니다." }
     ];
   }
   
   if (category === "student") {
     return [
-      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "거액의 송금을 쪼개서 하면 환율이 급변할 때의 평균 리스크를 상쇄하는 안전한 유학 자금 관리법이 됩니다." },
-      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "학비 납부 기한까지 기다리는 전략은 도박성이 짙어, 환율이 급상승하면 엄청난 비용 증가를 겪습니다." },
-      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "달러 가치가 비쌀 때 현지 소비를 줄이도록 유도하는 방어 행동은 현실적인 대책입니다." },
-      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "학비 일시에 미리 처리하면 추가 인상 위험은 사라지지만, 송금 후 환율이 급락할 경우 기회비용 손실이 큽니다." }
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: direction === "up" ? "환율 상승기에 유학 자금을 분할 송금하여 한꺼번에 고점에서 송금하는 환율 리스크를 방어합니다." : "환율 하락기에는 점차 낮아지는 달러 환율 이점을 분할 송금으로 안정적으로 취하며 리스크를 줄입니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: direction === "down" ? "환율 하락기에는 달러 가격이 계속 내려가므로, 학비 송금을 납기 한도 내에서 최대한 늦추어 원화 비용을 절약하는 최선의 대기 전략입니다." : "환율 상승기에는 송금을 지연시키다가 더 비싸진 환율로 학비를 보내야 하므로 가계의 원화 송금 부담이 폭발적으로 늘어납니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: direction === "up" ? "갑작스럽게 환율이 급등하여 등록금 송금 부담이 큰 시기인데, 과거 환율이 낮을 때 외화예금(달러 통장)에 저축해 두었던 달러를 인출하여 활용함으로써 비용 부담을 크게 아꼈습니다." : "과거에 환율이 저렴할 때 외화 적금으로 적립해 둔 달러 자금을 활용하여 안전하게 송금 처리를 마치는 방법입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: direction === "up" ? "환율 폭등세가 장기화될 것으로 보일 때 1년 치 등록금을 현재 환율로 선송금하여 향후 추가 폭등 위험을 예방하는 판단입니다." : "달러가 계속 하락하여 원화 가치가 오르는 시기인데 거액의 1년 치 학비를 즉시 선송금해버려, 추가 환율 하락에 따른 큰 원화 절감 혜택을 놓치게 됩니다." }
     ];
   }
   
   if (category === "shop") {
     return [
-      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: "원화 가치가 약해졌을 때(환율 상승) 외국인 관광객 마케팅을 공격적으로 확대하면 효과적인 낙수 효과를 얻습니다." },
-      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: "외화 현찰이나 디지털 대금을 나눠서 환전하는 습관은 환율 역방향 리스크를 줄입니다." },
-      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: "해외 변수에만 기댈 수 없으므로 국내 내수 소비자 수요도 챙겨 균형을 잡는 것이 현명합니다." },
-      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: "환전 차익을 얻기 위해 달러 현금을 쌓아두는 것은 도박적인 환차익 노리기로, 안전성이 급격히 떨어집니다." }
+      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: direction === "up" ? "환율 상승기에는 원화 가치가 약해져 외국인들에게 한국 여행 물가가 매우 저렴하게 체감되므로, 이 기회를 활용해 적극적으로 관광객을 유치하는 최고의 판단입니다." : "환율 하락기에는 원화 가치가 올라 외국인 관광객들의 지갑이 닫히는 시기이므로, 무리한 해외 프로모션은 광고 비용만 낭비할 수 있습니다." },
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: direction === "up" ? "관광 대금으로 모인 달러를 나누어 환전해 평균 환율을 확보하고, 혹시 모를 환율 꺾임 위험에 대처합니다." : "환율 하락기에는 외화 관광 결제 대금을 여러 시점에 분산하여 환전함으로써, 하루아침에 매출의 원화 환산 가치가 폭락하는 위험을 분산합니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: direction === "up" ? "환율 상승으로 해외 관광객이 많이 늘어난 시기지만, 국내 고객층의 비중도 안정적으로 지키기 위해 내수용 프로모션을 병행하여 균형을 잡는 방안입니다." : "환율 하락으로 외국인 관광객 소비가 급감할 때, 빠르게 국내 관광객 및 로컬 내수 고객 대상의 신상품과 행사를 추진하여 매출 타격을 방어하는 현명한 피봇 전략입니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: direction === "up" ? "달러 가치가 계속 올라가고 있으므로 외화 결제 대금 환전을 보류하고 모았다가 원화 가치가 최고점일 때 바꾸는 합리적인 대기 행동입니다." : "환율이 떨어져 달러 가치가 내리는 중인데 환전을 미루고 홀딩하고 있으면, 하루가 다르게 원화 매출액이 감소하는 손실을 겪습니다." }
     ];
   }
   
   if (category === "factory") {
     return [
-      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: "대량의 원료를 나누어 수입하면 환율 등락에 따른 리스크 평준화가 이루어집니다." },
-      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: "공장 가동을 멈출 수 없는 상황에서 무작정 대기하는 것은 납기 불이행 및 비용 급증 위험이 매우 높습니다." },
-      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "생산성 혁신과 국산 대체재 투자는 환율 고공행진 시 공장의 든든한 보호막이 됩니다." },
-      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: "장기 고정 환율 계약은 추가 가격 폭등을 예방해 주어 공장 가동 안정성을 확 올려줍니다." }
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? -2 : 4, stabilityChange: 6 }, feedback: direction === "up" ? "원자재 수입을 분할 발주해 평균 수입 단가를 낮추며 환율 급상승 리스크를 방어하는 안전한 조달 방식입니다." : "원자재 가격 및 환율 하락의 혜택을 안정적인 분할 체결로 나누어 반영하여 원료 조달 단가를 낮추는 방법입니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "down" ? 7 : -8, stabilityChange: -2 }, feedback: direction === "down" ? "환율 하락기에는 달러가 계속 싸지므로, 기존 원자재 재고를 소진해가며 구매를 늦추면 수입 비용을 크게 절감할 수 있는 훌륭한 대기 전략입니다." : "환율 상승기에는 비축 재고만 믿고 원자재 수입을 미루다가는 재고가 바닥난 시점에 엄청나게 비싸진 환율로 원료를 강제 수입해야 하므로 공장 비용이 폭증합니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: direction === "up" ? "원자재 가격과 환율이 치솟을 때, 공정 손실을 줄이고 비교적 저렴한 국산 대체 자재로 빠르게 전환하여 공장 마진을 확보하는 든든한 방어막입니다." : "수입 비용 부담이 적은 시기지만 장기적인 원가 절감을 위해 공장 생산 공정을 혁신하고 대체 자재 비율을 보강하는 행동입니다." },
+      { text: getParaphrase("lock"), type: "lock", effect: { moneyChange: direction === "up" ? -4 : 1, stabilityChange: 4 }, feedback: direction === "up" ? "환율이 오르는 추세에서 장기 고정 환율 계약을 맺어 미래의 수입 원가를 현재 시점에 안정적으로 묶어두는 좋은 방어 조치입니다." : "달러 가격이 하락하는 중인데 원자재 장기 수입 환율을 미리 높은 수준으로 묶어버려, 향후 단가 하락에 따른 이익을 보지 못합니다." }
     ];
   }
   
   if (category === "kpop") {
     return [
-      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: "원화 가치 하락기(환율 상승)에 달러 수입을 안겨다 줄 해외 투어를 늘리는 것은 탁월한 이익 극대화 전략입니다." },
-      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: "글로벌 비즈니스의 티켓/음원 수익 환전 시기를 쪼개 가져가는 것은 외환 리스크 관리의 기본입니다." },
-      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: "수익 정산 조건을 안정적인 고정 방식으로 전환하는 것은 글로벌 시장의 급격한 변화에서 회사 자금을 지키는 훌륭한 방패가 됩니다." },
-      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: "환율 피크를 예상하고 환전을 장기간 미루는 행동은 외화 운전자금 동결과 급격한 하락 시 큰 위험을 동반합니다." }
+      { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: direction === "up" ? 10 : 2, stabilityChange: 1 }, feedback: direction === "up" ? "환율 상승기에는 달러로 버는 티켓 및 굿즈 수익의 원화 가치가 폭등하므로, 글로벌 공연 일정을 공격적으로 넓혀 기획사 수익을 극대화하는 최고의 전략입니다." : "환율 하락기에는 달러 수익을 원화로 바꿀 때 환차손이 발생하므로, 무리한 글로벌 투어 확대보다는 현지 운영 비용 지출 리스크를 조율해야 합니다." },
+      { text: getParaphrase("split"), type: "split", effect: { moneyChange: direction === "up" ? 6 : 2, stabilityChange: 6 }, feedback: direction === "up" ? "글로벌 정산금 환전을 쪼개어 실행해 평균 환율을 취하며 급격한 환율 하락 변동에 선제 대처합니다." : "달러 가격이 계속 내리는 하락기에는 글로벌 수익금을 주기적으로 여러 번 환전하여 원화 가치 급락으로 인한 환차손 위험을 평준화합니다." },
+      { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 3, stabilityChange: 5 }, feedback: direction === "up" ? "해외 공연 정산금을 원화나 고정 환율로 묶어두면, 환율 상승에 따른 추가 달러 환산 수익 혜택을 누리지 못해 아쉬운 선택이 됩니다." : "환율이 떨어질 때는 해외 파트너와의 정산 방식을 계약 당시 고정된 환율이나 원화 지급 방식으로 전환하여 기획사 매출이 환손실로 깎여나가는 것을 안전하게 지킬 수 있습니다." },
+      { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: direction === "up" ? 7 : -6, stabilityChange: -3 }, feedback: direction === "up" ? "달러 가치가 오르고 있으므로 해외 티켓 수입 환전 시기를 뒤로 보류하여 원화 환산 가치가 최고일 때 환전하는 현명한 조치입니다." : "환율 하락기인데도 환전을 계속 보류하면, 보유한 달러의 원화 가치가 점점 떨어져 결국 기획사 정산 매출이 축소되는 불이익을 당합니다." }
     ];
   }
 
   return [
-    { text: getParaphrase("split"), type: "split", effect: { moneyChange: 3, stabilityChange: 6 }, feedback: "상황이 불확실할 때는 나누어 결정하는 전략이 안정적입니다." },
-    { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: "계약 조건을 점검하면 환율 변동 위험을 줄일 수 있습니다." },
-    { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: 5, stabilityChange: 0 }, feedback: "기회를 키울 수 있지만 부담도 함께 커질 수 있습니다." },
-    { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: 0, stabilityChange: -3 }, feedback: "기다리는 선택도 가능하지만 근거 없는 대기는 위험합니다." }
+    { text: getParaphrase("split"), type: "split", effect: { moneyChange: 3, stabilityChange: 6 }, feedback: direction === "up" ? "환율 상승 시점에 분할 대응하여 고점 매수/저점 매도의 불안을 덜어내고 안정성을 도모합니다." : "환율 하락의 이점을 안정적으로 가져가기 위해 분할 거래를 진행하여 리스크를 분산합니다." },
+    { text: getParaphrase("protect"), type: "protect", effect: { moneyChange: 2, stabilityChange: 5 }, feedback: direction === "up" ? "불리한 환율 조건에 대항하기 위해 내부 거래 가격이나 계약 조건을 신속히 보호 장치로 묶어둡니다." : "환율 변동 폭에 구애받지 않도록 사전에 계약 조건을 안전하게 조율하여 위험을 차단합니다." },
+    { text: getParaphrase("expand"), type: "expand", effect: { moneyChange: 5, stabilityChange: 0 }, feedback: direction === "up" ? "글로벌 기회가 커지는 환경을 적극 공략하여 달러 수익 기회를 극대화합니다." : "환율 하락로 마진이 위축될 수 있으므로 지나치게 공격적인 해외 확장보다는 조율이 필요합니다." },
+    { text: getParaphrase("wait"), type: "wait", effect: { moneyChange: 0, stabilityChange: -3 }, feedback: direction === "down" ? "환율 하락기에는 시장을 관망하며 보다 유리한 조건이 찾아올 때까지 대기하는 판단이 적절할 수 있습니다." : "환율 상승기에 아무 대책 없이 대기하다가는 향후 추가적인 외화 조달 비용 증가를 감당해야 할 수 있습니다." }
   ];
 }
+
 function roleVisualTemplate(team) {
   const roleName = team.role.name;
   if (roleName.includes("수출"))  return { icon: "🏭", bg: "#FFE6E1", text: "#A8331F", line: "#FF6B57" };
@@ -1730,9 +1728,7 @@ function resultCardTemplate(team) {
         <span class="result-sel ${last.response.impactScore ? "is-correct" : "is-wrong"}">
           ${last.response.impactScore ? "✓" : "✗"} 영향 ${impactLabel(last.impact)}
         </span>
-        <span class="result-sel ${last.response.strategyScore === 2 ? "is-correct" : last.response.strategyScore === 1 ? "is-partial" : "is-wrong"}">
-          ${last.response.strategyScore === 2 ? "✓" : last.response.strategyScore === 1 ? "△" : "✗"} 대응: ${last.choiceText}
-        </span>
+        <span class="result-sel">대응 선택: ${last.choiceText}</span>
       </div>
       ${choiceFeedback ? `<p class="result-feedback">${choiceFeedback}</p>` : ""}
       <div class="response-score-row">
@@ -1742,10 +1738,7 @@ function resultCardTemplate(team) {
         <div class="score-chip ${last.response.impactScore ? "ok" : "miss"}" data-tooltip="${last.response.impactScore ? '우리 역할에 미치는 유불리 분석 성공 (+3점)' : '우리 역할에 미치는 유불리 분석 실패 (+0점)'}">
           <span>역할 판단</span><strong>${last.response.impactScore}점</strong>
         </div>
-        <div class="score-chip ${last.response.strategyScore === 2 ? "ok" : last.response.strategyScore === 1 ? "partial" : "miss"}" data-tooltip="${last.response.strategyScore === 2 ? '역할과 상황에 가장 적절한 추천 전략 선택 (+2점)' : last.response.strategyScore === 1 ? '상황에 부분적으로 적절한 대안 전략 선택 (+1점)' : '우리 역할에 리스크가 크거나 부적절한 전략 선택 (+0점)'}">
-          <span>대응 전략</span><strong>${last.response.strategyScore}점</strong>
-        </div>
-        <div class="score-chip total" data-tooltip="환율 예측(${last.response.predictionScore}점) + 역할 판단(${last.response.impactScore}점) + 대응 전략(${last.response.strategyScore}점) = 총 ${last.response.total}점">
+        <div class="score-chip total" data-tooltip="환율 예측(${last.response.predictionScore}점) + 역할 판단(${last.response.impactScore}점) = 총 ${last.response.total}점">
           <span>이번 점수</span><strong>${last.response.total}점</strong>
         </div>
       </div>
@@ -1760,9 +1753,8 @@ function resultCardTemplate(team) {
 
 function responseReasonTemplate(last) {
   const prediction = last.response.predictionScore ? "환율 방향을 맞혔고" : "환율 방향 예측은 빗나갔고";
-  const impact = last.response.impactScore ? "우리 역할의 유불리도 정확히 판단했습니다" : "우리 역할의 유불리 판단은 다시 확인해야 합니다";
-  const strategy = last.response.strategyScore === 2 ? "대응 선택도 역할에 잘 맞았습니다." : last.response.strategyScore === 1 ? "대응 선택은 부분적으로 적절했습니다." : "대응 선택은 위험이 컸습니다.";
-  return `${prediction}, ${impact}. ${strategy}`;
+  const impact = last.response.impactScore ? "우리 역할의 유불리도 정확히 판단했습니다." : "우리 역할의 유불리 판단은 다시 확인해야 합니다.";
+  return `${prediction}, ${impact}`;
 }
 
 function predictionLabel(value) {
@@ -1784,12 +1776,12 @@ function assetBarChartTemplate() {
         ${state.teams.map((team, index) => {
           const visual = roleVisualTemplate(team);
           const y = 8 + index * rowHeight;
-          const width = Math.max(28, Math.round((team.money / maxMoney) * 680));
+          const width = Math.max(28, Math.round((team.money / maxMoney) * 640));
           const isTop = team.money === maxMoney;
-          const valueX = Math.min(950, 230 + width + 16);
+          const valueX = Math.min(950, 160 + width + 16);
           return `
             <text class="bar-team-label" x="18" y="${y + 22}">${escapeHtml(team.name)}</text>
-            <rect class="asset-bar ${isTop ? "is-top" : ""}" x="230" y="${y}" width="${width}" height="34" rx="6" fill="${visual.line}" ${isTop ? 'stroke="#d97706" stroke-width="4"' : ""}></rect>
+            <rect class="asset-bar ${isTop ? "is-top" : ""}" x="160" y="${y}" width="${width}" height="34" rx="6" fill="${visual.line}" ${isTop ? 'stroke="#d97706" stroke-width="4"' : ""}></rect>
             <text class="bar-value-label" x="${valueX}" y="${y + 22}">${team.money}만 원</text>
           `;
         }).join("")}
@@ -1832,7 +1824,7 @@ function exchangeImpactBoardTemplate(round) {
         </section>
       </div>
       <div class="board-note">
-        💡 <strong>배움 핵심:</strong> 환율 변동은 역할(수출/수입 등)에 따라 영향이 정반대로 나타납니다. 예측에만 의존하기보다는 리스크를 분산(분할 환전 등)하고 안정을 확보하는 대응 전략이 합리적입니다.
+        💡 <strong>배움 핵심:</strong> 환율 변동은 각자가 맡은 역할(수출, 수입 등)에 따라 유리함과 불리함이 정반대로 나타납니다. 환율이 오를지 내릴지 어림짐작하기보다는, 상황에 맞춰 위험을 나누는(분할 환전 등) 대응 전략이 현명합니다.
       </div>
     </article>
   `;
@@ -2008,12 +2000,10 @@ function calculateResponseScore(team, round, choice, selection, roleAdjust) {
   const impact = getExpectedImpact(team.role.name, round);
   const predictionScore = selection.prediction === direction ? 5 : 0;
   const impactScore = selection.impact === impact ? 3 : 0;
-  const strategyScore = scoreStrategyChoice(choice, team.role.name, roleAdjust.type);
   return {
     predictionScore,
     impactScore,
-    strategyScore,
-    total: predictionScore + impactScore + strategyScore
+    total: predictionScore + impactScore
   };
 }
 

@@ -1416,6 +1416,14 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
   font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em;
   white-space: nowrap;
 }
+.team-role-banner .role-type-badge {
+  margin-left: var(--space-2);
+  padding: 3px 8px;
+  font-size: 9.5px;
+  vertical-align: middle;
+  line-height: 1;
+  display: inline-flex;
+}
 .role-type-earner { background: #D9F4EA; color: #0A6E4F; border: 1px solid rgba(31,191,143,.25) }
 .role-type-spender { background: var(--coral-soft); color: #A8331F; border: 1px solid rgba(255,107,87,.25) }
 
@@ -1467,7 +1475,7 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
 
 /* 점수 칩 */
 .response-score-row {
-  display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px;
 }
 .score-chip {
   display: flex; flex-direction: column; align-items: center; gap: 2px;
