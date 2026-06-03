@@ -1345,7 +1345,10 @@ function teamChoiceTemplate(team, round) {
     <article class="team-card ${isTeamSelectionComplete(selected) ? "selected" : ""}">
       <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
         <span aria-hidden="true">${visual.icon}</span>
-        <strong>${escapeHtml(team.name)} · ${team.role.name} ${typeBadge}</strong>
+        <div class="team-role-titles">
+          <strong>${escapeHtml(team.name)} · ${team.role.name}</strong>
+          ${typeBadge}
+        </div>
         <em class="${isTeamSelectionComplete(selected) ? "done" : "pending"}">${isTeamSelectionComplete(selected) ? "✓ 완료" : "입력 중"}</em>
       </div>
       <div class="team-stats-row">
