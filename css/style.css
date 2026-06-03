@@ -634,7 +634,7 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
 .role-adv-good { color: #0A6E4F; border-color: var(--mint) }
 .role-adv-bad  { color: #A8331F; border-color: var(--coral) }
 
-.compact-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-2) }
+.compact-stats { display: grid; grid-template-columns: 1fr; gap: var(--space-2) }
 .compact-stats span {
   display: grid; min-height: 48px; align-content: center; justify-items: center;
   padding: var(--space-2); border-radius: var(--r-sm);
