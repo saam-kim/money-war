@@ -457,10 +457,8 @@ function renderRound() {
             <p style="margin-bottom: var(--space-3)">세 가지를 모두 입력하면 결과를 볼 수 있습니다.</p>
             <button class="primary-button" type="button" data-action="show-result" ${selectedCount === state.teams.length ? "" : "disabled"} style="width: 100%; height: 44px;">결과 보기 →</button>
           </article>
-          ${showTeacherStatus ? teacherPanelTemplate(round.teacherGuide) : predictionPanelTemplate()}
           ${promptPanelTemplate("뉴스 속에서 외화를 사려는 쪽과 팔려는 쪽을 찾고, 우리 역할의 비용과 수입이 어떻게 바뀔지 따져 보세요.", true)}
           ${timerPanelTemplate()}
-          ${showTeacherStatus ? teacherSubmissionPanelTemplate() : ""}
         </aside>
       </div>
       ${enlargedNewsOpen ? newsLargeViewTemplate() : ""}
@@ -1345,7 +1343,6 @@ function teamChoiceTemplate(team, round) {
       <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
         <span aria-hidden="true">${visual.icon}</span>
         <strong>${escapeHtml(team.name)} · ${team.role.name} ${typeBadge}</strong>
-        <em class="${isTeamSelectionComplete(selected) ? "done" : "pending"}">${isTeamSelectionComplete(selected) ? "✓ 완료" : "입력 중"}</em>
       </div>
       <div class="team-stats-row">
         <span class="metric">대응 점수 ${team.score}점</span>
