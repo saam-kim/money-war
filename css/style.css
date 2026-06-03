@@ -592,6 +592,26 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
    ========================================================== */
 .role-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--space-3) }
 
+.role-card {
+  display: flex;
+  flex-direction: column;
+}
+.role-card .role-hint {
+  margin-bottom: var(--space-3) !important;
+}
+.role-card .compact-stats {
+  margin-top: auto !important;
+}
+
+.team-card {
+  display: flex;
+  flex-direction: column;
+}
+.team-card .choice-section-label {
+  margin-top: auto !important;
+  margin-bottom: var(--space-2) !important;
+}
+
 .role-card-header {
   display: flex; align-items: center; gap: var(--space-3);
   margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
