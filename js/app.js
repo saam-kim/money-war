@@ -1339,16 +1339,13 @@ function teamChoiceTemplate(team, round) {
   const choices = roleStrategyOptions(team.role.name, round);
   const roleType = getRoleType(team.role.name);
   const typeBadge = roleType === "earner"
-    ? `<span class="role-type-badge role-type-earner">💰 외화 수입 모둠</span>`
-    : `<span class="role-type-badge role-type-spender">💸 외화 지출 모둠</span>`;
+    ? `<span class="role-type-badge role-type-earner">💰 외화 버는 쪽</span>`
+    : `<span class="role-type-badge role-type-spender">💸 외화 쓰는 쪽</span>`;
   return `
     <article class="team-card ${isTeamSelectionComplete(selected) ? "selected" : ""}">
       <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
         <span aria-hidden="true">${visual.icon}</span>
-        <div class="team-role-titles">
-          <strong>${escapeHtml(team.name)} · ${team.role.name}</strong>
-          ${typeBadge}
-        </div>
+        <strong>${escapeHtml(team.name)} · ${team.role.name} ${typeBadge}</strong>
         <em class="${isTeamSelectionComplete(selected) ? "done" : "pending"}">${isTeamSelectionComplete(selected) ? "✓ 완료" : "입력 중"}</em>
       </div>
       <div class="team-stats-row">
