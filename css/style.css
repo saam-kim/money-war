@@ -621,9 +621,10 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
   background: var(--surface-2);
 }
 .role-card-icon { font-size: 22px; flex-shrink: 0 }
-.role-card-titles { display: flex; flex-direction: column; gap: 1px; min-width: 0 }
+.role-card-titles { display: flex; flex-direction: column; gap: 1px; min-width: 0; flex: 1 }
 .role-card-team { font-size: 10px; color: var(--ink-4); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase }
-.role-card-name { font-size: 14.5px; font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+.role-card-name-row { display: flex; align-items: center; gap: var(--space-2); min-width: 0 }
+.role-card-name { font-size: 14.5px; font-weight: 800; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 }
 
 .role-advantage-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); margin-bottom: var(--space-2) }
 .role-adv {
@@ -763,8 +764,7 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
    TEAM ROLE BANNER
    ========================================================== */
 .team-role-banner {
-  display: grid; grid-template-columns: auto 1fr; gap: var(--space-2);
-  align-items: center; min-height: 44px;
+  display: flex; align-items: center; gap: var(--space-2); min-height: 44px;
   margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) var(--space-3);
   padding: 0 var(--space-3);
   border-radius: var(--r-lg) var(--r-lg) 0 0;
@@ -774,7 +774,7 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
   border-left: 3px solid var(--team-line, var(--line));
 }
 .team-role-banner span { font-size: 21px; line-height: 1 }
-.team-role-banner strong { font-size: 15px; font-weight: 800; min-width: 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.team-role-banner strong { font-size: 15px; font-weight: 800; min-width: 0; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; flex: 1 }
 
 /* ==========================================================
    TEACHER / PREDICTION / PROMPT / TIMER
@@ -937,13 +937,13 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
 .team-card h3 { font-size: 13.5px; margin-bottom: 0 }
 
 .team-role-banner {
-  grid-template-columns: auto minmax(0, 1fr);
+  display: flex; align-items: center; gap: var(--space-2);
   min-height: 42px;
   margin: calc(var(--space-3) * -1) calc(var(--space-3) * -1) var(--space-3);
   padding: var(--space-2) var(--space-3);
 }
 .team-role-banner span { font-size: 16.5px }
-.team-role-banner strong { font-size: 14.5px; line-height: 1.2; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.team-role-banner strong { font-size: 14.5px; line-height: 1.2; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; flex: 1 }
 
 .team-card .metric-row,
 .team-card .delta-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2) }
@@ -1430,22 +1430,22 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
 .role-type-badge {
   margin-left: auto; flex-shrink: 0;
   display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 9px; border-radius: 999px;
-  font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em;
+  padding: 4.5px 10px; border-radius: 999px;
+  font-size: 12.5px; font-weight: 700; letter-spacing: 0.02em;
   white-space: nowrap;
 }
 .team-role-banner .role-type-badge {
   margin-left: var(--space-2);
-  padding: 3px 8px;
-  font-size: 10.5px;
+  padding: 4px 9px;
+  font-size: 12.5px;
   vertical-align: middle;
   line-height: 1;
   display: inline-flex;
 }
-.role-card-name .role-type-badge {
+.role-card-name-row .role-type-badge {
   margin-left: var(--space-2);
-  padding: 2.5px 7px;
-  font-size: 9.5px;
+  padding: 4px 9px;
+  font-size: 12px;
   vertical-align: middle;
   line-height: 1;
   display: inline-flex;
@@ -1602,9 +1602,9 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 10px;
+  padding: 4.5px 10px;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
 }
 

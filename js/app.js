@@ -1314,7 +1314,10 @@ function roleCardTemplate(team) {
         <span class="role-card-icon" aria-hidden="true">${visual.icon}</span>
         <div class="role-card-titles">
           <span class="role-card-team">${escapeHtml(team.name)}</span>
-          <strong class="role-card-name">${team.role.name} ${typeLabel}</strong>
+          <div class="role-card-name-row">
+            <strong class="role-card-name">${team.role.name}</strong>
+            ${typeLabel}
+          </div>
         </div>
       </div>
       <p class="role-desc">${team.role.description}</p>
@@ -1342,7 +1345,8 @@ function teamChoiceTemplate(team, round) {
     <article class="team-card ${isTeamSelectionComplete(selected) ? "selected" : ""}">
       <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
         <span aria-hidden="true">${visual.icon}</span>
-        <strong>${escapeHtml(team.name)} · ${team.role.name} ${typeBadge}</strong>
+        <strong>${escapeHtml(team.name)} · ${team.role.name}</strong>
+        ${typeBadge}
       </div>
       <div class="team-stats-row">
         <span class="metric">대응 점수 ${team.score}점</span>
