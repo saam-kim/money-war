@@ -2023,28 +2023,6 @@ function getExpectedImpact(roleName, round) {
   return direction === "down" ? "unfavorable" : "favorable";
 }
 
-function scoreStrategyChoice(choice, roleName, roleEffectType) {
-  // round.choices path: use recommendedRoles
-  if (Array.isArray(choice.recommendedRoles)) {
-    const recommended = choice.recommendedRoles.includes(roleName);
-    if (recommended) return 2;
-    return roleEffectType === "neutral" ? 1 : 0;
-  }
-  // legacy roleStrategyOptions path
-  const { type: choiceType } = choice;
-  if (roleEffectType === "weak") {
-    if (choiceType === "protect" || choiceType === "split" || choiceType === "lock") return 2;
-    if (choiceType === "wait") return 1;
-    return 0;
-  }
-  if (roleEffectType === "strong") {
-    if (choiceType === "split" || choiceType === "expand") return 2;
-    if (choiceType === "protect" || choiceType === "lock") return 1;
-    return 0;
-  }
-  if (choiceType === "split" || choiceType === "protect") return 2;
-  return 1;
-}
 
 function getRoleAdjustment(roleName, round) {
   if (round.strongRoles.includes(roleName)) {
