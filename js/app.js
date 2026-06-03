@@ -1316,9 +1316,8 @@ function roleCardTemplate(team) {
         <span class="role-card-icon" aria-hidden="true">${visual.icon}</span>
         <div class="role-card-titles">
           <span class="role-card-team">${escapeHtml(team.name)}</span>
-          <strong class="role-card-name">${team.role.name}</strong>
+          <strong class="role-card-name">${team.role.name} ${typeLabel}</strong>
         </div>
-        ${typeLabel}
       </div>
       <p class="role-desc">${team.role.description}</p>
       <div class="role-advantage-row">

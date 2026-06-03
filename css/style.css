@@ -1444,6 +1444,14 @@ button:disabled { cursor: not-allowed; opacity: 0.42; transform: none !important
   line-height: 1;
   display: inline-flex;
 }
+.role-card-name .role-type-badge {
+  margin-left: var(--space-2);
+  padding: 2.5px 7px;
+  font-size: 9.5px;
+  vertical-align: middle;
+  line-height: 1;
+  display: inline-flex;
+}
 .role-type-earner { background: #D9F4EA; color: #0A6E4F; border: 1px solid rgba(31,191,143,.25) }
 .role-type-spender { background: var(--coral-soft); color: #A8331F; border: 1px solid rgba(255,107,87,.25) }
 
