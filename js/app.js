@@ -583,7 +583,20 @@ function confettiEffectTemplate() {
 
 function renderFinal() {
   const sorted = [...state.teams].sort((a, b) => b.score - a.score);
-  const best = sorted[0];
+  
+  let currentRank = 1;
+  const rankings = sorted.map((team, index) => {
+    if (index > 0 && team.score < sorted[index - 1].score) {
+      currentRank = index + 1;
+    }
+    const isTie = sorted.filter(t => t.score === team.score).length > 1;
+    const rankText = isTie ? `공동 ${currentRank}위` : `${currentRank}위`;
+    return {
+      team,
+      rankText
+    };
+  });
+
   const screen = createScreen();
   screen.innerHTML = `
     ${confettiEffectTemplate()}
@@ -595,9 +608,9 @@ function renderFinal() {
           <article class="ranking-card">
             <h3>🏆 모둠별 최종 순위</h3>
             <ol class="rank-list">
-              ${sorted.map((team, index) => `
+              ${rankings.map(({ team, rankText }) => `
                 <li>
-                  <span>${index + 1}위</span>
+                  <span>${rankText}</span>
                   <span>${escapeHtml(team.name)} · ${team.role.name}</span>
                   <span>누적 ${team.score}점 (최종 자금: ${team.money}만 원)</span>
                 </li>
@@ -660,28 +673,48 @@ function boardLargeUnifiedViewTemplate() {
 }
 
 function finalVictoryBannerTemplate(sortedTeams) {
-  const winner = sortedTeams[0];
-  const runnerText = sortedTeams.slice(1, 3)
-    .map((team, index) => `${index + 2}위 ${escapeHtml(team.name)}`)
-    .join(" · ");
-  const visual = roleVisualTemplate(winner);
+  const maxScore = Math.max(...sortedTeams.map(t => t.score));
+  const winners = sortedTeams.filter(t => t.score === maxScore);
+  const winnerNames = winners.map(t => escapeHtml(t.name)).join(", ");
+
+  let runnerText = "";
+  const uniqueScores = [...new Set(sortedTeams.map(t => t.score))].sort((a, b) => b - a);
+  if (uniqueScores.length > 1) {
+    const runnerScore = uniqueScores[1];
+    const runners = sortedTeams.filter(t => t.score === runnerScore);
+    const runnerNames = runners.map(t => escapeHtml(t.name)).join(", ");
+    runnerText = `우수상: ${runnerNames} (${runnerScore}점)`;
+  }
+
+  const winner = winners[0];
+  const visual = winners.length === 1 ? roleVisualTemplate(winner) : { bg: "var(--brand-soft)", text: "var(--brand-ink)", line: "var(--brand)" };
+  const awardLabel = winners.length > 1 ? "공동 최고 대응상!" : "최고 대응상!";
   return `
     <article class="victory-banner" style="--winner-bg: ${visual.bg}; --winner-text: ${visual.text}; --winner-line: ${visual.line}">
-      <strong><span aria-hidden="true">🏆</span> ${escapeHtml(winner.name)} 최고 대응상! 누적 점수 ${winner.score}점</strong>
+      <strong><span aria-hidden="true">🏆</span> ${winnerNames} ${awardLabel} 누적 점수 ${maxScore}점</strong>
       <span>${runnerText || "끝까지 참여한 모든 모둠이 환율 전략가입니다."}</span>
     </article>
   `;
 }
 
 function awardSummaryTemplate() {
-  const bestResponse = [...state.teams].sort((a, b) => b.score - a.score)[0];
-  const assetWinner = [...state.teams].sort((a, b) => b.money - a.money)[0];
-  const predictionWinner = [...state.teams].sort((a, b) => countPredictionHits(b) - countPredictionHits(a))[0];
+  const maxScore = Math.max(...state.teams.map(t => t.score));
+  const bestResponseTeams = state.teams.filter(t => t.score === maxScore);
+  const bestResponseNames = bestResponseTeams.map(t => escapeHtml(t.name)).join(", ");
+
+  const maxHits = Math.max(...state.teams.map(t => countPredictionHits(t)));
+  const predictionWinnerTeams = state.teams.filter(t => countPredictionHits(t) === maxHits);
+  const predictionWinnerNames = predictionWinnerTeams.map(t => escapeHtml(t.name)).join(", ");
+
+  const maxMoney = Math.max(...state.teams.map(t => t.money));
+  const assetWinnerTeams = state.teams.filter(t => t.money === maxMoney);
+  const assetWinnerNames = assetWinnerTeams.map(t => escapeHtml(t.name)).join(", ");
+
   return `
     <section class="award-grid" aria-label="시상">
-      <article><strong>최고 대응상</strong><span>${escapeHtml(bestResponse.name)} · ${bestResponse.score}점</span></article>
-      <article><strong>예측왕</strong><span>${escapeHtml(predictionWinner.name)} · ${countPredictionHits(predictionWinner)}회 적중</span></article>
-      <article><strong>최종 자산상</strong><span>${escapeHtml(assetWinner.name)} · ${assetWinner.money}만 원</span></article>
+      <article><strong>최고 대응상</strong><span>${bestResponseNames} · ${maxScore}점</span></article>
+      <article><strong>예측왕</strong><span>${predictionWinnerNames} · ${maxHits}회 적중</span></article>
+      <article><strong>최종 자산상</strong><span>${assetWinnerNames} · ${maxMoney}만 원</span></article>
     </section>
   `;
 }
