@@ -183,7 +183,7 @@ function renderStart() {
         <div class="dashboard-section">
           <p class="dashboard-label">게임 규칙</p>
           <div class="rule-list">
-            <p>🏆 승리 조건: 대응 점수가 가장 높은 모둠</p>
+            <p>🏆 승리 조건: 누적 점수가 가장 높은 모둠</p>
             <p>🔄 진행: 뉴스 확인 → 예측 → 역할 판단 → 대응 선택</p>
             <p>💡 핵심: 자산은 재미 요소, 승부는 환율 이해</p>
           </div>
@@ -263,7 +263,7 @@ function renderLesson() {
             <p>모둠이 가진 돈입니다. 선택 결과에 따라 늘거나 줄어들지만, 최종 승리의 기준은 아닙니다.</p>
           </article>
           <article>
-            <strong>대응 점수</strong>
+            <strong>누적 점수</strong>
             <p>모둠이 환율 변동에 맞춰 얼마나 합리적인 선택을 했는지 평가하는 최종 승리 기준입니다. 환율 예측과 역할 판단에 따라 결정됩니다.</p>
           </article>
         </div>
@@ -276,7 +276,7 @@ function renderLesson() {
             <p>예측과 판단이 정확하면 <b>✓ (성공)</b>, 빗나가면 <b>X (실패)</b>로 표시됩니다.</p>
           </article>
           <article>
-            <strong>대응 점수 구성 (합계 8점)</strong>
+            <strong>누적 점수 구성 (합계 8점)</strong>
             <p><b>환율 예측(5점) + 역할 판단(3점)</b>의 합산 점수입니다. 모둠이 경제 원리에 맞춰 합리적으로 의사결정했는지 점수화합니다.</p>
           </article>
           <article>
@@ -616,8 +616,14 @@ function renderFinal() {
           </div>
         </aside>
       </div>
+      ${enlargedBoardOpen ? boardLargeUnifiedViewTemplate() : ""}
     </section>
   `;
+
+  bindLargeBoardToggleControls(screen);
+  if (enlargedBoardOpen) {
+    bindLargeBoardControls(screen);
+  }
 
   // Confetti auto-removal after 3 seconds with smooth transition
   setTimeout(() => {
@@ -637,7 +643,21 @@ function renderFinal() {
   return screen;
 }
 
-
+function boardLargeUnifiedViewTemplate() {
+  return `
+    <div class="board-large-backdrop" role="dialog" aria-modal="true" aria-label="판서 크게 보기">
+      <article class="board-large-panel" style="max-width: 900px; padding: var(--space-5);">
+        <div class="board-large-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-4); border-bottom: 2px solid rgba(255,255,255,0.1); padding-bottom: var(--space-2)">
+          <span style="font-size: 16px; font-weight: 800; color: #7DD3FC">📝 전체 판서 정리 크게 보기</span>
+          <button class="mini-button" type="button" data-action="close-board-large" style="background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2)">닫기</button>
+        </div>
+        <div class="board-large-content">
+          ${chalkboardUnifiedTemplate(true)}
+        </div>
+      </article>
+    </div>
+  `;
+}
 
 function finalVictoryBannerTemplate(sortedTeams) {
   const winner = sortedTeams[0];
@@ -647,7 +667,7 @@ function finalVictoryBannerTemplate(sortedTeams) {
   const visual = roleVisualTemplate(winner);
   return `
     <article class="victory-banner" style="--winner-bg: ${visual.bg}; --winner-text: ${visual.text}; --winner-line: ${visual.line}">
-      <strong><span aria-hidden="true">🏆</span> ${escapeHtml(winner.name)} 최고 대응상! 대응 점수 ${winner.score}점</strong>
+      <strong><span aria-hidden="true">🏆</span> ${escapeHtml(winner.name)} 최고 대응상! 누적 점수 ${winner.score}점</strong>
       <span>${runnerText || "끝까지 참여한 모든 모둠이 환율 전략가입니다."}</span>
     </article>
   `;
@@ -766,10 +786,14 @@ function learningSummaryTemplate() {
   `;
 }
 
-function chalkboardUnifiedTemplate() {
+function chalkboardUnifiedTemplate(isLarge = false) {
   return `
     <article class="chalkboard-unified">
-      <p class="chalkboard-eyebrow">판서 정리</p>
+      ${isLarge ? '' : `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <p class="chalkboard-eyebrow" style="margin-bottom: 0;">판서 정리</p>
+        <button class="mini-button" type="button" data-action="open-board-large" style="font-size: 11.5px; height: 28px; padding: 0 10px">크게 보기</button>
+      </div>`}
 
       <div class="cu-def">
         <span class="cu-def-label">환율이란?</span>
@@ -925,7 +949,7 @@ function renderMaterials() {
               <th>환율 예측</th>
               <th>환율 변동의 영향</th>
               <th>대응 선택</th>
-              <th>대응 점수</th>
+              <th>누적 점수</th>
             </tr>
           </thead>
           <tbody>
@@ -1342,14 +1366,19 @@ function teamChoiceTemplate(team, round) {
     ? `<span class="role-type-badge role-type-earner">💰 외화 버는 쪽</span>`
     : `<span class="role-type-badge role-type-spender">💸 외화 쓰는 쪽</span>`;
   return `
-    <article class="team-card ${isTeamSelectionComplete(selected) ? "selected" : ""}">
-      <div class="team-role-banner" style="--team-bg: ${visual.bg}; --team-text: ${visual.text}; --team-line: ${visual.line}">
-        <span aria-hidden="true">${visual.icon}</span>
-        <strong>${escapeHtml(team.name)} · ${team.role.name}</strong>
-        ${typeBadge}
+    <article class="team-card ${isTeamSelectionComplete(selected) ? "selected" : ""}" style="border-top: 4px solid ${visual.line};">
+      <div class="role-card-header" style="background: ${visual.bg}; border-radius: inherit; border-bottom-left-radius: 0; border-bottom-right-radius: 0;">
+        <span class="role-card-icon" aria-hidden="true">${visual.icon}</span>
+        <div class="role-card-titles">
+          <span class="role-card-team">${escapeHtml(team.name)}</span>
+          <div class="role-card-name-row">
+            <strong class="role-card-name">${team.role.name}</strong>
+            ${typeBadge}
+          </div>
+        </div>
       </div>
       <div class="team-stats-row">
-        <span class="metric">대응 점수 ${team.score}점</span>
+        <span class="metric">누적 점수 ${team.score}점</span>
         <span class="metric">자금 ${team.money}만 원</span>
       </div>
       <div class="decision-block">
@@ -1446,9 +1475,9 @@ const STRATEGY_VARIATIONS = {
       "비싼 수입 원가를 방어하기 위해 국내 유통망을 통해 유사 품목 대체재를 수급한다"
     ],
     lock: [
-      "선물환 계약 등을 통해 결제 환율을 현재 시점에 고정한다",
-      "은행 선물환 서비스를 신청하여 장래의 결제 환율을 미리 고정해 둔다",
-      "미래의 환율 변동 부담을 원천 차단하기 위해 지금 결제 환율을 확정 계약한다"
+      "은행에 미리 환율을 고정해달라고 신청한다",
+      "나중에 결제할 때 환율이 바뀔까봐 은행과 미리 환율을 약속해 둔다",
+      "미래의 환율 변동을 피하기 위해 은행 서비스로 결제 환율을 고정한다"
     ]
   },
   buyer: {
