@@ -1,4 +1,4 @@
-const ROLE_CARDS = [
+﻿const ROLE_CARDS = [
   {
     name: "해외여행자",
     description: "해외여행을 위해 달러를 환전해야 합니다.",
@@ -45,7 +45,7 @@ const ROLE_CARDS = [
     initialStability: 50
   },
   {
-    name: "외국인 관광객 대상 가게",
+    name: "관광지 상점",
     description: "외국인 관광객에게 숙박, 음식, 기념품을 판매합니다.",
     strongWhen: "환율 상승",
     weakWhen: "환율 하락",
@@ -54,7 +54,7 @@ const ROLE_CARDS = [
     initialStability: 55
   },
   {
-    name: "해외 원자재 수입 공장",
+    name: "수입 자재공장",
     description: "생산에 필요한 원유, 금속 등 원자재를 해외에서 들여옵니다.",
     strongWhen: "환율 하락",
     weakWhen: "환율 상승",
@@ -63,7 +63,7 @@ const ROLE_CARDS = [
     initialStability: 56
   },
   {
-    name: "K-pop 공연 기획사",
+    name: "K-pop 기획사",
     description: "해외 공연과 콘텐츠 판매로 외화를 벌어들입니다.",
     strongWhen: "환율 상승 (달러 수입 증가)",
     weakWhen: "환율 하락 (달러 수입 가치 감소)",
@@ -85,8 +85,8 @@ const ROUNDS = [
     discussionPrompt: "우리 역할은 달러 가격이 오른 상황에서 비용이 늘어날까요, 수입이 늘어날까요?",
     resultFocus: "달러화 자산에 대한 선호가 높아져 외환(달러) 수요가 증가하면 환율이 상승(원화 가치 하락)합니다. 이는 외화를 벌어들이는 수출 기업에는 이익을 주지만, 외화를 써야 하는 여행객이나 수입 기업에는 비용 부담을 줍니다.",
     baseEffect: { scoreChange: 1, moneyChange: 0, stabilityChange: -2 },
-    strongRoles: ["수출기업", "외국인 관광객 대상 가게", "K-pop 공연 기획사"],
-    weakRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "해외 원자재 수입 공장"],
+    strongRoles: ["수출기업", "관광지 상점", "K-pop 기획사"],
+    weakRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "수입 자재공장"],
     choices: [
       {
         text: "필요한 외화를 나누어 환전한다",
@@ -102,13 +102,13 @@ const ROUNDS = [
       },
       {
         text: "수출 가격을 유지하고 해외 판매를 늘린다",
-        recommendedRoles: ["수출기업", "K-pop 공연 기획사"],
+        recommendedRoles: ["수출기업", "K-pop 기획사"],
         effect: { scoreChange: 5, moneyChange: 12, stabilityChange: 2 },
         feedback: "환율 상승은 수출 대금을 원화로 바꿀 때 유리하게 작용할 수 있습니다."
       },
       {
         text: "수입 물량을 줄이고 국내 대체품을 찾는다",
-        recommendedRoles: ["수입기업", "해외 원자재 수입 공장"],
+        recommendedRoles: ["수입기업", "수입 자재공장"],
         effect: { scoreChange: 4, moneyChange: 4, stabilityChange: 4 },
         feedback: "수입 비용이 오를 때 대체품을 찾으면 부담을 줄일 수 있습니다."
       }
@@ -126,8 +126,8 @@ const ROUNDS = [
     discussionPrompt: "원화 가치가 높아지면 우리 역할의 구매 비용이나 판매 수입은 어떻게 달라질까요?",
     resultFocus: "국내 유입되는 달러가 늘어나 시장에 외환(달러) 공급이 증가하면 환율이 하락(원화 가치 상승)합니다. 이는 외화를 사야 하는 여행객이나 수입 기업에게는 유리하지만, 달러로 대금을 받는 수출 기업에는 원화 환산 수입을 감소시킵니다.",
     baseEffect: { scoreChange: 1, moneyChange: 1, stabilityChange: 2 },
-    strongRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "해외 원자재 수입 공장"],
-    weakRoles: ["수출기업", "외국인 관광객 대상 가게"],
+    strongRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "수입 자재공장"],
+    weakRoles: ["수출기업", "관광지 상점"],
     choices: [
       {
         text: "해외 구매와 학비 송금을 앞당긴다",
@@ -149,7 +149,7 @@ const ROUNDS = [
       },
       {
         text: "장기 계약으로 환율 변동을 관리한다",
-        recommendedRoles: ["수출기업", "수입기업", "해외 원자재 수입 공장"],
+        recommendedRoles: ["수출기업", "수입기업", "수입 자재공장"],
         effect: { scoreChange: 3, moneyChange: 3, stabilityChange: 6 },
         feedback: "계약 시점을 조정하면 환율 변동의 영향을 관리할 수 있습니다."
       }
@@ -168,7 +168,7 @@ const ROUNDS = [
     resultFocus: "미국 경제 지표 둔화 등으로 달러를 팔고 원화를 사려는 수요가 늘면 환율이 하락(달러 약세)합니다. 달러 약세 전망은 해외 소비를 늘리지만, 원화 환전액이 줄어드는 수출 기획사에는 불리하게 작용합니다.",
     baseEffect: { scoreChange: 1, moneyChange: 0, stabilityChange: 1 },
     strongRoles: ["해외여행자", "해외직구 소비자", "유학생 가정"],
-    weakRoles: ["외국인 관광객 대상 가게"],
+    weakRoles: ["관광지 상점"],
     choices: [
       {
         text: "해외여행 비용을 비교해 계획을 확정한다",
@@ -184,13 +184,13 @@ const ROUNDS = [
       },
       {
         text: "국내 관광객 대상 행사를 강화한다",
-        recommendedRoles: ["외국인 관광객 대상 가게", "해외여행자"],
+        recommendedRoles: ["관광지 상점", "해외여행자"],
         effect: { scoreChange: 3, moneyChange: 3, stabilityChange: 4 },
         feedback: "해외로 빠지는 수요에 대응해 국내 소비자를 붙잡는 전략입니다."
       },
       {
         text: "유행만 보고 큰 금액을 한 번에 투자한다",
-        recommendedRoles: ["수출기업", "K-pop 공연 기획사"],
+        recommendedRoles: ["수출기업", "K-pop 기획사"],
         effect: { scoreChange: -2, moneyChange: -6, stabilityChange: -4 },
         feedback: "환율 변화가 기회가 될 수 있지만 무리한 투자는 위험을 높입니다."
       }
@@ -209,29 +209,29 @@ const ROUNDS = [
     resultFocus: "국제 원자재 수입을 위한 달러 수요가 급증하여 환율 상승 압력이 발생하고, 원유 등 원료 가격 자체가 오르면 수입 기업의 비용 부담이 이중으로 커져 국내 물가 상승으로 이어집니다.",
     baseEffect: { scoreChange: 0, moneyChange: -4, stabilityChange: -4 },
     strongRoles: ["수출기업"],
-    weakRoles: ["수입기업", "해외 원자재 수입 공장", "해외여행자", "유학생 가정"],
+    weakRoles: ["수입기업", "수입 자재공장", "해외여행자", "유학생 가정"],
     choices: [
       {
         text: "원자재 사용량을 줄이고 생산 계획을 조정한다",
-        recommendedRoles: ["해외 원자재 수입 공장", "수입기업"],
+        recommendedRoles: ["수입 자재공장", "수입기업"],
         effect: { scoreChange: 5, moneyChange: 5, stabilityChange: 5 },
         feedback: "비용 상승이 클 때는 생산 계획을 조정해 손실을 줄일 수 있습니다."
       },
       {
         text: "국내 대체 재료와 장기 계약을 찾는다",
-        recommendedRoles: ["해외 원자재 수입 공장", "수입기업"],
+        recommendedRoles: ["수입 자재공장", "수입기업"],
         effect: { scoreChange: 5, moneyChange: 6, stabilityChange: 7 },
         feedback: "대체재와 장기 계약은 수입 비용 변동 위험을 줄이는 방법입니다."
       },
       {
         text: "오른 비용을 곧바로 가격에 모두 반영한다",
-        recommendedRoles: ["수입기업", "해외 원자재 수입 공장"],
+        recommendedRoles: ["수입기업", "수입 자재공장"],
         effect: { scoreChange: 0, moneyChange: 4, stabilityChange: -6 },
         feedback: "가격을 급하게 올리면 단기 자금은 지켜도 소비자 이탈 위험이 커집니다."
       },
       {
         text: "수출 수입으로 비용 상승을 일부 보완한다",
-        recommendedRoles: ["수출기업", "K-pop 공연 기획사"],
+        recommendedRoles: ["수출기업", "K-pop 기획사"],
         effect: { scoreChange: 4, moneyChange: 7, stabilityChange: 2 },
         feedback: "달러 수입이 있는 기업은 환율 상승의 이익으로 비용 부담을 일부 줄일 수 있습니다."
       }
@@ -249,30 +249,30 @@ const ROUNDS = [
     discussionPrompt: "해외에서 달러 수입이 늘면 환율 변화는 기획사의 자금에 어떤 영향을 줄까요?",
     resultFocus: "K-콘텐츠 수출 성공으로 해외로부터 달러가 많이 유입되어 국내 외환(달러) 공급이 늘어나면 환율이 하락(원화 가치 상승)하는 압력을 받게 되며, 기획사는 환율 추이에 따라 정산 조건 조절이 필요합니다.",
     baseEffect: { scoreChange: 2, moneyChange: 3, stabilityChange: 2 },
-    strongRoles: ["K-pop 공연 기획사", "수출기업", "외국인 관광객 대상 가게"],
+    strongRoles: ["K-pop 기획사", "수출기업", "관광지 상점"],
     weakRoles: [],
     choices: [
       {
         text: "해외 홍보와 공연 일정을 확대한다",
-        recommendedRoles: ["K-pop 공연 기획사", "수출기업"],
+        recommendedRoles: ["K-pop 기획사", "수출기업"],
         effect: { scoreChange: 6, moneyChange: 10, stabilityChange: 1 },
         feedback: "해외 수요가 클 때 적극적으로 진출하면 수입이 늘 수 있지만 운영 부담도 커집니다."
       },
       {
         text: "계약 조건과 환전 시점을 나누어 관리한다",
-        recommendedRoles: ["K-pop 공연 기획사", "수출기업"],
+        recommendedRoles: ["K-pop 기획사", "수출기업"],
         effect: { scoreChange: 5, moneyChange: 6, stabilityChange: 7 },
         feedback: "콘텐츠 수출도 계약과 환율 관리를 함께 해야 안정적입니다."
       },
       {
         text: "외국인 관광객 연계 상품을 만든다",
-        recommendedRoles: ["외국인 관광객 대상 가게", "K-pop 공연 기획사"],
+        recommendedRoles: ["관광지 상점", "K-pop 기획사"],
         effect: { scoreChange: 4, moneyChange: 6, stabilityChange: 4 },
         feedback: "콘텐츠 인기는 관광, 숙박, 상품 판매 같은 소비 확대로 이어질 수 있습니다."
       },
       {
         text: "인기만 믿고 비용 검토 없이 해외 지사를 세운다",
-        recommendedRoles: ["K-pop 공연 기획사", "수출기업"],
+        recommendedRoles: ["K-pop 기획사", "수출기업"],
         effect: { scoreChange: -1, moneyChange: -7, stabilityChange: -5 },
         feedback: "해외 지사 설립은 큰 비용과 운영 부담이 따르므로 신중한 판단이 필요합니다."
       }
@@ -290,8 +290,8 @@ const ROUNDS = [
     discussionPrompt: "달러를 보유하려는 사람이 늘어나면 원/달러 환율은 어느 방향으로 움직일까요?",
     resultFocus: "미국 금리가 오르면 자금이 미국으로 유출되며 외환(달러) 수요가 크게 증가하고 환율이 상승(달러 강세)합니다. 이에 대응해 수입 기업은 외화 선확보 등의 리스크 관리를 해야 합니다.",
     baseEffect: { scoreChange: 1, moneyChange: 0, stabilityChange: -1 },
-    strongRoles: ["수출기업", "외국인 관광객 대상 가게", "K-pop 공연 기획사"],
-    weakRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "해외 원자재 수입 공장"],
+    strongRoles: ["수출기업", "관광지 상점", "K-pop 기획사"],
+    weakRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "수입 자재공장"],
     choices: [
       {
         text: "달러 결제 계획을 앞당겨 위험을 줄인다",
@@ -301,7 +301,7 @@ const ROUNDS = [
       },
       {
         text: "해외 판매 확대를 준비한다",
-        recommendedRoles: ["수출기업", "K-pop 공연 기획사"],
+        recommendedRoles: ["수출기업", "K-pop 기획사"],
         effect: { scoreChange: 5, moneyChange: 8, stabilityChange: 1 },
         feedback: "달러 수입이 있는 역할은 환율 상승을 기회로 활용할 수 있습니다."
       },
@@ -331,8 +331,8 @@ const ROUNDS = [
     discussionPrompt: "달러를 팔고 원화를 사는 거래가 늘면 원/달러 환율은 어떻게 움직일까요?",
     resultFocus: "외국인들이 주식 투자를 위해 달러를 원화로 환전하면서 시장에 외환(달러) 공급이 증가(원화 수요 증가)하여 환율이 하락합니다. 이는 수입 물가 안정에 기여하지만 수출 가격 경쟁력은 약화시킵니다.",
     baseEffect: { scoreChange: 1, moneyChange: 1, stabilityChange: 2 },
-    strongRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "해외 원자재 수입 공장"],
-    weakRoles: ["수출기업", "외국인 관광객 대상 가게", "K-pop 공연 기획사"],
+    strongRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "수입 자재공장"],
+    weakRoles: ["수출기업", "관광지 상점", "K-pop 기획사"],
     choices: [
       {
         text: "필요한 달러 결제를 일부 앞당긴다",
@@ -372,12 +372,12 @@ const ROUNDS = [
     discussionPrompt: "원자재 가격 부담이 줄면 수입기업과 공장의 선택은 어떻게 달라질까요?",
     resultFocus: "국제 유가가 하락하면 원유 수입을 위해 필요한 외환(달러) 수요가 감소하여 환율이 하락(원화 가치 상승)하게 됩니다. 이는 에너지를 대량 수입하는 공장과 기업들의 수입 비용 부담을 크게 낮춰줍니다.",
     baseEffect: { scoreChange: 1, moneyChange: 2, stabilityChange: 2 },
-    strongRoles: ["수입기업", "해외 원자재 수입 공장"],
+    strongRoles: ["수입기업", "수입 자재공장"],
     weakRoles: ["수출기업"],
     choices: [
       {
         text: "원자재 구매 시점을 나누어 조정한다",
-        recommendedRoles: ["해외 원자재 수입 공장"],
+        recommendedRoles: ["수입 자재공장"],
         effect: { scoreChange: 5, moneyChange: 5, stabilityChange: 6 },
         feedback: "가격이 안정될 때도 나누어 구매하면 위험을 줄일 수 있습니다."
       },
@@ -395,7 +395,7 @@ const ROUNDS = [
       },
       {
         text: "가격이 낮다고 한 번에 과도하게 구매한다",
-        recommendedRoles: ["수입기업", "해외 원자재 수입 공장"],
+        recommendedRoles: ["수입기업", "수입 자재공장"],
         effect: { scoreChange: -1, moneyChange: -3, stabilityChange: -2 },
         feedback: "무리한 구매는 재고 부담과 위험을 높일 수 있습니다."
       }
@@ -414,17 +414,17 @@ const ROUNDS = [
     resultFocus: "해외 경기가 둔화되어 수출이 감소하면 국내로 들어오는 달러(외환 공급)가 줄어들어 환율 상승 압력이 발생하지만, 수출 기업은 환율 유불리보다 수출 주문 자체가 줄어드는 실적 타격을 우선 겪게 됩니다.",
     baseEffect: { scoreChange: 0, moneyChange: -2, stabilityChange: -3 },
     strongRoles: ["수입기업", "해외직구 소비자"],
-    weakRoles: ["수출기업", "K-pop 공연 기획사", "외국인 관광객 대상 가게"],
+    weakRoles: ["수출기업", "K-pop 기획사", "관광지 상점"],
     choices: [
       {
         text: "판매 지역과 상품 구성을 조정한다",
-        recommendedRoles: ["수출기업", "K-pop 공연 기획사"],
+        recommendedRoles: ["수출기업", "K-pop 기획사"],
         effect: { scoreChange: 5, moneyChange: 3, stabilityChange: 5 },
         feedback: "해외 수요가 줄 때는 시장과 상품 전략을 조정해야 합니다."
       },
       {
         text: "국내 고객과 대체 시장을 찾는다",
-        recommendedRoles: ["수출기업", "외국인 관광객 대상 가게"],
+        recommendedRoles: ["수출기업", "관광지 상점"],
         effect: { scoreChange: 4, moneyChange: 2, stabilityChange: 4 },
         feedback: "수요 감소에 대응해 다른 시장을 찾는 전략입니다."
       },
@@ -454,8 +454,8 @@ const ROUNDS = [
     discussionPrompt: "세계 경제가 불안할 때 달러를 찾는 사람이 늘면 환율은 어떻게 움직일까요?",
     resultFocus: "전쟁이나 분쟁 등 지정학적 위험이 커지면 안전 자산인 달러를 보유하려는 글로벌 외환(달러) 수요가 급증하여 환율이 상승(달러 가치 폭등)하며, 기업들은 원가 상승 위험에 즉시 대비해야 합니다.",
     baseEffect: { scoreChange: 0, moneyChange: -1, stabilityChange: -4 },
-    strongRoles: ["수출기업", "외국인 관광객 대상 가게", "K-pop 공연 기획사"],
-    weakRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "해외 원자재 수입 공장"],
+    strongRoles: ["수출기업", "관광지 상점", "K-pop 기획사"],
+    weakRoles: ["해외여행자", "수입기업", "해외직구 소비자", "유학생 가정", "수입 자재공장"],
     choices: [
       {
         text: "필요한 외화를 나누어 확보한다",
@@ -465,13 +465,13 @@ const ROUNDS = [
       },
       {
         text: "달러 수입 계약의 환전 시점을 나눈다",
-        recommendedRoles: ["수출기업", "K-pop 공연 기획사"],
+        recommendedRoles: ["수출기업", "K-pop 기획사"],
         effect: { scoreChange: 5, moneyChange: 7, stabilityChange: 5 },
         feedback: "달러를 버는 역할도 환전 시점을 나누면 변동 위험을 관리할 수 있습니다."
       },
       {
         text: "비용 절감 계획을 먼저 세운다",
-        recommendedRoles: ["해외 원자재 수입 공장", "수입기업"],
+        recommendedRoles: ["수입 자재공장", "수입기업"],
         effect: { scoreChange: 4, moneyChange: 2, stabilityChange: 4 },
         feedback: "불리한 환율에서는 비용 구조를 점검하는 대응이 필요합니다."
       },
