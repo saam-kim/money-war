@@ -1,0 +1,91 @@
+// Teacher practice must never write, delete or replace a real lesson.
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const assert = require('node:assert/strict');
+const C = require('../js/core.js');
+const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
+const url = process.env.TEST_URL || 'http://127.0.0.1:8766';
+const out = process.env.QA_OUTPUT_DIR || path.join(os.tmpdir(), 'money-war-qa');
+let browser;
+(async () => {
+  fs.mkdirSync(out, {recursive:true});
+  browser = await chromium.launch({headless:true,...(process.env.CHROME_PATH ? {executablePath:process.env.CHROME_PATH} : {})});
+  const context = await browser.newContext({viewport:{width:1280,height:720}});
+  const page = await context.newPage(), errors = [];
+  page.on('pageerror', e => errors.push(e.message));
+  const raw = () => page.evaluate(key => localStorage.getItem(key), C.STORAGE_KEY);
+  const settled = () => page.waitForFunction(() => !document.querySelector('#app').hasAttribute('aria-busy'));
+  const next = async () => {await settled();await page.locator('[data-action="next"]').click();await settled();};
+  await page.goto(url);
+  assert.equal(await page.getByRole('button',{name:'수업 리허설',exact:true}).count(),1);
+  await page.getByRole('button',{name:'수업 리허설',exact:true}).click();
+  assert.equal(await raw(),null,'practice works without creating a saved lesson');
+  assert.equal(await page.locator('#rehearsal-exit').isVisible(),true);
+  await page.setViewportSize({width:390,height:844});
+  await page.evaluate(()=>document.fonts.ready);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'practice header fits the narrow screen');
+  assert.ok(await page.locator('#rehearsal-exit').evaluate(n=>n.getBoundingClientRect().right<=innerWidth),'practice exit remains inside the narrow screen');
+  await page.screenshot({path:path.join(out,'teacher-rehearsal-mobile.png'),fullPage:true});
+  await page.setViewportSize({width:1280,height:720});
+  await page.locator('#rehearsal-exit').click();
+  let live = C.create({count:2,length:4});
+  for(let i=0;i<3;i++)live=C.dispatch(live,{type:'next'});
+  const original=JSON.stringify(live);
+  await page.evaluate(({key,raw})=>localStorage.setItem(key,raw),{key:C.STORAGE_KEY,raw:original});
+  await page.reload();
+  await page.getByRole('button',{name:'수업 리허설',exact:true}).click();
+  await page.evaluate(()=>document.fonts.ready);
+  await page.screenshot({path:path.join(out,'teacher-rehearsal-start.png')});
+  let actions=0,rounds=0;
+  while(await page.locator('#app').getAttribute('data-phase')!=='final') {
+    if(await page.locator('#app').getAttribute('data-phase')==='responseEntry'){
+      rounds++;
+      assert.equal(await page.locator('.team-row:not(.head)').count(),5);
+      assert.match(await page.locator('#input-count').innerText(),/5\/5/,'example answers let the teacher continue without dummy data entry');
+      if(rounds===1){
+        await page.locator('.team-row[data-row="0"] input[data-field="cause"][value="D"]').locator('..').click();
+        await settled();
+        assert.equal(await raw(),original,'editing an example never touches real answers');
+        await page.screenshot({path:path.join(out,'teacher-rehearsal-entry.png')});
+      }
+    }
+    await next();actions++;
+    assert.equal(await raw(),original,'every practice phase preserves the exact live record');
+    assert.ok(actions<80,'practice reaches the final screen');
+  }
+  assert.equal(rounds,6);
+  assert.equal(await page.locator('.final-grid').count(),1);
+  await page.screenshot({path:path.join(out,'teacher-rehearsal-final.png')});
+  await page.evaluate(()=>{window.print=()=>{};});
+  await page.locator('[data-action="printResult"]').click();
+  assert.match(await page.locator('#print-root').textContent(),/수업 리허설 · 예시 답안 결과/,'printed sample results identify the rehearsal');
+  assert.equal(await raw(),original,'preparing the sample print preserves live progress');
+  await page.locator('#menu').click();await page.locator('[data-tool="reset"]').click();
+  assert.equal(await page.locator('#app').getAttribute('data-phase'),'rehearsal');
+  assert.equal(await page.locator('#print-root').textContent(),'','restarting practice clears prepared sample output');
+  assert.equal(await raw(),original,'restart affects only practice');
+  const other=await context.newPage();await other.goto(url);
+  live=C.dispatch(live,{type:'timerAdd'});
+  const latest=JSON.stringify(live);
+  await other.evaluate(({key,raw})=>localStorage.setItem(key,raw),{key:C.STORAGE_KEY,raw:latest});
+  assert.equal(await page.locator('#rehearsal-exit').isVisible(),true);
+  await page.locator('#rehearsal-exit').click();
+  assert.equal(await raw(),latest,'exit loads the latest live record instead of restoring an old snapshot');
+  await page.locator('[data-action="resume"]').click();
+  assert.equal(await page.locator('#app').getAttribute('data-phase'),live.phase);
+  assert.equal(await page.locator('#rehearsal-exit').isVisible(),false);
+  await page.locator('#home').click();await page.locator('[data-action="teacherRehearsal"]').click();
+  await next();await page.reload();
+  assert.equal(await raw(),latest,'refresh discards practice and preserves live progress');
+  assert.equal(await page.locator('#app').getAttribute('data-phase'),'landing');
+  assert.equal(await page.locator('#rehearsal-exit').isVisible(),false);
+  const blocked=await browser.newPage();blocked.on('pageerror',e=>errors.push(e.message));
+  await blocked.addInitScript(()=>{Storage.prototype.getItem=Storage.prototype.setItem=()=>{throw Error('Storage blocked');};});
+  await blocked.goto(url);await blocked.locator('[data-action="teacherRehearsal"]').click();
+  await blocked.locator('[data-action="next"]').click();
+  await blocked.waitForFunction(()=>document.querySelector('#app').dataset.phase==='newsReading');
+  await blocked.locator('#rehearsal-exit').click();
+  assert.match(await blocked.locator('#save-status').innerText(),/자동 저장을 사용할 수 없습니다/);
+  assert.deepEqual(errors,[]);
+  console.log('PASS teacher rehearsal: six rounds with editable examples, isolated writes and restart, latest live record on exit, refresh safety, blocked storage.');
+  await browser.close();
+})().catch(async e=>{console.error(e);await browser?.close();process.exitCode=1;});

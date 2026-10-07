@@ -1,0 +1,7 @@
+docs/
+tests/
+scratch/
+.github/
+.impeccable/
+README.md
+dist/
