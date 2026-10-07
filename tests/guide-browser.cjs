@@ -1,0 +1,80 @@
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs'), path = require('node:path'), os = require('node:os');
+const C = require('../js/core.js');
+const url = process.env.TEST_URL || 'http://127.0.0.1:8766';
+const out = process.env.QA_OUTPUT_DIR || path.join(os.tmpdir(), 'money-war-guide-qa');
+let browser;
+(async () => {
+  fs.mkdirSync(out, { recursive: true });
+  browser = await chromium.launch({ headless: true, ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}) });
+  const page = await browser.newPage(), errors = [], report = [];
+  page.on('pageerror', e => errors.push(e.message));
+  for (const [width, height] of [[360,844],[390,844],[768,844],[1024,768],[1280,720],[1366,768],[1895,891],[1920,1080]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto(url);
+    await page.evaluate(() => document.fonts.ready);
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `landing fits ${width}`);
+    if (width >= 1200) {
+      const bounds = await page.locator('.exchange-graphic').boundingBox();
+      const title = await page.locator('.landing h1').boundingBox();
+      assert.ok(bounds.x >= title.x + title.width, 'illustration stays beside the title');
+      assert.ok(bounds.width >= (width >= 1800 ? 600 : 400), 'illustration uses its column');
+      const actions = await page.locator('.landing .actions').boundingBox();
+      assert.ok(actions.y + actions.height <= height, 'landing actions are in the first viewport');
+    }
+    if ([390,1280,1895].includes(width)) await page.screenshot({ path: path.join(out, `landing-${width}.png`), fullPage: true });
+    await page.getByRole('button', { name: '교사용 수업 가이드', exact: true }).click();
+    assert.equal(await page.locator('#dialog').getAttribute('aria-labelledby'), 'dialog-title');
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'dialog-title');
+    const content = await page.locator('#dialog').innerText();
+    for (const expected of ['A4 한 장', '흑백·양면', '동그라미', '모든 모둠', '개인 확인 A·B', '자동으로 넘어가지', '최초 점수', '키보드']) assert.ok(content.includes(expected), expected);
+    assert.ok(await page.locator('#dialog-content').evaluate(n => n.scrollWidth <= n.clientWidth + 1), `guide fits ${width}`);
+    const close = page.locator('#dialog>form button');
+    assert.ok(await close.isVisible());
+    const closeBounds = await close.boundingBox();
+    assert.ok(closeBounds.y + closeBounds.height < height, 'close remains visible');
+    if ([390,1280,1895].includes(width)) await page.screenshot({ path: path.join(out, `guide-prepare-${width}.png`) });
+    for (const [section, label] of [['flow','진행 순서'],['questions','질문 예시'],['keys','키보드 조작']]) {
+      await page.getByRole('button', { name: label, exact: true }).click();
+      assert.equal(await page.evaluate(() => document.activeElement.id), `guide-${section}-title`);
+      const heading = await page.locator(`#guide-${section}-title`).boundingBox();
+      const nav = await page.locator('.guide-nav').boundingBox();
+      assert.ok(heading.y >= nav.y + nav.height - 1, 'jump target is below sticky navigation');
+      if ([390,1280].includes(width)) await page.screenshot({ path: path.join(out, `guide-${section}-${width}.png`) });
+    }
+    await page.keyboard.press('Escape');
+    assert.equal(await page.evaluate(() => document.activeElement.id), 'teacher-guide');
+    report.push({ width, height, landing: 'fits', guide: 'fits, chapters accessible, close visible' });
+  }
+  await page.setViewportSize({ width:1280, height:720 });
+  let state = C.create({ count:4, length:4 });
+  for (let i=0; i<4; i++) state = C.dispatch(state, { type:'next' });
+  await page.evaluate(({ key, state }) => localStorage.setItem(key, JSON.stringify(state)), { key:C.STORAGE_KEY, state });
+  await page.reload();
+  await page.locator('[data-action="resume"]').click();
+  const stored = await page.evaluate(key => localStorage.getItem(key), C.STORAGE_KEY);
+  await page.locator('#teacher-guide').click();
+  for (const key of ['n','p','1','5','ArrowDown','t','+']) await page.keyboard.press(key);
+  assert.equal(await page.locator('#app').getAttribute('data-phase'), 'responseEntry');
+  assert.equal(await page.evaluate(key => localStorage.getItem(key), C.STORAGE_KEY), stored, 'guide cannot advance, overwrite answers or alter the timer');
+  await page.keyboard.press('Escape');
+  await page.keyboard.press('1');
+  await page.waitForFunction(key => JSON.parse(localStorage.getItem(key)).rounds[0].entries[0].cause === 'A', C.STORAGE_KEY);
+  await page.locator('#teacher-guide').click();
+  assert.equal(await page.locator('#dialog-content').evaluate(n => n.scrollTop), 0, 'reopening starts at the beginning');
+  await page.locator('#dialog>form button').click();
+  await page.keyboard.press('h');
+  assert.equal(await page.locator('#dialog').evaluate(n => n.classList.contains('teacher-guide-dialog')), false, 'ordinary dialogs retain their layout');
+  await page.keyboard.press('Escape');
+  await page.locator('#home').click();
+  await page.locator('[data-action="teacherRehearsal"]').click();
+  const realLesson = await page.evaluate(key => localStorage.getItem(key), C.STORAGE_KEY);
+  await page.locator('#teacher-guide').click();
+  await page.keyboard.press('Escape');
+  assert.equal(await page.evaluate(key => localStorage.getItem(key), C.STORAGE_KEY), realLesson, 'rehearsal guide leaves real records intact');
+  assert.deepEqual(errors, []);
+  fs.writeFileSync(path.join(out, 'guide-report.json'), JSON.stringify(report, null, 2));
+  console.log('Guide: 8 viewport layouts, 4 chapters, focus return, lesson/shortcut protection, rehearsal isolation passed.');
+  await browser.close();
+})().catch(async e => { console.error(e); if (browser) await browser.close(); process.exitCode = 1; });

@@ -202,7 +202,7 @@
     return `<svg class="situation-graphic" viewBox="0 0 160 120" aria-hidden="true" focusable="false"><circle cx="82" cy="61" r="49" fill="var(--pale)"/><circle cx="130" cy="86" r="10" fill="var(--amber)"/><g fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${symbols[id] || symbols.content}</g></svg>`;
   }
   function exchangeGraphic() {
-    return `<svg class="exchange-graphic" viewBox="0 0 440 360" aria-hidden="true" focusable="false"><path d="M56 204v-85q0-35 35-35h256" fill="none" stroke="var(--line)" stroke-width="3"/><path d="M384 156v85q0 35-35 35H93" fill="none" stroke="var(--line)" stroke-width="3"/><g fill="var(--white)" stroke="var(--blue)" stroke-width="3"><rect x="35" y="117" width="155" height="103" rx="13"/><rect x="45" y="107" width="155" height="103" rx="13"/><rect x="240" y="150" width="155" height="103" rx="13"/><rect x="230" y="140" width="155" height="103" rx="13"/></g><circle cx="122" cy="158" r="33" fill="var(--pale)"/><circle cx="307" cy="191" r="33" fill="var(--pale)"/><g fill="var(--blue)" text-anchor="middle" font-size="44" font-weight="650"><text x="122" y="174">₩</text><text x="307" y="207">$</text></g><g fill="none" stroke="var(--blue)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M192 82h92m-13-12 13 12-13 12M248 277h-92m13-12-13 12 13 12"/></g><circle cx="352" cy="82" r="13" fill="var(--amber)"/><g fill="var(--ink)" text-anchor="middle" font-size="24" font-weight="550"><text x="122" y="324">원화</text><text x="307" y="324">달러</text></g></svg>`;
+    return `<svg class="exchange-graphic" viewBox="15 55 400 282" aria-hidden="true" focusable="false"><path d="M56 204v-85q0-35 35-35h256" fill="none" stroke="var(--line)" stroke-width="3"/><path d="M384 156v85q0 35-35 35H93" fill="none" stroke="var(--line)" stroke-width="3"/><g fill="var(--white)" stroke="var(--blue)" stroke-width="3"><rect x="35" y="117" width="155" height="103" rx="13"/><rect x="45" y="107" width="155" height="103" rx="13"/><rect x="240" y="150" width="155" height="103" rx="13"/><rect x="230" y="140" width="155" height="103" rx="13"/></g><circle cx="122" cy="158" r="33" fill="var(--pale)"/><circle cx="307" cy="191" r="33" fill="var(--pale)"/><g fill="var(--blue)" text-anchor="middle" font-size="44" font-weight="650"><text x="122" y="174">₩</text><text x="307" y="207">$</text></g><g fill="none" stroke="var(--blue)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M192 82h92m-13-12 13 12-13 12M248 277h-92m13-12-13 12 13 12"/></g><circle cx="352" cy="82" r="13" fill="var(--amber)"/><g fill="var(--ink)" text-anchor="middle" font-size="24" font-weight="550"><text x="122" y="324">원화</text><text x="307" y="324">달러</text></g></svg>`;
   }
   function transactionGraphic(news) {
     const buying = D.causes[news.cause].market === 'demand';
@@ -394,11 +394,27 @@
   }
   function showDialog(content, returnFocus = document.activeElement) {
     dialogReturnFocus = returnFocus;
+    document.querySelector('#dialog').classList.remove('teacher-guide-dialog');
     document.querySelector('#dialog-content').innerHTML = content;
     const title = document.querySelector('#dialog-content h1, #dialog-content h2');
     if (title) { title.id = 'dialog-title'; document.querySelector('#dialog').setAttribute('aria-labelledby', title.id); }
     document.querySelector('#dialog').showModal();
   }
+  document.querySelector('#teacher-guide').addEventListener('click', () => {
+    closeMenu();
+    showDialog(MWGuide.render());
+    const dialog = document.querySelector('#dialog');
+    dialog.classList.add('teacher-guide-dialog');
+    document.querySelector('#dialog-content').scrollTop = 0;
+    document.querySelector('#dialog-title').focus({ preventScroll: true });
+  });
+  document.querySelector('#dialog-content').addEventListener('click', event => {
+    const target = event.target.closest('[data-guide-target]');
+    if (!target) return;
+    const heading = document.getElementById(target.dataset.guideTarget)?.querySelector('h3');
+    heading?.focus({ preventScroll: true });
+    heading?.scrollIntoView({ block: 'start' });
+  });
   function preparePrint(kind) {
     document.querySelector('#print-root').innerHTML = kind === 'result' && state?.phase === 'final' ? MWPrint.summary(state) : MWPrint.worksheet(view === 'setup' ? draft.length : state?.config.length || 6);
     if (rehearsalMode && kind === 'result') document.querySelector('#print-root .print-heading')?.insertAdjacentHTML('afterend', '<p class="print-intro">수업 리허설 · 예시 답안 결과</p>');

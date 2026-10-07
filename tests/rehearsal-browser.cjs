@@ -16,6 +16,7 @@ let browser;
   const settled = () => page.waitForFunction(() => !document.querySelector('#app').hasAttribute('aria-busy'));
   const next = async () => {await settled();await page.locator('[data-action="next"]').click();await settled();};
   await page.goto(url);
+  await page.getByRole('button',{name:'수업 리허설',exact:true}).waitFor({state:'visible'});
   assert.equal(await page.getByRole('button',{name:'수업 리허설',exact:true}).count(),1);
   await page.getByRole('button',{name:'수업 리허설',exact:true}).click();
   assert.equal(await raw(),null,'practice works without creating a saved lesson');
