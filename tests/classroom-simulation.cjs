@@ -46,7 +46,7 @@ let browser;
           input:region ? { top:r.top, bottom:r.bottom, height:region.clientHeight, content:region.scrollHeight, scrollTop:region.scrollTop } : null,
           detail:detail ? { height:detail.clientHeight, content:detail.scrollHeight } : null,
           result:result ? { width:result.clientWidth, contentWidth:result.scrollWidth, height:result.clientHeight, contentHeight:result.scrollHeight } : null,
-          text:info('.news .news-title,.news>p,.activity h2,.activity>p,.cause-legend,.reason,.chain-step h2,.chain-step p,.chart-panel text,.chart-note,.feedback-detail h2,.feedback-detail p,.locked-list li,.view-heading h1,.result-table th,.result-table td,.sentence-template summary,.sentence-template[open]>p') };
+          text:info('.news .news-title,.news>p,.activity h2,.activity>p,.cause-legend,.reason,.reason-template,.chain-step h2,.chain-step p,.chart-panel text,.chart-note,.feedback-detail h2,.feedback-detail p,.locked-list li,.view-heading h1,.result-table th,.result-table td') };
       });
       record.screens.push({ label, ...metrics });
       if (screenshot) await page.screenshot({ path: path.join(out, `${profile.id}-${label}.png`), fullPage: false });
@@ -57,7 +57,10 @@ let browser;
         assert.equal(await page.locator('.results-region').isVisible(),false,'editing must have a separate space');
         assert.equal(await page.locator('.correction-editor .team-table').isVisible(),true);
       }
-      if (label==='discussion-open') assert.ok(await page.locator('.sentence-template p').evaluate(n=>n.getBoundingClientRect().bottom<=document.querySelector('.footer').getBoundingClientRect().top),'discussion template fully visible');
+      if (label==='discussion-frame') {
+        assert.equal(await page.locator('.reason-template').count(),2,'both reasoning frames are always present');
+        assert.ok(await page.locator('.reason-rail').evaluate(n=>n.getBoundingClientRect().bottom<=document.querySelector('.footer').getBoundingClientRect().top),'reasoning frames fully visible');
+      }
       if (label.endsWith('feedback') || label==='correction') assert.ok(!metrics.detail || metrics.detail.content<=metrics.detail.height+1,'feedback must not have inner scrolling');
     }
     await page.goto(url); await page.evaluate(() => document.fonts.ready);
@@ -74,7 +77,7 @@ let browser;
       await next(); if (round===0) await observe('individual', true);
       await next();
       if (round===0) {
-        await page.locator('.sentence-template summary').click(); await observe('discussion-open', true);
+        await observe('discussion-frame', true);
         if (profile.id==='lesson2') {
           await page.clock.fastForward(51000);
           assert.equal((await state()).phase, 'discussion');
