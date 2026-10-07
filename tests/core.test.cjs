@@ -80,12 +80,13 @@ for (const length of [4, 6]) test(`${length} rounds: staged disclosure, immutabl
 test('timer expiry does not submit or advance; pausing and extending survive restore', () => {
   let s = step(C.create({ count: 8 }));
   assert.equal(s.phase, 'newsReading');
-  assert.equal(C.remaining(s.timer, now + 30_000), 0);
+  assert.equal(s.timer.remaining, 40, 'expanded articles receive forty seconds of reading time');
+  assert.equal(C.remaining(s.timer, now + 50_000), 0);
   assert.equal(s.phase, 'newsReading');
   s = C.dispatch(s, { type: 'timerToggle' }, now + 5_000);
-  assert.equal(C.remaining(s.timer, now + 100_000), 15);
+  assert.equal(C.remaining(s.timer, now + 100_000), 35);
   s = C.dispatch(s, { type: 'timerAdd' }, now + 100_000);
-  assert.equal(C.remaining(C.restore(s).timer), 25);
+  assert.equal(C.remaining(C.restore(s).timer), 45);
   s = entry(s);
   assert.equal(s.timer.remaining, 60);
   assert.ok(s.rounds[0].entries.every(a => !C.complete(a)));

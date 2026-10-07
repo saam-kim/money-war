@@ -541,6 +541,9 @@ details>p {
   border-top:1px solid #e6eaf0;
   padding-top:14px
 }
+.news .news-paragraph+.news-paragraph {
+  margin-top:16px
+}
 .activity {
   background:var(--surface-soft);
   border-radius:var(--radius-panel);
@@ -2700,30 +2703,30 @@ dialog.teacher-guide-dialog[open] {
     padding-bottom:0
   }
   .worksheet-personal .print-question>p {
-    font-size:18px;
-    line-height:1.65;
+    font-size:16px;
+    line-height:1.6;
     margin:0;
     word-break:keep-all
   }
   .worksheet-personal .print-question h2 {
-    font-size:22px;
-    margin-bottom:12px
+    font-size:20px;
+    margin-bottom:8px
   }
   .worksheet-personal .worksheet-personal-choices {
     flex:1;
     align-items:center;
-    margin:16px 0;
-    padding:16px 20px;
+    margin:12px 0;
+    padding:12px 20px;
     border-color:#666;
     border-radius:0
   }
   .worksheet-personal .worksheet-personal-choices p {
-    font-size:18px;
-    line-height:2
+    font-size:17px;
+    line-height:1.7
   }
   .worksheet-personal .worksheet-personal-choices h3 {
     font-size:15px;
-    margin:0 0 12px
+    margin:0 0 8px
   }
   .worksheet-personal .print-question>h3 {
     font-size:14px;
@@ -3505,7 +3508,30 @@ button:active:not(:disabled) {
     margin:4px 0 12px
   }
   .news {
-    min-height:310px
+    min-height:310px;
+    padding:20px 24px
+  }
+  .news-heading {
+    margin:10px 0 12px
+  }
+  .news .news-title {
+    font-size:32px
+  }
+  .news .situation-graphic {
+    width:64px;
+    height:48px
+  }
+  .news .news-paragraph {
+    font-size:24px;
+    line-height:1.5
+  }
+  .news .news-paragraph+.news-paragraph {
+    margin-top:12px
+  }
+  .news p.condition {
+    margin-top:14px;
+    padding-top:10px;
+    font-size:16px
   }
   .transfer-case {
     padding:18px 22px

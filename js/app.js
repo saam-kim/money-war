@@ -211,7 +211,7 @@
   }
   function newsCard(news, number = state.index + 1, level = 1) {
     const identifier = typeof number === 'number' ? String(number).padStart(2, '0') : number;
-    return `<article class="news"><div class="news-meta"><span>NEWS ${identifier}</span></div><div class="news-heading"><h${level} class="news-title" tabindex="-1">${news.title}</h${level}>${situationGraphic(news.id)}</div><p>${news.text}</p><p class="condition">다른 조건은 같습니다.</p></article>`;
+    return `<article class="news"><div class="news-meta"><span>NEWS ${identifier}</span></div><div class="news-heading"><h${level} class="news-title" tabindex="-1">${news.title}</h${level}>${situationGraphic(news.id)}</div>${news.text.split('\n\n').map(paragraph => `<p class="news-paragraph">${esc(paragraph)}</p>`).join('')}<p class="condition">다른 조건은 같습니다.</p></article>`;
   }
   function groups(team, answers, prefix = 'entry') {
     return ['cause', 'rate'].map(field => {

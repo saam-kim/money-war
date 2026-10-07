@@ -6,7 +6,7 @@
   // Keep the storage location so existing lessons can be upgraded without losing originals.
   const STORAGE_KEY = 'money-war.lesson.v2';
   const phases = ['rehearsal', 'newsReading', 'individual', 'discussion', 'responseEntry', 'responsesLocked', 'explanation', 'roundFeedback', 'correction', 'individualA', 'individualB', 'individualAnswers', 'final'];
-  const durations = { newsReading: 20, individual: 20, discussion: 50, responseEntry: 30, explanation: 60, correction: 30, individualA: 60, individualB: 60 };
+  const durations = { newsReading: 40, individual: 20, discussion: 50, responseEntry: 30, explanation: 60, correction: 30, individualA: 60, individualB: 60 };
   const blankAnswer = () => ({ cause: null, rate: null, missing: false });
   const complete = a => Boolean(a && (a.missing || (data.causes[a.cause] && ['up', 'down'].includes(a.rate))));
   const clone = value => JSON.parse(JSON.stringify(value));
