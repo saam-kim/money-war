@@ -3141,7 +3141,9 @@ button:active:not(:disabled) {
   .exchange-graphic {
     width:100%;
     max-width:720px;
-    justify-self:center
+    justify-self:center;
+    position:relative;
+    top:clamp(32px,6dvh,64px)
   }
 }
 @media screen and (min-width:1600px) {
@@ -3167,6 +3169,9 @@ button:active:not(:disabled) {
   }
   .landing-intro {
     margin-bottom:16px
+  }
+  .exchange-graphic {
+    top:24px
   }
 }
 @media(min-width:900px) {
