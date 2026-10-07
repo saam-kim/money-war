@@ -247,12 +247,12 @@
     return `<div class="results-region"><div class="result-scroll" tabindex="0" role="region" aria-label="이번 라운드 모둠 점수"><table class="result-table"><caption class="sr-only">최초 답안 기준 요소별 점수와 누적 점수</caption><thead><tr><th scope="col">모둠</th><th scope="col">수요·공급</th><th scope="col">증감</th><th scope="col">환율</th><th scope="col">이번</th><th scope="col">누적</th></tr></thead><tbody>${record.originals.map((a, team) => {
       const result = C.score(a, news.cause);
       return `<tr><th scope="row"><button type="button" data-team-detail="${team}" aria-controls="team-detail" aria-pressed="${selectedDetail === team}">${team + 1}. ${esc(state.config.teams[team])}</button></th>${result.parts.map(p => `<td><span class="${p ? 'correct' : 'review'}"><span class="sr-only">${p ? '정답 ' : '다시 확인 '}</span>${p ? '2' : '0'}</span></td>`).join('')}<td><strong>${result.total}/6</strong></td><td>${totals[team].total}</td></tr>`;
-    }).join('')}</tbody></table></div><div id="team-detail">${selectedDetail !== null ? detailPanel(selectedDetail) : '<p class="hint">모둠 이름을 누르면 최초 답안과 고칠 연결을 확인합니다.</p>'}</div></div>`;
+    }).join('')}</tbody></table></div><div id="team-detail">${selectedDetail !== null ? detailPanel(selectedDetail) : '<p class="hint">모둠 이름을 누르면 최초 답안과 다시 살펴볼 부분을 확인합니다.</p>'}</div></div>`;
   }
   function detailPanel(team) {
     const record = state.rounds[state.index], a = record.originals[team], result = C.score(a, D.rounds[state.index].cause);
     const feedback = ['달러를 사는 쪽은 수요, 파는 쪽은 공급입니다.', '그 거래가 전보다 늘었는지 줄었는지 확인하세요.', '움직인 곡선에서 새 균형 환율을 찾아보세요.'];
-    return `<section class="feedback-detail"><h2>${team + 1}. ${esc(state.config.teams[team])}</h2><p class="feedback-verdict">${result.total === 6 ? '분석 완성 · 6/6' : '고칠 연결 확인'}</p><p>최초 답안<br><strong>${answerText(a)}</strong></p>${!result.parts[0] && result.parts[2] ? '<p>환율 방향은 맞았습니다. 달러 거래의 주체를 다시 살펴보세요.</p>' : ''}${a.missing ? '<p>이번 라운드는 미제출로 기록했습니다.</p>' : `<ul>${result.parts.map((p, i) => !p ? `<li>${feedback[i]}</li>` : '').join('')}</ul>`}${C.complete(record.corrections[team]) ? `<p>수정 기록<br><strong>${answerText(record.corrections[team])}</strong></p>` : ''}</section>`;
+    return `<section class="feedback-detail"><h2>${team + 1}. ${esc(state.config.teams[team])}</h2><p class="feedback-verdict">${result.total === 6 ? '분석 완성 · 6/6' : '다시 살펴볼 부분'}</p><p>최초 답안<br><strong>${answerText(a)}</strong></p>${!result.parts[0] && result.parts[2] ? '<p>환율 방향은 맞았습니다. 달러 거래의 주체를 다시 살펴보세요.</p>' : ''}${a.missing ? '<p>이번 라운드는 미제출로 기록했습니다.</p>' : `<ul>${result.parts.map((p, i) => !p ? `<li>${feedback[i]}</li>` : '').join('')}</ul>`}${C.complete(record.corrections[team]) ? `<p>수정 기록<br><strong>${answerText(record.corrections[team])}</strong></p>` : ''}</section>`;
   }
   function personalComparison() {
     return `<div class="individual-answer-grid">${D.individual.map(q => {
@@ -298,7 +298,7 @@
       ['먼저 혼자 판단', '기록지에 혼자 적어요', '<rect x="6" y="3" width="16" height="22" rx="2"/><path d="M10 9h8M10 14h8M10 19h5"/>'],
       ['모둠과 근거 비교', '모둠의 답을 정해요', '<circle cx="10" cy="8" r="4"/><path d="M3 24v-3a7 7 0 0 1 14 0v3M20 4a4 4 0 0 1 0 8M22 16a6 6 0 0 1 3 5v3"/>'],
       ['답안판 함께 들기', '교사 신호에 맞춰요', '<rect x="2" y="4" width="11" height="15" rx="2"/><rect x="16" y="7" width="10" height="15" rx="2"/><path d="M7 19v6M21 22v3M5 10h5M19 13h4"/>'],
-      ['설명 듣고 고치기', '틀린 연결을 고쳐요', '<path d="M5 7h18M5 14h9M5 21h9m3-1 3 3 6-8"/>']
+      ['설명 듣고 고치기', '틀린 판단을 고쳐요', '<path d="M5 7h18M5 14h9M5 21h9m3-1 3 3 6-8"/>']
     ];
     return heading('시작 전에, 함께 익혀볼까요?', '뉴스를 읽고 달러 거래의 변화로 환율을 설명해 보세요.') +
       `<ol class="rules-flow" aria-label="한 라운드의 활동 순서">${steps.map(([title, description, drawing]) => `<li><svg viewBox="0 0 28 28" aria-hidden="true" focusable="false">${drawing}</svg><div><strong>${title}</strong><span>${description}</span></div></li>`).join('')}</ol>` +
@@ -321,7 +321,7 @@
     }
     if (['roundFeedback', 'correction'].includes(phase)) {
       const c = D.causes[news.cause];
-      return top + `<div class="feedback-heading">${heading(phase === 'correction' ? '틀린 연결을 개인 기록지에서 고치세요.' : '원인과 환율을 나누어 확인합니다.', `${c.label} → 환율 ${D.direction(c.rate)}`)}${phase === 'correction' ? `${timer(true, '<button type="button" data-action="correctionToggle" aria-controls="correction-records" aria-expanded="false" class="quiet">모둠 수정 기록</button>')}` : ''}</div>` + resultTable() + (phase === 'correction' ? `<details class="correction-editor" id="correction-records"><summary class="sr-only">모둠 수정 기록 · 선택</summary><p>고친 연결은 개인 기록지의 선택어로 표시합니다. 앱 수정 기록은 최초 점수에 합치지 않습니다.</p>${inputKeyboardHint()}${responseTable(true)}</details>` : '') + footer(phase === 'correction' ? '기록지의 거래·원인·환율 선택어를 다시 확인하세요.' : '각 요소 2점 · 0점인 연결을 다시 설명해 보세요.', 'next', phase === 'roundFeedback' ? '개인 기록 고치기 · 30초' : state.index + 1 === state.config.length ? '개인 확인 시작' : '다음 뉴스 읽기', false);
+      return top + `<div class="feedback-heading">${heading(phase === 'correction' ? '틀린 부분을 개인 기록지에서 고치세요.' : '원인과 환율을 나누어 확인합니다.', `${c.label} → 환율 ${D.direction(c.rate)}`)}${phase === 'correction' ? `${timer(true, '<button type="button" data-action="correctionToggle" aria-controls="correction-records" aria-expanded="false" class="quiet">모둠 수정 기록</button>')}` : ''}</div>` + resultTable() + (phase === 'correction' ? `<details class="correction-editor" id="correction-records"><summary class="sr-only">모둠 수정 기록 · 선택</summary><p>고친 답은 개인 기록지의 선택어로 표시합니다. 앱 수정 기록은 최초 점수에 합치지 않습니다.</p>${inputKeyboardHint()}${responseTable(true)}</details>` : '') + footer(phase === 'correction' ? '기록지의 거래·원인·환율 선택어를 다시 확인하세요.' : '각 요소 2점 · 틀린 판단의 이유를 다시 설명해 보세요.', 'next', phase === 'roundFeedback' ? '개인 기록 고치기 · 30초' : state.index + 1 === state.config.length ? '개인 확인 시작' : '다음 뉴스 읽기', false);
     }
     if (['individualA', 'individualB'].includes(phase)) {
       const q = D.individual[phase === 'individualA' ? 0 : 1];
@@ -506,7 +506,7 @@
       app.querySelectorAll('[data-team-detail]').forEach(b => b.setAttribute('aria-pressed', String(b === detail)));
       document.querySelector('#team-detail').innerHTML = detailPanel(selectedDetail);
       // Feedback occupies its own column; selecting a team does not resize or scroll the table.
-      announce(`${selectedDetail + 1}. ${state.config.teams[selectedDetail]}의 최초 답안과 고칠 연결을 표시했습니다.`);
+      announce(`${selectedDetail + 1}. ${state.config.teams[selectedDetail]}의 최초 답안과 다시 살펴볼 부분을 표시했습니다.`);
     }
   });
   document.querySelector('#home').addEventListener('click', event => { event.preventDefault(); handleAction('home'); });
