@@ -16,4 +16,3 @@ window.MWPrint = (() => {
   }
   return { worksheet, summary, principles };
 })();
-
