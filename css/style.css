@@ -3217,6 +3217,14 @@ button:active:not(:disabled) {
   #app[data-phase=responsesLocked] .lesson-content {
     flex:0 1 auto
   }
+  #app[data-phase=responsesLocked] .lesson-content,
+  #app[data-phase=responsesLocked] .footer {
+    max-width:840px
+  }
+  #app[data-phase=responsesLocked]:has(.locked-panel.only-missing) .lesson-content,
+  #app[data-phase=responsesLocked]:has(.locked-panel.only-missing) .footer {
+    max-width:560px
+  }
   #app[data-phase=responsesLocked] .view-heading h1 {
     font-size:36px
   }
@@ -3230,7 +3238,7 @@ button:active:not(:disabled) {
     display:grid;
     grid-template-columns:240px minmax(0,1fr);
     align-items:center;
-    padding:14px 0;
+    padding:10px 0;
     font-size:24px
   }
   #app[data-phase=responsesLocked] .locked-list li:first-child {
