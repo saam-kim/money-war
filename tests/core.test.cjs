@@ -39,8 +39,73 @@ test('answer entry remains independent; missing requires a teacher action; locki
   assert.throws(() => step(s, { type: 'unlock' }));
   const before = s.rounds[0].originals;
   s = step(s, { type: 'back' });
-  assert.equal(s.phase, 'explanation');
+  assert.equal(s.phase, 'responsesLocked');
   assert.deepEqual(s.rounds[0].originals, before);
+  assert.throws(() => step(s, { type: 'unlock' }));
+});
+
+function explained() {
+  let s = answer(answer(entry(C.create({ count: 2, length: 4 })), 0, 'A'), 1, 'A');
+  for (let i = 0; i < 4; i++) s = step(s);
+  return s;
+}
+
+test('previous explanation traverses 3, 2, 1 and read-only originals without resetting disclosure or the timer', () => {
+  let s = explained();
+  const originals = JSON.stringify(s.rounds[0].originals), history = s.history.length, timer = s.timer;
+  for (const visible of [2, 1]) {
+    s = step(s, { type: 'back' });
+    assert.equal(s.phase, 'explanation');
+    assert.equal(s.rounds[0].viewStep ?? s.rounds[0].reveal, visible);
+    assert.equal(s.rounds[0].reveal, 3, 'disclosure cannot be undone to edit the first answer');
+    assert.equal(s.history.length, history, 'individual explanation steps do not consume phase history');
+    assert.deepEqual(s.timer, timer);
+    assert.deepEqual(C.restore(s), s, 'current explanation survives refresh');
+  }
+  s = step(s, { type: 'back' });
+  assert.equal(s.phase, 'responsesLocked');
+  assert.throws(() => step(s, { type: 'unlock' }));
+  assert.throws(() => step(s, { type: 'back' }), 'no route back to editable first answers');
+  for (const visible of [1, 2, 3]) {
+    s = step(s);
+    assert.equal(s.phase, 'explanation');
+    assert.equal(s.rounds[0].viewStep ?? s.rounds[0].reveal, visible);
+    assert.deepEqual(C.totals(s).map(r => r.total), [0, 0]);
+  }
+  s = step(s);
+  assert.equal(s.phase, 'roundFeedback');
+  assert.deepEqual(C.totals(s).map(r => r.total), [6, 6]);
+  assert.equal(JSON.stringify(s.rounds[0].originals), originals);
+});
+
+test('reviewing already scored explanation preserves totals and reaches correction again', () => {
+  let s = step(explained());
+  for (const visible of [3, 2, 1]) {
+    s = step(s, { type: 'back' });
+    assert.equal(s.phase, 'explanation');
+    assert.equal(s.rounds[0].viewStep ?? s.rounds[0].reveal, visible);
+    assert.deepEqual(C.totals(s).map(r => r.total), [6, 6]);
+  }
+  s = step(s, { type: 'back' });
+  for (let i = 0; i < 4; i++) s = step(s);
+  assert.equal(s.phase, 'roundFeedback');
+  assert.deepEqual(C.totals(s).map(r => r.total), [6, 6]);
+  s = step(s); assert.equal(s.phase, 'correction');
+  s = step(s); assert.equal(s.index, 1);
+  s = step(s, { type: 'back' }); assert.equal(s.phase, 'correction');
+  s = step(s, { type: 'back' }); assert.equal(s.phase, 'roundFeedback');
+});
+
+test('legacy explanations resume at their disclosed step and malformed visible steps are rejected', () => {
+  const legacy = explained();
+  assert.ok(C.restore(legacy));
+  assert.equal(C.restore(legacy).rounds[0].viewStep ?? legacy.rounds[0].reveal, 3);
+  for (const invalid of [0, 4, 1.5, '2']) {
+    const bad = structuredClone(legacy); bad.rounds[0].viewStep = invalid;
+    assert.equal(C.restore(bad), null);
+  }
+  const bad = structuredClone(legacy); bad.rounds[0].reveal = 1; bad.rounds[0].viewStep = 2;
+  assert.equal(C.restore(bad), null, 'a cursor cannot display undisclosed explanations');
 });
 
 for (const length of [4, 6]) test(`${length} rounds: staged disclosure, immutable scoring, correction, resume, individual transfer, tied ranking`, () => {

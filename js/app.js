@@ -135,7 +135,7 @@
   }
   function phaseLabel() {
     if (['individualA', 'individualB', 'individualAnswers', 'final'].includes(state.phase)) return labels[state.phase];
-    return `${state.index + 1}라운드 ${labels[state.phase]}${state.phase === 'explanation' ? ' ' + state.rounds[state.index].reveal + '단계' : ''}`;
+    return `${state.index + 1}라운드 ${labels[state.phase]}${state.phase === 'explanation' ? ' ' + C.visibleStep(state.rounds[state.index]) + '단계' : ''}`;
   }
   const button = (action, text, cls = '', disabled = false) => `<button type="button" data-action="${action}" class="${cls}" ${disabled ? 'disabled' : ''}>${text}</button>`;
   const heading = (title, subtitle = '') => `<div class="view-heading"><h1 tabindex="-1">${title}</h1>${subtitle ? `<p>${subtitle}</p>` : ''}</div>`;
@@ -177,7 +177,7 @@
   }
   const unit = '<p class="unit">원/달러 환율 = 1달러에 필요한 원화</p>';
   function footer(text, action, actionText, disabled = false, extra = '') {
-    return `<footer class="footer">${text ? `<p>${text}</p>` : ''}<div class="actions">${state.history.length ? button('back', '이전 단계', 'quiet') : ''}${extra}${action ? button(action, actionText, 'primary', disabled) : ''}</div></footer>`;
+    return `<footer class="footer">${text ? `<p>${text}</p>` : ''}<div class="actions">${C.canBack(state) ? button('back', '이전 단계', 'quiet') : ''}${extra}${action ? button(action, actionText, 'primary', disabled) : ''}</div></footer>`;
   }
   function timer(compact = false, extraControls = '') {
     const seconds = C.remaining(state.timer), isRunning = state.timer.deadline !== null && seconds > 0;
@@ -314,10 +314,11 @@
       return top + `<div class="workspace">${newsCard(news)}<aside class="activity"><h2>${instructions[0]}</h2>${timer()}<p>${instructions[1]}</p></aside></div>` + reasoningRail() + footer(phase === 'discussion' ? '모든 모둠이 동시에 공개한 뒤 입력하세요.' : '각 판단의 이유를 한 문장으로 설명해 보세요.', 'next', instructions[2]);
     }
     if (phase === 'responseEntry') return top + `<div class="input-heading">${heading('모둠의 답안을 기록하세요.', news.title)}${timer(true)}${button('news', '뉴스 다시 보기')}</div>` + `<div class="input-summary">${inputKeyboardHint()}<p class="input-count" id="input-count">${record.entries.filter(C.complete).length}/${record.entries.length}모둠 입력 완료</p></div>` + responseTable() + footer('동시 공개한 원인과 환율을 기록합니다. 미제출은 직접 표시하세요.', 'next', '선택 확정', !record.entries.every(C.complete));
-    if (phase === 'responsesLocked') return top + heading('최초 답안을 확인하세요.', '입력 실수는 해설을 시작하기 전에 고칠 수 있습니다.') + `<section class="panel locked-panel${record.originals.every(a => a.missing) ? ' only-missing' : ''}"><ul class="locked-list">${record.originals.map((a, team) => `<li><strong>${team + 1}. ${esc(state.config.teams[team])}</strong><span>${answerText(a)}</span></li>`).join('')}</ul></section>` + footer('', 'next', '거래 행동 공개', false, button('unlock', '입력 수정', 'quiet'));
+    if (phase === 'responsesLocked') return top + heading('최초 답안을 확인하세요.', record.reveal ? '모둠이 처음 제출한 답안입니다.' : '입력 실수는 해설을 시작하기 전에 고칠 수 있습니다.') + `<section class="panel locked-panel${record.originals.every(a => a.missing) ? ' only-missing' : ''}"><ul class="locked-list">${record.originals.map((a, team) => `<li><strong>${team + 1}. ${esc(state.config.teams[team])}</strong><span>${answerText(a)}</span></li>`).join('')}</ul></section>` + footer('', 'next', record.reveal ? '해설 다시 보기' : '거래 행동 공개', false, record.reveal ? '' : button('unlock', '입력 수정', 'quiet'));
     if (phase === 'explanation') {
-      const next = ['거래 행동 공개', '달러 시장 공개', '환율 공개', '모둠 결과 보기'][record.reveal];
-      return top + `<div class="reveal-heading">${heading('달러 거래에서 환율까지', `${record.reveal}/3단계 공개 · ${news.title}`)}<div class="explanation-timer">${timer(true)}</div></div><div class="reveal-layout">${chain(news, record.reveal)}<section class="chart-panel">${record.reveal >= 2 ? '<h2>우리나라 달러 외환 시장</h2><div id="market-graph"></div>' : transactionGraphic(news)}</section></div>` + footer(record.reveal < 3 ? '공개한 설명은 계속 남아 있습니다.' : '점수는 다음 버튼에서 따로 공개합니다.', 'next', next);
+      const reveal = C.visibleStep(record);
+      const next = ['거래 행동 공개', '달러 시장 공개', '환율 공개', '모둠 결과 보기'][reveal];
+      return top + `<div class="reveal-heading">${heading('달러 거래에서 환율까지', `${reveal}/3단계 공개 · ${news.title}`)}<div class="explanation-timer">${timer(true)}</div></div><div class="reveal-layout">${chain(news, reveal)}<section class="chart-panel">${reveal >= 2 ? '<h2>우리나라 달러 외환 시장</h2><div id="market-graph"></div>' : transactionGraphic(news)}</section></div>` + footer(reveal < 3 ? '이전·다음 버튼으로 설명을 차례로 확인하세요.' : '점수는 다음 버튼에서 따로 공개합니다.', 'next', next);
     }
     if (['roundFeedback', 'correction'].includes(phase)) {
       const c = D.causes[news.cause];
@@ -342,7 +343,7 @@
     const previousFrame = renderedFrame;
     const frame = {
       screen: view === 'lesson' && state ? `${view}:${rehearsalMode}:${state.index}:${state.phase}` : view,
-      reveal: view === 'lesson' && state?.phase === 'explanation' ? state.rounds[state.index].reveal : 0
+      reveal: view === 'lesson' && state?.phase === 'explanation' ? C.visibleStep(state.rounds[state.index]) : 0
     };
     app.dataset.phase = view === 'lesson' && state ? state.phase : view;
     document.querySelector('#rehearsal-exit').hidden = !rehearsalMode;
@@ -358,7 +359,7 @@
       app.prepend(content);
     }
     document.querySelector('#round-progress').innerHTML = view === 'lesson' && state ? `<span>${['individualA','individualB','individualAnswers','final'].includes(state.phase) ? '본 게임 완료' : '라운드'}</span><strong>${state.index + 1} / ${state.config.length}</strong><div class="dots" aria-hidden="true">${state.rounds.map((r, i) => `<i class="${r.scored ? 'done' : i === state.index ? 'now' : ''}"></i>`).join('')}</div>` : '';
-    if (document.querySelector('#market-graph')) MWGraph.render(document.querySelector('#market-graph'), D.rounds[state.index].cause, state.rounds[state.index].reveal);
+    if (document.querySelector('#market-graph')) MWGraph.render(document.querySelector('#market-graph'), D.rounds[state.index].cause, C.visibleStep(state.rounds[state.index]));
     if (rehearsalMode) document.querySelector('#round-progress').insertAdjacentHTML('afterbegin', '<span class="rehearsal-label">수업 리허설</span>');
     if (focus) { if (mutationPending) focusAfterMutation = true; else app.querySelector('h1')?.focus({ preventScroll: true }); window.scrollTo({ top: 0 }); app.querySelector('.lesson-content')?.scrollTo({ top: 0 }); }
     updateTimer();
@@ -604,7 +605,7 @@
     if (!rehearsalMode && (event.key === C.STORAGE_KEY || event.key === null) && session.changed()) conflict();
   });
   let resizeFrame;
-  window.addEventListener('resize', () => { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(() => { fitResultRows(); const graph = document.querySelector('#market-graph'); if (graph) MWGraph.render(graph, D.rounds[state.index].cause, state.rounds[state.index].reveal); }); });
+  window.addEventListener('resize', () => { cancelAnimationFrame(resizeFrame); resizeFrame = requestAnimationFrame(() => { fitResultRows(); const graph = document.querySelector('#market-graph'); if (graph) MWGraph.render(graph, D.rounds[state.index].cause, C.visibleStep(state.rounds[state.index])); }); });
   document.querySelector('#dialog').addEventListener('click', event => {
     const bounds = event.currentTarget.getBoundingClientRect();
     if (event.target === event.currentTarget && (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom)) event.currentTarget.close();

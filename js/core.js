@@ -39,9 +39,16 @@
     return rows.map(row => ({ ...row, rank: 1 + rows.filter(other => other.total > row.total).length, tied: rows.filter(other => other.total === row.total).length > 1 }));
   }
   function remaining(timer, now = Date.now()) { return timer.deadline === null ? timer.remaining : Math.max(0, Math.ceil((timer.deadline - now) / 1000)); }
+  // Disclosure is irreversible; the visible explanation can move backward independently.
+  function visibleStep(round) { return round.viewStep ?? round.reveal; }
+  function canBack(state) {
+    if (state.phase === 'responsesLocked' && state.rounds[state.index].reveal > 0) return false;
+    return state.phase === 'explanation' || state.history.length > 0;
+  }
   function setPhase(state, phase, now, remember = true) {
     if (remember) state.history.push({ phase: state.phase, index: state.index });
     state.phase = phase;
+    if (phase === 'explanation') state.rounds[state.index].viewStep = state.rounds[state.index].reveal;
     const seconds = phase === 'responseEntry' && state.config.teams.length > 5 ? 60 : durations[phase] || 0;
     state.timer = { remaining: seconds, deadline: seconds ? now + seconds * 1000 : null };
   }
@@ -62,16 +69,22 @@
       if (state.phase !== 'responsesLocked' || round.reveal > 0 || round.scored) fail();
       round.originals = null; setPhase(state, 'responseEntry', now);
     } else if (action.type === 'back') {
-      const previous = state.history.pop();
-      if (!previous) fail();
-      state.index = previous.index;
-      const target = state.rounds[state.index];
-      let phase = previous.phase;
-      const preReveal = ['rehearsal', 'newsReading', 'individual', 'discussion', 'responseEntry', 'responsesLocked'];
-      if (target.reveal > 0 && preReveal.includes(phase)) phase = target.scored ? 'roundFeedback' : 'explanation';
-      else if (target.originals && preReveal.includes(phase)) phase = 'responsesLocked';
-      if (state.individualDone && ['individualA', 'individualB'].includes(phase)) phase = 'individualAnswers';
-      setPhase(state, phase, now, false);
+      if (!canBack(state)) fail();
+      if (state.phase === 'explanation') {
+        if (visibleStep(round) > 1) round.viewStep = visibleStep(round) - 1;
+        else setPhase(state, 'responsesLocked', now, false);
+      } else {
+        const previous = state.history.pop();
+        if (!previous) fail();
+        state.index = previous.index;
+        const target = state.rounds[state.index];
+        let phase = previous.phase;
+        const preReveal = ['rehearsal', 'newsReading', 'individual', 'discussion', 'responseEntry', 'responsesLocked'];
+        if (target.reveal > 0 && preReveal.includes(phase)) phase = target.scored ? 'roundFeedback' : 'explanation';
+        else if (target.originals && preReveal.includes(phase)) phase = 'responsesLocked';
+        if (state.individualDone && ['individualA', 'individualB'].includes(phase)) phase = 'individualAnswers';
+        setPhase(state, phase, now, false);
+      }
     } else if (action.type === 'timerToggle') {
       const seconds = remaining(state.timer, now);
       state.timer = { remaining: seconds, deadline: state.timer.deadline === null && seconds > 0 ? now + seconds * 1000 : null };
@@ -85,9 +98,14 @@
         round.originals = clone(round.entries);
         setPhase(state, 'responsesLocked', now);
       } else if (state.phase === 'responsesLocked') {
-        round.reveal = Math.max(1, round.reveal); setPhase(state, 'explanation', now);
+        const reviewing = round.reveal > 0;
+        round.reveal = Math.max(1, round.reveal); setPhase(state, 'explanation', now, !reviewing);
+        round.viewStep = 1;
       } else if (state.phase === 'explanation') {
-        if (round.reveal < REVEAL_STEPS) round.reveal += 1;
+        if (visibleStep(round) < REVEAL_STEPS) {
+          round.viewStep = visibleStep(round) + 1;
+          round.reveal = Math.max(round.reveal, round.viewStep);
+        }
         else { round.scored = true; setPhase(state, 'roundFeedback', now); }
       } else if (state.phase === 'correction') {
         state.history.push({ phase: state.phase, index: state.index });
@@ -136,6 +154,7 @@
         const r = state.rounds[i];
         delete r.lifeRevealed;
         if (r.id !== data.rounds[i].id || !Number.isInteger(r.reveal) || r.reveal < 0 || r.reveal > REVEAL_STEPS || typeof r.scored !== 'boolean') return null;
+        if (Object.hasOwn(r, 'viewStep') && (!Number.isInteger(r.viewStep) || r.viewStep < 1 || r.viewStep > r.reveal)) return null;
         for (const answers of [r.entries, r.corrections]) if (!Array.isArray(answers) || answers.length !== config.teams.length || !answers.every(validAnswer)) return null;
         if (r.originals !== null && (!Array.isArray(r.originals) || r.originals.length !== config.teams.length || !r.originals.every(a => validAnswer(a) && complete(a)))) return null;
         if ((r.reveal || r.scored) && !r.originals || r.scored && r.reveal !== REVEAL_STEPS) return null;
@@ -150,7 +169,7 @@
       return state;
     } catch (_) { return null; }
   }
-  const api = { VERSION, POINTS_PER_ROUND, REVEAL_STEPS, STORAGE_KEY, phases, durations, blankAnswer, complete, create, score, totals, ranking, remaining, dispatch, restore };
+  const api = { VERSION, POINTS_PER_ROUND, REVEAL_STEPS, STORAGE_KEY, phases, durations, blankAnswer, complete, create, score, totals, ranking, remaining, visibleStep, canBack, dispatch, restore };
   root.MWCore = api;
   if (typeof module !== 'undefined') module.exports = api;
 })(typeof globalThis !== 'undefined' ? globalThis : window);
