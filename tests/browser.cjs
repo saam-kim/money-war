@@ -37,7 +37,7 @@ let browser;
   for (let i = 0; i < 6; i++) {
     assert.equal((await stored()).phase, 'newsReading');
     assert.equal(await page.locator('.news').count(), 1);
-    for (let step = 0; step < 3; step++) {
+    for (let step = 0; step < 1; step++) {
       await next();
       assert.equal(await page.locator('#market-graph').count(), 0);
       assert.equal(await page.locator('.result-table').count(), 0);
@@ -131,7 +131,7 @@ let browser;
   page.once('dialog', dialog => dialog.accept());
   await page.locator('#setup-form button[type="submit"]').click(); await next();
   for (let i = 0; i < 4; i++) {
-    for (let j = 0; j < 3; j++) { await next(); if (i === 0 && j === 0) await shot('news-mobile'); }
+    for (let j = 0; j < 1; j++) { await next(); if (i === 0 && j === 0) await shot('news-mobile'); }
     const code = D.rounds[i].cause, key = D.causes[code];
     const cause = page.locator(`.team-row[data-row="0"] [data-field="cause"][value="${code}"]`);
     await cause.focus(); await page.keyboard.press('Space'); assert.equal(await cause.isChecked(), true);
@@ -183,7 +183,7 @@ let browser;
 
   // A saved retired screen returns to the same round without rewriting on load.
   let oldLesson=C.create({count:2,length:4});
-  for(let i=0;i<4;i++)oldLesson=C.dispatch(oldLesson,{type:'next'});
+  while(oldLesson.phase!=='responseEntry')oldLesson=C.dispatch(oldLesson,{type:'next'});
   for(const team of [0,1])for(const [field,value] of [['cause','A'],['rate','up']])oldLesson=C.dispatch(oldLesson,{type:'answer',team,field,value});
   for(let i=0;i<6;i++)oldLesson=C.dispatch(oldLesson,{type:'next'});
   oldLesson.config.life=true;oldLesson.phase='life';oldLesson.rounds[0].lifeRevealed=true;

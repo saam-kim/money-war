@@ -49,7 +49,7 @@ let browser;
   }
   await page.setViewportSize({ width:1280, height:720 });
   let state = C.create({ count:4, length:4 });
-  for (let i=0; i<4; i++) state = C.dispatch(state, { type:'next' });
+  for (let i=0; i<2; i++) state = C.dispatch(state, { type:'next' });
   await page.evaluate(({ key, state }) => localStorage.setItem(key, JSON.stringify(state)), { key:C.STORAGE_KEY, state });
   await page.reload();
   await page.locator('[data-action="resume"]').click();

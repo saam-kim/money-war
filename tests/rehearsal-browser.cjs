@@ -29,7 +29,7 @@ let browser;
   await page.setViewportSize({width:1280,height:720});
   await page.locator('#rehearsal-exit').click();
   let live = C.create({count:2,length:4});
-  for(let i=0;i<3;i++)live=C.dispatch(live,{type:'next'});
+  for(let i=0;i<2;i++)live=C.dispatch(live,{type:'next'});
   const original=JSON.stringify(live);
   await page.evaluate(({key,raw})=>localStorage.setItem(key,raw),{key:C.STORAGE_KEY,raw:original});
   await page.reload();

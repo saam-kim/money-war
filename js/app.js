@@ -2,7 +2,7 @@
   'use strict';
   const D = MWData, C = MWCore, app = document.querySelector('#app');
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-  const labels = { rehearsal: '활동 안내', newsReading: '뉴스 함께 읽기', individual: '개인 판단', discussion: '모둠 토의', responseEntry: '모둠 답안 입력', responsesLocked: '최초 답안 확정', explanation: '이유를 단계별로 확인', roundFeedback: '모둠 결과', correction: '개인 기록 고치기', individualA: '개인 확인 A', individualB: '개인 확인 B', individualAnswers: '개인 확인 해설', final: '원리와 결과 정리' };
+  const labels = { rehearsal: '활동 안내', newsReading: '뉴스 판단·토의', responseEntry: '모둠 답안 입력', responsesLocked: '최초 답안 확정', explanation: '이유를 단계별로 확인', roundFeedback: '모둠 결과', correction: '개인 기록 고치기', individualA: '개인 확인 A', individualB: '개인 확인 B', individualAnswers: '개인 확인 해설', final: '원리와 결과 정리' };
   let state = null, view = 'landing', activeTeam = 0, selectedDetail = null, timerEnded = false, printPrepared = false, storageAvailable = true;
   let dialogReturnFocus = null;
   let rehearsalMode = false;
@@ -184,9 +184,6 @@
     return `<div class="timer ${compact ? 'compact' : ''} ${seconds <= 10 && seconds > 0 ? 'closing' : ''}"><span class="clock" aria-label="남은 시간" id="timer-value">${formatTime(seconds)}</span><div class="timer-actions">${button('timerToggle', isRunning ? '일시 정지' : '타이머 시작', 'quiet', seconds === 0)}${button('timerAdd', '+10초', 'quiet')}${extraControls}</div><p class="timer-message" id="timer-message">${seconds === 0 ? '시간이 끝났습니다 · 계속 진행할 수 있습니다' : seconds <= 10 ? '마무리할 시간' : '시간이 끝나도 자동으로 넘어가지 않습니다'}</p></div>`;
   }
   function formatTime(seconds) { return String(Math.floor(seconds / 60)).padStart(2, '0') + ':' + String(seconds % 60).padStart(2, '0'); }
-  function reasoningRail() {
-    return `<section class="reason-rail" aria-label="원인과 환율을 설명하는 문장 틀"><div class="reason-item"><h2 class="reason">① 원인 · 달러 수요·공급의 변화</h2><p class="reason-template">달러를 [사는 / 파는] 거래가 [늘어난다 / 줄어든다].<br>그래서 달러 [수요 / 공급]가 [증가 / 감소]한다.</p></div><div class="reason-item"><h2 class="reason">② 원/달러 환율</h2><p class="reason-template">달러 [수요 / 공급]가 [증가 / 감소]하므로,<br>원/달러 환율은 [상승 / 하락]한다.</p></div></section>`;
-  }
   // Situation symbols stay neutral: no market or rate direction before a response.
   function situationGraphic(id) {
     const symbols = {
@@ -309,9 +306,8 @@
     const personal = ['individualA', 'individualB', 'individualAnswers', 'final'].includes(phase);
     const top = `<div class="phase"><strong>${labels[phase]}</strong><span>${personal ? '새 사례에 혼자 적용' : '원인과 환율 · 라운드당 6점'}</span></div>`;
     if (phase === 'rehearsal') return top + practiceView() + footer('개인 기록지와 모둠 답안판을 준비하면 시작할 수 있어요.', 'next', '첫 뉴스 읽기');
-    if (['newsReading', 'individual', 'discussion'].includes(phase)) {
-      const instructions = { newsReading: ['뉴스를 함께 읽으세요', '거래 주체와 달라진 행동을 찾아보세요.', '개인 판단 시작'], individual: ['먼저 혼자 판단하세요', '기록지에서 원인과 환율의 알맞은 말에 동그라미를 치세요.', '모둠 토의 시작'], discussion: ['함께 근거를 비교하세요', '누가 달러를 사거나 팔까요? 그 거래가 늘었나요, 줄었나요?', '답안판 동시에 들고 입력'] }[phase];
-      return top + `<div class="workspace">${newsCard(news)}<aside class="activity"><h2>${instructions[0]}</h2>${timer()}<p>${instructions[1]}</p></aside></div>` + reasoningRail() + footer(phase === 'discussion' ? '모든 모둠이 동시에 공개한 뒤 입력하세요.' : '각 판단의 이유를 한 문장으로 설명해 보세요.', 'next', instructions[2]);
+    if (phase === 'newsReading') {
+      return `<section class="round-activity" aria-label="뉴스 읽기와 개인 판단, 모둠 토의"><div class="activity-bar"><ol class="activity-order" aria-label="학생 활동 순서"><li>혼자 판단</li><li>모둠 토의</li><li>답안판 함께 들기</li></ol>${timer(true)}</div>${newsCard(news)}<p class="discussion-prompt">누가 달러를 사거나 팔며, 그 거래는 왜 늘거나 줄었을까?</p></section>` + footer('', 'next', '모둠 답안 입력');
     }
     if (phase === 'responseEntry') return top + `<div class="input-heading">${heading('모둠의 답안을 기록하세요.', news.title)}${timer(true)}${button('news', '뉴스 다시 보기')}</div>` + `<div class="input-summary">${inputKeyboardHint()}<p class="input-count" id="input-count">${record.entries.filter(C.complete).length}/${record.entries.length}모둠 입력 완료</p></div>` + responseTable() + footer('동시 공개한 원인과 환율을 기록합니다. 미제출은 직접 표시하세요.', 'next', '선택 확정', !record.entries.every(C.complete));
     if (phase === 'responsesLocked') return top + heading('최초 답안을 확인하세요.', record.reveal ? '모둠이 처음 제출한 답안입니다.' : '입력 실수는 해설을 시작하기 전에 고칠 수 있습니다.') + `<section class="panel locked-panel${record.originals.every(a => a.missing) ? ' only-missing' : ''}"><ul class="locked-list">${record.originals.map((a, team) => `<li><strong>${team + 1}. ${esc(state.config.teams[team])}</strong><span>${answerText(a)}</span></li>`).join('')}</ul></section>` + footer('', 'next', record.reveal ? '해설 다시 보기' : '거래 행동 공개', false, record.reveal ? '' : button('unlock', '입력 수정', 'quiet'));
@@ -326,7 +322,7 @@
     }
     if (['individualA', 'individualB'].includes(phase)) {
       const q = D.individual[phase === 'individualA' ? 0 : 1];
-      return top + `<div class="workspace">${newsCard(q, phase === 'individualA' ? 'A' : 'B', 1)}<aside class="activity"><h2>이번에는 혼자 설명하세요.</h2>${timer()}<p>기록지의 알맞은 말에 동그라미를 치고, 뉴스의 판단 근거에 밑줄을 그으세요.</p></aside></div>` + reasoningRail() + footer('두 문항을 모두 푼 뒤 함께 해설합니다.', 'next', phase === 'individualA' ? 'A 응답 완료 · B 보기' : '개인 응답 완료 · 해설 보기');
+      return `<section class="round-activity" aria-label="${labels[phase]}"><div class="activity-bar"><p class="personal-direction">혼자 판단하고, 뉴스의 근거에 밑줄을 그으세요.</p>${timer(true)}</div>${newsCard(q, phase === 'individualA' ? 'A' : 'B', 1)}</section>` + footer('두 문항을 모두 푼 뒤 함께 해설합니다.', 'next', phase === 'individualA' ? 'A 응답 완료 · B 보기' : '개인 응답 완료 · 해설 보기');
     }
     if (phase === 'individualAnswers') return top + heading('모두 감소인데, 환율은 왜 다를까요?', '달러를 사는 거래와 파는 거래를 비교해 보세요.') + personalComparison() + footer('개인 확인은 모둠 점수에 합치지 않습니다.', 'next', '최종 원리와 결과 보기');
     if (phase === 'final') return top + finalView();

@@ -46,7 +46,7 @@ let browser;
           input:region ? { top:r.top, bottom:r.bottom, height:region.clientHeight, content:region.scrollHeight, scrollTop:region.scrollTop } : null,
           detail:detail ? { height:detail.clientHeight, content:detail.scrollHeight } : null,
           result:result ? { width:result.clientWidth, contentWidth:result.scrollWidth, height:result.clientHeight, contentHeight:result.scrollHeight } : null,
-          text:info('.news .news-title,.news>p,.activity h2,.activity>p,.cause-legend,.reason,.reason-template,.chain-step h2,.chain-step p,.chart-panel text,.chart-note,.feedback-detail h2,.feedback-detail p,.locked-list li,.view-heading h1,.result-table th,.result-table td') };
+          text:info('.news .news-title,.news>p,.activity h2,.activity>p,.cause-legend,.discussion-prompt,.activity-order li,.chain-step h2,.chain-step p,.chart-panel text,.chart-note,.feedback-detail h2,.feedback-detail p,.locked-list li,.view-heading h1,.result-table th,.result-table td') };
       });
       record.screens.push({ label, ...metrics });
       if (screenshot) await page.screenshot({ path: path.join(out, `${profile.id}-${label}.png`), fullPage: false });
@@ -57,9 +57,10 @@ let browser;
         assert.equal(await page.locator('.results-region').isVisible(),false,'editing must have a separate space');
         assert.equal(await page.locator('.correction-editor .team-table').isVisible(),true);
       }
-      if (label==='discussion-frame') {
-        assert.equal(await page.locator('.reason-template').count(),2,'both reasoning frames are always present');
-        assert.ok(await page.locator('.reason-rail').evaluate(n=>n.getBoundingClientRect().bottom<=document.querySelector('.footer').getBoundingClientRect().top),'reasoning frames fully visible');
+      if (label==='combined-activity') {
+        assert.equal(await page.locator('.activity-order li').count(),3,'individual judgment precedes discussion and boards');
+        assert.equal(await page.locator('.reason-template').count(),0);
+        assert.ok(await page.locator('.discussion-prompt').evaluate(n=>n.getBoundingClientRect().bottom<=document.querySelector('.footer').getBoundingClientRect().top),'discussion question fully visible');
       }
       if (label.endsWith('feedback') || label==='correction') assert.ok(!metrics.detail || metrics.detail.content<=metrics.detail.height+1,'feedback must not have inner scrolling');
     }
@@ -74,15 +75,13 @@ let browser;
     for (let round=0; round<profile.length; round++) {
       assert.equal((await state()).phase, 'newsReading');
       await observe(`r${round+1}-news`, round===0 || round===4);
-      await next(); if (round===0) await observe('individual', true);
-      await next();
       if (round===0) {
-        await observe('discussion-frame', true);
+        await observe('combined-activity', true);
         if (profile.id==='lesson2') {
-          await page.clock.fastForward(51000);
-          assert.equal((await state()).phase, 'discussion');
+          await page.clock.fastForward(111000);
+          assert.equal((await state()).phase, 'newsReading');
           assert.equal(await page.locator('#timer-value').innerText(), '00:00');
-          await observe('discussion-expired', false); record.exceptionalActions.push('timer expiry remained teacher-controlled');
+          await observe('activity-expired', false); record.exceptionalActions.push('timer expiry remained teacher-controlled');
         }
       }
       await next(); if (round===0) await observe('input-empty', false);

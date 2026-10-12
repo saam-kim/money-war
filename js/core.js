@@ -5,8 +5,8 @@
   const POINTS_PER_ROUND = 6, REVEAL_STEPS = 3;
   // Keep the storage location so existing lessons can be upgraded without losing originals.
   const STORAGE_KEY = 'money-war.lesson.v2';
-  const phases = ['rehearsal', 'newsReading', 'individual', 'discussion', 'responseEntry', 'responsesLocked', 'explanation', 'roundFeedback', 'correction', 'individualA', 'individualB', 'individualAnswers', 'final'];
-  const durations = { newsReading: 40, individual: 20, discussion: 50, responseEntry: 30, explanation: 60, correction: 30, individualA: 60, individualB: 60 };
+  const phases = ['rehearsal', 'newsReading', 'responseEntry', 'responsesLocked', 'explanation', 'roundFeedback', 'correction', 'individualA', 'individualB', 'individualAnswers', 'final'];
+  const durations = { newsReading: 110, responseEntry: 30, explanation: 60, correction: 30, individualA: 60, individualB: 60 };
   const blankAnswer = () => ({ cause: null, rate: null, missing: false });
   const complete = a => Boolean(a && (a.missing || (data.causes[a.cause] && ['up', 'down'].includes(a.rate))));
   const clone = value => JSON.parse(JSON.stringify(value));
@@ -79,7 +79,7 @@
         state.index = previous.index;
         const target = state.rounds[state.index];
         let phase = previous.phase;
-        const preReveal = ['rehearsal', 'newsReading', 'individual', 'discussion', 'responseEntry', 'responsesLocked'];
+        const preReveal = ['rehearsal', 'newsReading', 'responseEntry', 'responsesLocked'];
         if (target.reveal > 0 && preReveal.includes(phase)) phase = target.scored ? 'roundFeedback' : 'explanation';
         else if (target.originals && preReveal.includes(phase)) phase = 'responsesLocked';
         if (state.individualDone && ['individualA', 'individualB'].includes(phase)) phase = 'individualAnswers';
@@ -92,7 +92,7 @@
       const seconds = remaining(state.timer, now) + 10;
       state.timer = { remaining: seconds, deadline: state.timer.deadline === null ? null : now + seconds * 1000 };
     } else if (action.type === 'next') {
-      const next = { rehearsal: 'newsReading', newsReading: 'individual', individual: 'discussion', discussion: 'responseEntry', responsesLocked: 'explanation', roundFeedback: 'correction', individualA: 'individualB', individualB: 'individualAnswers', individualAnswers: 'final' };
+      const next = { rehearsal: 'newsReading', newsReading: 'responseEntry', responsesLocked: 'explanation', roundFeedback: 'correction', individualA: 'individualB', individualB: 'individualAnswers', individualAnswers: 'final' };
       if (state.phase === 'responseEntry') {
         if (!round.entries.every(complete) || round.reveal > 0) fail();
         round.originals = clone(round.entries);
@@ -135,6 +135,14 @@
           if (Number.isInteger(r.reveal) && r.reveal === 4) r.reveal = REVEAL_STEPS;
         });
         state.version = VERSION; state.migratedFrom = 2;
+      }
+      // The three student activities share one screen; retain saved timers and answers.
+      const mergedPhases = ['individual', 'discussion'];
+      if (mergedPhases.includes(state.phase)) state.phase = 'newsReading';
+      if (Array.isArray(state.history)) {
+        state.history = state.history.map(h => mergedPhases.includes(h.phase) ? { ...h, phase: 'newsReading' } : h)
+          .filter((h, i, list) => !i || h.phase !== 'newsReading' || list[i - 1].phase !== h.phase || list[i - 1].index !== h.index);
+        while (state.phase === 'newsReading' && state.history.at(-1)?.phase === state.phase && state.history.at(-1).index === state.index) state.history.pop();
       }
       // Retired optional screens resume at the current round's correction.
       const wasLife = state.phase === 'life';

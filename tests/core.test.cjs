@@ -145,24 +145,49 @@ for (const length of [4, 6]) test(`${length} rounds: staged disclosure, immutabl
 test('timer expiry does not submit or advance; pausing and extending survive restore', () => {
   let s = step(C.create({ count: 8 }));
   assert.equal(s.phase, 'newsReading');
-  assert.equal(s.timer.remaining, 40, 'expanded articles receive forty seconds of reading time');
-  assert.equal(C.remaining(s.timer, now + 50_000), 0);
+  assert.equal(s.timer.remaining, 110, 'reading, individual judgment and discussion share their existing time budget');
+  assert.equal(C.remaining(s.timer, now + 120_000), 0);
   assert.equal(s.phase, 'newsReading');
   s = C.dispatch(s, { type: 'timerToggle' }, now + 5_000);
-  assert.equal(C.remaining(s.timer, now + 100_000), 35);
+  assert.equal(C.remaining(s.timer, now + 100_000), 105);
   s = C.dispatch(s, { type: 'timerAdd' }, now + 100_000);
-  assert.equal(C.remaining(C.restore(s).timer), 45);
+  assert.equal(C.remaining(C.restore(s).timer), 115);
   s = entry(s);
   assert.equal(s.timer.remaining, 60);
   assert.ok(s.rounds[0].entries.every(a => !C.complete(a)));
 });
 
-test('news opens directly and simultaneous boards lead directly to teacher entry', () => {
+test('one teacher action moves the combined news activity directly to answer entry', () => {
   let s = step(C.create());
   assert.equal(s.phase, 'newsReading');
-  s = step(s); assert.equal(s.phase, 'individual');
-  s = step(s); assert.equal(s.phase, 'discussion');
   s = step(s); assert.equal(s.phase, 'responseEntry');
+  assert.ok(s.rounds[0].entries.every(a => !C.complete(a)));
+  assert.equal(s.rounds[0].originals, null);
+  assert.throws(() => step(s), 'entering responses cannot expose answers before the teacher fills them');
+  s = step(s, { type: 'back' }); assert.equal(s.phase, 'newsReading');
+  s = step(s); assert.equal(s.phase, 'responseEntry');
+});
+
+test('old individual and discussion screens merge without losing remaining time, answers or phase history', () => {
+  for (const phase of ['individual', 'discussion']) {
+    const legacy = C.create({ count: 2, length: 4 });
+    legacy.phase = phase;
+    legacy.timer = { remaining: 17, deadline: null };
+    legacy.history = [{ phase: 'rehearsal', index: 0 }, { phase: 'newsReading', index: 0 }, { phase: 'individual', index: 0 }];
+    const raw = JSON.stringify(legacy), restored = C.restore(raw);
+    assert.equal(restored.phase, 'newsReading');
+    assert.deepEqual(restored.timer, { remaining: 17, deadline: null });
+    assert.deepEqual(restored.rounds, legacy.rounds);
+    assert.deepEqual(restored.history, [{ phase: 'rehearsal', index: 0 }], 'merged activity does not retain same-screen back targets');
+    assert.equal(step(restored).phase, 'responseEntry');
+    assert.equal(step(restored, { type: 'back' }).phase, 'rehearsal');
+    assert.equal(JSON.stringify(legacy), raw, 'migration does not mutate its input');
+  }
+  const legacy = entry(C.create({ count: 2 }));
+  legacy.history = [{ phase: 'rehearsal', index: 0 }, { phase: 'newsReading', index: 0 }, { phase: 'individual', index: 0 }, { phase: 'discussion', index: 0 }];
+  const restored = C.restore(legacy);
+  assert.equal(step(restored, { type: 'back' }).phase, 'newsReading');
+  assert.equal(step(step(restored, { type: 'back' }), { type: 'back' }).phase, 'rehearsal');
 });
 
 test('v2 records keep original answers while adopting the explicit six-point contract', () => {

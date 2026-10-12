@@ -47,7 +47,7 @@ let browser;
   await page.locator('#menu').click(); await page.locator('[data-tool="shortcuts"]').click();
   await page.locator('#shortcuts-enabled').check(); await key('Escape');
   await page.locator('#menu').click(); await key('n'); assert.equal(await phase(),'newsReading','open menu blocks lesson shortcuts');
-  await key('Escape'); await key('n'); await key('n'); await key('n');
+  await key('Escape'); await key('n');
   assert.equal(await phase(),'responseEntry');
   await key('n'); assert.equal(await phase(),'responseEntry','incomplete answers cannot be confirmed by keyboard');
   await key('v'); await key('n'); assert.equal(await phase(),'responseEntry'); await key('Escape');
@@ -91,7 +91,7 @@ let browser;
   await key('l'); await key('e'); assert.equal(await phase(),'correction','retired keys do not open an optional screen');
   await key('n');
   for(let round=1;round<4;round++) {
-    for(let i=0;i<3;i++)await key('n');
+    await key('n');
     assert.equal(await phase(),'responseEntry');
     await key('1');await key('5');await key('ArrowDown');await key('0');
     for(let i=0;i<7;i++)await key('n');

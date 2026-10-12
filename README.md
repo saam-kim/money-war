@@ -26,7 +26,7 @@ python -m http.server 8766 --bind 127.0.0.1
 
 1. 모둠 수(2~8), 모둠 이름, 기본 6라운드(약 30분) 또는 단축 4라운드(약 20분)를 설정합니다.
 2. 개인 기록지를 인쇄하고 제출 방식을 연습합니다. 달러 수요 증가·감소 또는 달러 공급 증가·감소와 환율 상승/하락을 각각 판단합니다.
-3. 뉴스 읽기 → 개인 판단 → 모둠 토의 → 답안판 동시 공개 → 교사 입력 → 최초 답안 확정 순서로 진행합니다.
+3. 같은 뉴스 화면에서 읽기 → 개인 판단 → 모둠 토의를 진행합니다. 교사가 말로 전환을 안내하고, 모든 모둠이 답안판을 동시에 들면 ‘모둠 답안 입력’ 또는 N 한 번으로 입력 화면을 엽니다. 통합 참고 시간은 1분 50초이며 종료돼도 자동으로 넘어가지 않습니다.
 4. 거래 행동 → 달러 시장 변화 → 원/달러 환율의 해설을 하나씩 공개합니다. 세 단계 뒤에 별도 버튼으로 모둠 결과를 봅니다. 뉴스 준비와 동시 공개 확인은 추가 화면 없이 진행하며, 모든 모둠의 답안판을 동시에 공개한 뒤 입력합니다.
 5. 개인 기록에서 틀린 판단을 고칩니다. 앱의 모둠 수정 기록은 선택 사항입니다.
 6. 마지막 두 개인 문항을 모두 푼 뒤 해설을 확인하고, 네 가지 원리와 모둠 결과를 정리·인쇄합니다.
@@ -108,6 +108,8 @@ node tests/layout.cjs
 node tests/classroom-simulation.cjs
 node tests/rehearsal-browser.cjs
 node tests/keyboard-browser.cjs
+node tests/combined-activity-browser.cjs
+node tests/explanation-navigation-browser.cjs
 ```
 
 선택 환경 변수: `TEST_URL`(기본 localhost:8766), `PLAYWRIGHT_MODULE`(Playwright 모듈 경로), `CHROME_PATH`(Chrome 실행 파일), `QA_OUTPUT_DIR`(스크린샷·PDF·레이아웃 보고서 경로). 기본 출력은 OS 임시 폴더의 `money-war-qa`입니다. 교과서 PDF·추출 텍스트·학생 개인 기록은 저장소에 포함하지 않습니다.

@@ -28,7 +28,7 @@ const next = async page => {
   await settled(page);
 };
 async function originalAnswers(page) {
-  for (let i = 0; i < 3; i++) await next(page);
+  for (let i = 0; i < 1; i++) await next(page);
   for (const team of [0, 1]) for (const [field, value] of [['cause', 'A'], ['rate', 'up']]) {
     await page.locator(`input[data-team="${team}"][data-field="${field}"][value="${value}"]`).locator('..').click();
     await settled(page);
@@ -114,7 +114,7 @@ async function oldTab(context) {
   await a.evaluate(async () => { window.releaseTestLock(); await window.testLockHeld; });
   await clicks;
   await Promise.all([settled(a), settled(b)]);
-  assert.equal(JSON.parse(await stored(a)).phase, 'individual');
+  assert.equal(JSON.parse(await stored(a)).phase, 'responseEntry');
   await context.close();
   console.log('PASS simultaneous progress: exactly one revision wins');
 
@@ -124,7 +124,7 @@ async function oldTab(context) {
   await next(a);
   await b.locator('[data-action="reloadLatest"]').waitFor();
   await b.locator('[data-action="reloadLatest"]').click();
-  assert.equal(await b.locator('#app').getAttribute('data-phase'), 'individual');
+  assert.equal(await b.locator('#app').getAttribute('data-phase'), 'responseEntry');
   const oldId = JSON.parse(await stored(a)).lessonId;
   await a.locator('#home').click(); await a.locator('[data-action="setup"]').click();
   a.once('dialog', d => d.accept()); await a.locator('#setup-form button[type="submit"]').click(); await settled(a);
@@ -137,7 +137,7 @@ async function oldTab(context) {
 
   // Answer input uses the same protection as stage buttons, even without an event.
   context = await browser.newContext(); a = await context.newPage(); await start(a);
-  for (let i = 0; i < 3; i++) await next(a);
+  for (let i = 0; i < 1; i++) await next(a);
   b = await oldTab(context);
   await a.locator('input[data-team="0"][data-field="cause"][value="A"]').locator('..').click(); await settled(a);
   const entered = await stored(a);
@@ -192,7 +192,7 @@ async function oldTab(context) {
 
   // A tab's own delayed storage events never invalidate its latest successful write.
   context = await browser.newContext(); a = await context.newPage(); await start(a);
-  for (let i = 0; i < 3; i++) await next(a);
+  for (let i = 0; i < 1; i++) await next(a);
   assert.equal(await a.locator('[data-action="reloadLatest"]').count(), 0);
   assert.equal(JSON.parse(await stored(a)).phase, 'responseEntry');
   await context.close();
