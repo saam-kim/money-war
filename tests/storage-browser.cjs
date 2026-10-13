@@ -30,6 +30,7 @@ const next = async page => {
 async function originalAnswers(page) {
   for (let i = 0; i < 1; i++) await next(page);
   for (const team of [0, 1]) for (const [field, value] of [['cause', 'A'], ['rate', 'up']]) {
+    if (!await page.locator(`.team-row[data-row="${team}"]`).isVisible()) await page.locator(`[data-entry-team="${team}"]`).click();
     await page.locator(`input[data-team="${team}"][data-field="${field}"][value="${value}"]`).locator('..').click();
     await settled(page);
   }

@@ -140,9 +140,6 @@
   const button = (action, text, cls = '', disabled = false) => `<button type="button" data-action="${action}" class="${cls}" ${disabled ? 'disabled' : ''}>${text}</button>`;
   const heading = (title, subtitle = '') => `<div class="view-heading"><h1 tabindex="-1">${title}</h1>${subtitle ? `<p>${subtitle}</p>` : ''}</div>`;
   const keycap = (key, decorative = false) => `<kbd class="keycap" ${decorative ? 'aria-hidden="true"' : ''}>${key}</kbd>`;
-  function inputKeyboardHint() {
-    return shortcutsEnabled ? `<p class="keyboard-entry-hint"><strong id="keyboard-team">입력: ${activeTeam + 1}. ${esc(state.config.teams[activeTeam])}</strong><span>원인 ${keycap('1–4')} · 상승 ${keycap('5')} · 하락 ${keycap('6')} · 모둠 ${keycap('↑')} ${keycap('↓')}</span></p>` : '';
-  }
   function applyShortcutLabels() {
     app.querySelectorAll('button[data-action]').forEach(control => {
       const key = shortcutKeys[control.dataset.action]; if (!key) return;
@@ -163,9 +160,11 @@
       const active = Number(row.dataset.row) === activeTeam;
       row.classList.toggle('mobile-active',active);
       row.classList.toggle('keyboard-active',shortcutsEnabled && active);
+      if (row.closest('.answer-console')) row.hidden = !active;
     });
-    const hint = app.querySelector('#keyboard-team');
-    if (hint) hint.textContent = `입력: ${activeTeam + 1}. ${state.config.teams[activeTeam]}`;
+    app.querySelectorAll('[data-entry-team]').forEach(card => card.setAttribute('aria-pressed', String(Number(card.dataset.entryTeam) === activeTeam)));
+    app.querySelector('[data-action="teamPrev"]')?.toggleAttribute('disabled', activeTeam === 0);
+    app.querySelector('[data-action="teamNext"]')?.toggleAttribute('disabled', activeTeam === state.config.teams.length - 1);
     if (focus) {
       const row = app.querySelector(`.team-row[data-row="${activeTeam}"]`);
       (row?.querySelector('input:not(:disabled)') || row?.querySelector('.missing-button'))?.focus({preventScroll:true});
@@ -173,11 +172,11 @@
     }
   }
   function showShortcutHelp() {
-    showDialog(`<h2>키보드로 수업 진행</h2><label class="setup-choice"><input type="checkbox" id="shortcuts-enabled" ${shortcutsEnabled ? 'checked' : ''}>키보드 단축키 사용</label><p>한글 입력 상태에서도 같은 위치의 키를 누릅니다. 이름 입력 중이나 메뉴·팝업을 연 동안에는 수업 단축키가 작동하지 않습니다.</p><table class="shortcut-guide"><tbody><tr><th>다음 / 이전 단계</th><td>${keycap('N')} / ${keycap('P')}</td></tr><tr><th>타이머 정지·시작 / 10초 추가</th><td>${keycap('T')} / ${keycap('+')}</td></tr><tr><th>원인 선택 · 화면의 왼쪽부터</th><td>${keycap('1')} 수요 증가 · ${keycap('2')} 수요 감소<br>${keycap('3')} 공급 증가 · ${keycap('4')} 공급 감소</td></tr><tr><th>환율 상승 / 하락</th><td>${keycap('5')} / ${keycap('6')}</td></tr><tr><th>이전 / 다음 모둠</th><td>${keycap('↑')} / ${keycap('↓')}</td></tr><tr><th>미제출 기록·해제</th><td>${keycap('0')}</td></tr><tr><th>모둠 결과 상세</th><td>${keycap('1–8')} 해당 모둠 보기</td></tr><tr><th>뉴스 다시 보기 / 수정 기록 열기·닫기</th><td>${keycap('V')} / ${keycap('R')}</td></tr><tr><th>단축키 안내 / 팝업 닫기</th><td>${keycap('H')} / ${keycap('Esc')}</td></tr></tbody></table><p>화면에 있는 버튼만 조작합니다. 입력이 끝나지 않으면 다음 단계로 넘어가지 않습니다. 키를 길게 눌러도 한 단계씩 진행합니다.</p>`);
+    showDialog(`<h2>키보드로 수업 진행</h2><label class="setup-choice"><input type="checkbox" id="shortcuts-enabled" ${shortcutsEnabled ? 'checked' : ''}>키보드 단축키 사용</label><p>한글 입력 상태에서도 같은 위치의 키를 누릅니다. 이름 입력 중이나 메뉴·팝업을 연 동안에는 수업 단축키가 작동하지 않습니다.</p><table class="shortcut-guide"><tbody><tr><th>다음 / 이전 단계</th><td>${keycap('N')} / ${keycap('P')}</td></tr><tr><th>타이머 정지·시작 / 10초 추가</th><td>${keycap('T')} / ${keycap('+')}</td></tr><tr><th>원인 선택 · 2×2 버튼 순서</th><td>${keycap('1')} 수요 증가 · ${keycap('2')} 수요 감소<br>${keycap('3')} 공급 증가 · ${keycap('4')} 공급 감소</td></tr><tr><th>환율 상승 / 하락</th><td>${keycap('5')} / ${keycap('6')}</td></tr><tr><th>이전 / 다음 모둠</th><td>${keycap('↑')} / ${keycap('↓')}</td></tr><tr><th>미제출 기록·해제</th><td>${keycap('0')}</td></tr><tr><th>모둠 결과 상세</th><td>${keycap('1–8')} 해당 모둠 보기</td></tr><tr><th>뉴스 다시 보기 / 수정 기록 열기·닫기</th><td>${keycap('V')} / ${keycap('R')}</td></tr><tr><th>단축키 안내 / 팝업 닫기</th><td>${keycap('H')} / ${keycap('Esc')}</td></tr></tbody></table><p>화면에 있는 버튼만 조작합니다. 입력이 끝나지 않으면 다음 단계로 넘어가지 않습니다. 키를 길게 눌러도 한 단계씩 진행합니다.</p>`);
   }
   const unit = '<p class="unit">원/달러 환율 = 1달러에 필요한 원화</p>';
   function footer(text, action, actionText, disabled = false, extra = '') {
-    return `<footer class="footer">${text ? `<p>${text}</p>` : ''}<div class="actions">${C.canBack(state) ? button('back', '이전 단계', 'quiet') : ''}${extra}${action ? button(action, actionText, 'primary', disabled) : ''}</div></footer>`;
+    return `<footer class="footer">${text ? `<p>${text}</p>` : ''}<div class="actions">${C.canBack(state) && !['responsesLocked', 'individualAnswers'].includes(state.phase) ? button('back', '이전 단계', 'quiet') : ''}${extra}${action ? button(action, actionText, 'primary', disabled) : ''}</div></footer>`;
   }
   function timer(compact = false, extraControls = '') {
     const seconds = C.remaining(state.timer), isRunning = state.timer.deadline !== null && seconds > 0;
@@ -210,30 +209,41 @@
     const identifier = typeof number === 'number' ? String(number).padStart(2, '0') : number;
     return `<article class="news"><div class="news-meta"><span>NEWS ${identifier}</span></div><div class="news-heading"><h${level} class="news-title" tabindex="-1">${news.title}</h${level}>${situationGraphic(news.id)}</div>${news.text.split('\n\n').map(paragraph => `<p class="news-paragraph">${esc(paragraph)}</p>`).join('')}<p class="condition">다른 조건은 같습니다.</p></article>`;
   }
-  function groups(team, answers, prefix = 'entry') {
+  function groups(team, answers, prefix = 'entry', showKeys = false) {
     return ['cause', 'rate'].map(field => {
       const options = field === 'cause' ? Object.entries(D.causes).map(([key, cause]) => [key, cause.label, cause.label]) : [['up', '↑ 상승', '상승'], ['down', '↓ 하락', '하락']];
       const fieldName = { cause: '원인', rate: '원/달러 환율' }[field];
       const practice = prefix === 'practice';
       const legend = practice ? `${field === 'cause' ? '① 원인' : '② 환율 방향'} <small>하나 고르기</small>` : fieldName;
-      return `<fieldset class="answer-group ${field}-group"><legend>${legend}</legend><div class="options">${options.map(([value, label, full]) => `<label class="option"><input type="radio" name="${prefix}-${team}-${field}" value="${value}" data-team="${team}" data-field="${field}" aria-label="${practice ? '연습' : `${team + 1}모둠`} ${fieldName}: ${full}" ${answers[field] === value && !answers.missing ? 'checked' : ''} ${answers.missing ? 'disabled' : ''}><span>${label}</span></label>`).join('')}</div></fieldset>`;
+      return `<fieldset class="answer-group ${field}-group"><legend>${legend}</legend><div class="options">${options.map(([value, label, full], index) => `<label class="option"><input type="radio" name="${prefix}-${team}-${field}" value="${value}" data-team="${team}" data-field="${field}" aria-label="${practice ? '연습' : `${team + 1}모둠`} ${fieldName}: ${full}" ${answers[field] === value && !answers.missing ? 'checked' : ''} ${answers.missing ? 'disabled' : ''}><span>${showKeys && shortcutsEnabled ? keycap(String(index + (field === 'cause' ? 1 : 5)), true) : ''}${label}</span></label>`).join('')}</div></fieldset>`;
     }).join('');
+  }
+  function answerOverview(a, team, correction) {
+    return `<span class="overview-name"><strong>${team + 1}. ${esc(state.config.teams[team])}</strong></span><span class="overview-cause">${a.missing ? '미제출' : a.cause ? D.causes[a.cause].label : correction ? '수정 기록 없음' : '원인 선택 전'}</span><span class="overview-rate"><span>${a.missing ? '—' : a.rate ? `환율 ${D.direction(a.rate)}` : '환율 선택 전'}</span>${answerStatus(a)}</span>`;
+  }
+  function updateAnswerOverview() {
+    const correction = state.phase === 'correction';
+    const answers = state.rounds[state.index][correction ? 'corrections' : 'entries'];
+    app.querySelectorAll('[data-entry-team]').forEach(card => {
+      const team = Number(card.dataset.entryTeam);
+      card.innerHTML = answerOverview(answers[team], team, correction);
+    });
   }
   function responseTable(correction = false) {
     const record = state.rounds[state.index], answers = correction ? record.corrections : record.entries;
-    const content = `<div class="mobile-team-nav">${button('teamPrev', '이전 모둠', '', activeTeam === 0)}<strong>${activeTeam + 1}/${answers.length}모둠</strong>${button('teamNext', '다음 모둠', '', activeTeam === answers.length - 1)}</div><div class="team-table" role="region" aria-label="${correction ? '수정' : '모둠'} 답안 입력"><div class="team-row head" aria-hidden="true"><span>모둠</span><span>① 원인</span><span>② 환율</span><span>상태</span></div>${answers.map((a, team) => `<div class="team-row ${team === activeTeam ? 'mobile-active' : ''}" data-row="${team}"><div class="team-name"><span class="team-icon">${team + 1}</span><strong>${esc(state.config.teams[team])}</strong></div>${groups(team, a, correction ? 'correction' : 'entry')}<div class="status" data-status="${team}">${answerStatus(a)}${!correction ? `<button type="button" class="missing-button" data-missing="${team}">${a.missing ? '입력으로 전환' : '미제출로 기록'}</button>` : ''}</div></div>`).join('')}</div>`;
-    return content + (correction ? '<p class="input-count" id="input-count">수정 답안은 선택 기록이며 최초 점수는 유지됩니다.</p>' : '');
+    const content = `<div class="answer-console"><section class="entry-editor"><div class="team-table" role="region" aria-label="${correction ? '수정' : '모둠'} 답안 입력">${answers.map((a, team) => `<div class="team-row ${team === activeTeam ? 'mobile-active' : ''}" data-row="${team}" ${team !== activeTeam ? 'hidden' : ''}><h2 class="team-name"><span class="team-icon">${team + 1}</span><strong>${esc(state.config.teams[team])}</strong></h2>${groups(team, a, correction ? 'correction' : 'entry', true)}<div class="status" data-status="${team}">${answerStatus(a)}${!correction ? `<button type="button" class="missing-button" data-missing="${team}" ${shortcutsEnabled ? 'aria-keyshortcuts="0"' : ''}>${a.missing ? '입력으로 전환' : '미제출로 기록'}${shortcutsEnabled ? keycap('0', true) : ''}</button>` : ''}</div></div>`).join('')}</div><nav class="entry-nav" aria-label="입력 모둠 이동">${button('teamPrev', '이전 모둠', 'quiet', activeTeam === 0)}${button('teamNext', '다음 모둠', 'quiet', activeTeam === answers.length - 1)}</nav></section><section class="entry-overview" aria-label="${correction ? '모둠 수정 기록 현황' : '전체 모둠 답안 현황'}"><h2>${correction ? '모둠 수정 기록' : '전체 모둠 답안'}</h2><div class="answer-board">${answers.map((a, team) => `<button type="button" data-entry-team="${team}" aria-pressed="${team === activeTeam}">${answerOverview(a, team, correction)}</button>`).join('')}</div></section></div>`;
+    return content;
   }
   function answerStatus(a) { return `<span class="${C.complete(a) ? 'complete' : ''}">${a.missing ? '미제출' : C.complete(a) ? '입력 완료' : [a.cause, a.rate].filter(Boolean).length + '/2 선택'}</span>`; }
   function answerText(a) { return !a || a.missing ? '미제출' : `${a.cause ? D.causes[a.cause].label : '원인 미선택'} / 환율 ${a.rate ? D.direction(a.rate) : '미선택'}`; }
   function chain(news, reveal) {
     const c = D.causes[news.cause], curve = c.market === 'demand' ? '수요' : '공급';
     const steps = [
-      ['거래 행동', news.action, news.context || '달러를 사는 쪽인지 파는 쪽인지 확인합니다.'],
-      ['외환 시장', c.label, `${curve} 곡선이 ${c.change === 'increase' ? '오른쪽' : '왼쪽'}으로 이동합니다. 다른 조건은 일정합니다.`],
+      ['거래 행동', `달러를 ${c.market === 'demand' ? '사는' : '파는'} 거래가 ${c.change === 'increase' ? '늘어납니다' : '줄어듭니다'}.`, news.context || news.action],
+      ['외환 시장', c.label, `${curve} 곡선이 ${c.change === 'increase' ? '오른쪽' : '왼쪽'}으로 이동합니다.`],
       ['환율', `원/달러 환율 ${D.direction(c.rate)}`, c.rate === 'up' ? '1달러를 사는 데 필요한 원화 금액이 늘어납니다.' : '1달러를 사는 데 필요한 원화 금액이 줄어듭니다.']
     ];
-    return `<div class="chain">${steps.map(([name, title, detail], i) => `<section class="chain-step ${reveal <= i ? 'pending' : ''}"><span class="num">0${i + 1}</span><div>${reveal > i ? `<h2>${title}</h2><p>${detail}</p>` : `<h2>${name} · 아직 공개 전</h2>`}</div></section>`).join('')}</div>`;
+    return `<div class="chain">${steps.map(([name, title, detail], i) => `<section class="chain-step ${reveal <= i ? 'pending' : ''} ${reveal === i + 1 ? 'current-step' : ''}"><span class="num">0${i + 1}</span><div>${reveal > i ? `<h2>${title}</h2><p>${detail}</p>` : `<h2>${name} · 다음 단계</h2>`}</div></section>`).join('')}</div>`;
   }
   function resultTable() {
     const record = state.rounds[state.index], news = D.rounds[state.index], totals = C.totals(state);
@@ -272,7 +282,7 @@
     const available = content.getBoundingClientRect().bottom - region.getBoundingClientRect().top - 8;
     const headerHeight = table.tHead.getBoundingClientRect().height;
     // Fill the projection area while keeping few-team rows and short screens usable.
-    const rowHeight = Math.max(44, Math.min(144, Math.floor((available - headerHeight - 2) / count)));
+    const rowHeight = Math.max(44, Math.min(96, Math.floor((available - headerHeight - 2) / count)));
     const fontSize = Math.max(20, Math.min(28, Math.round(rowHeight * .2 + 10)));
     region.style.setProperty('--result-row-height', `${rowHeight}px`);
     region.style.setProperty('--result-font-size', `${fontSize}px`);
@@ -288,7 +298,7 @@
     resultLayoutObserver.observe(app.querySelector('.feedback-heading'));
   }
   function finalView() {
-    return heading('새 뉴스에서도 달러 거래부터 설명해 보세요.', '거래 행동 → 달러 시장 → 환율') + `<div class="final-grid"><section class="panel"><h2>네 가지 관계</h2><div class="result-scroll">${MWPrint.principles()}</div></section><section class="panel"><h2>모둠 분석 결과 <small>${state.config.length * C.POINTS_PER_ROUND}점 만점</small></h2><p>각 항목은 정답 횟수입니다. 동점은 공동 순위이며 개인 확인은 점수에 합치지 않습니다.</p><div class="result-scroll"><table class="result-table"><thead><tr><th>순위</th><th>모둠</th><th>총점</th><th>수요·공급</th><th>증감</th><th>환율</th></tr></thead><tbody>${C.ranking(state).map(r => `<tr><td>${r.tied ? '공동 ' : ''}${r.rank}위</td><th>${r.team + 1}. ${esc(r.name)}</th><td><strong>${r.total}/${state.config.length * C.POINTS_PER_ROUND}</strong></td>${r.parts.map(p => `<td>${p}/${state.config.length}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section></div>` + footer('최초 제출 답안을 기준으로 분석 점수를 계산했습니다.', 'printResult', '결과·정리 인쇄', false, button('home', '처음으로', 'quiet'));
+    return heading('환율의 원리와 모둠 결과', '거래 행동 → 달러 시장 → 환율') + `<div class="final-grid"><section class="panel"><h2>네 가지 관계</h2><div class="result-scroll">${MWPrint.principles()}</div></section><section class="panel"><h2>모둠 분석 결과 <small>${state.config.length * C.POINTS_PER_ROUND}점 만점</small></h2><p>각 항목은 정답 횟수입니다. 동점은 공동 순위이며 개인 확인은 점수에 합치지 않습니다.</p><div class="result-scroll"><table class="result-table"><thead><tr><th>순위</th><th>모둠</th><th>총점</th><th>수요·공급</th><th>증감</th><th>환율</th></tr></thead><tbody>${C.ranking(state).map(r => `<tr><td>${r.tied ? '공동 ' : ''}${r.rank}위</td><th>${r.team + 1}. ${esc(r.name)}</th><td><strong>${r.total}/${state.config.length * C.POINTS_PER_ROUND}</strong></td>${r.parts.map(p => `<td>${p}/${state.config.length}</td>`).join('')}</tr>`).join('')}</tbody></table></div></section></div>` + footer('최초 제출 답안을 기준으로 분석 점수를 계산했습니다.', 'printResult', '결과·정리 인쇄', false, button('home', '처음으로', 'quiet'));
   }
   function practiceView() {
     const steps = [
@@ -303,22 +313,21 @@
   }
   function lessonView() {
     const phase = state.phase, record = state.rounds[state.index], news = D.rounds[state.index];
-    const personal = ['individualA', 'individualB', 'individualAnswers', 'final'].includes(phase);
-    const top = `<div class="phase"><strong>${labels[phase]}</strong><span>${personal ? '새 사례에 혼자 적용' : '원인과 환율 · 라운드당 6점'}</span></div>`;
+    const top = '';
     if (phase === 'rehearsal') return top + practiceView() + footer('개인 기록지와 모둠 답안판을 준비하면 시작할 수 있어요.', 'next', '첫 뉴스 읽기');
     if (phase === 'newsReading') {
       return `<section class="round-activity" aria-label="뉴스 읽기와 개인 판단, 모둠 토의"><div class="activity-bar"><ol class="activity-order" aria-label="학생 활동 순서"><li>혼자 판단</li><li>모둠 토의</li><li>답안판 함께 들기</li></ol>${timer(true)}</div>${newsCard(news)}<p class="discussion-prompt">누가 달러를 사거나 팔며, 그 거래는 왜 늘거나 줄었을까?</p></section>` + footer('', 'next', '모둠 답안 입력');
     }
-    if (phase === 'responseEntry') return top + `<div class="input-heading">${heading('모둠의 답안을 기록하세요.', news.title)}${timer(true)}${button('news', '뉴스 다시 보기')}</div>` + `<div class="input-summary">${inputKeyboardHint()}<p class="input-count" id="input-count">${record.entries.filter(C.complete).length}/${record.entries.length}모둠 입력 완료</p></div>` + responseTable() + footer('동시 공개한 원인과 환율을 기록합니다. 미제출은 직접 표시하세요.', 'next', '선택 확정', !record.entries.every(C.complete));
-    if (phase === 'responsesLocked') return top + heading('최초 답안을 확인하세요.', record.reveal ? '모둠이 처음 제출한 답안입니다.' : '입력 실수는 해설을 시작하기 전에 고칠 수 있습니다.') + `<section class="panel locked-panel${record.originals.every(a => a.missing) ? ' only-missing' : ''}"><ul class="locked-list">${record.originals.map((a, team) => `<li><strong>${team + 1}. ${esc(state.config.teams[team])}</strong><span>${answerText(a)}</span></li>`).join('')}</ul></section>` + footer('', 'next', record.reveal ? '해설 다시 보기' : '거래 행동 공개', false, record.reveal ? '' : button('unlock', '입력 수정', 'quiet'));
+    if (phase === 'responseEntry') return top + `<div class="input-heading">${heading('모둠 답안 입력', news.title)}${timer(true)}${button('news', '뉴스 다시 보기')}</div>` + `<div class="input-summary"><p class="input-count" id="input-count">${record.entries.filter(C.complete).length}/${record.entries.length}모둠 입력 완료</p></div>` + responseTable() + footer('동시 공개한 원인과 환율을 기록합니다. 미제출은 직접 표시하세요.', 'next', '선택 확정', !record.entries.every(C.complete));
+    if (phase === 'responsesLocked') return top + heading('최초 답안을 확인하세요.', record.reveal ? '모둠이 처음 제출한 답안입니다.' : '입력 실수는 해설을 시작하기 전에 고칠 수 있습니다.') + `<section class="panel locked-panel${record.originals.every(a => a.missing) ? ' only-missing' : ''}"><ul class="locked-list">${record.originals.map((a, team) => `<li><strong>${team + 1}. ${esc(state.config.teams[team])}</strong><span class="locked-answer">${a.missing ? '미제출' : `<span class="locked-cause">${D.causes[a.cause].label}</span><span class="locked-rate">환율 ${D.direction(a.rate)}</span>`}</span></li>`).join('')}</ul></section>` + footer('', 'next', record.reveal ? '해설 다시 보기' : '거래 행동 공개', false, record.reveal ? '' : button('unlock', '입력 수정', 'quiet'));
     if (phase === 'explanation') {
       const reveal = C.visibleStep(record);
       const next = ['거래 행동 공개', '달러 시장 공개', '환율 공개', '모둠 결과 보기'][reveal];
-      return top + `<div class="reveal-heading">${heading('달러 거래에서 환율까지', `${reveal}/3단계 공개 · ${news.title}`)}<div class="explanation-timer">${timer(true)}</div></div><div class="reveal-layout">${chain(news, reveal)}<section class="chart-panel">${reveal >= 2 ? '<h2>우리나라 달러 외환 시장</h2><div id="market-graph"></div>' : transactionGraphic(news)}</section></div>` + footer(reveal < 3 ? '이전·다음 버튼으로 설명을 차례로 확인하세요.' : '점수는 다음 버튼에서 따로 공개합니다.', 'next', next);
+      return top + `<div class="reveal-heading">${heading('달러 거래에서 환율까지', `${reveal}/3단계 공개 · ${news.title}`)}<div class="explanation-timer">${timer(true)}</div></div><div class="reveal-layout"><section class="chart-panel">${reveal >= 2 ? '<h2>우리나라 달러 외환 시장</h2><div id="market-graph"></div>' : transactionGraphic(news)}</section>${chain(news, reveal)}</div>` + footer(reveal < 3 ? '이전·다음 버튼으로 설명을 차례로 확인하세요.' : '점수는 다음 버튼에서 따로 공개합니다.', 'next', next);
     }
     if (['roundFeedback', 'correction'].includes(phase)) {
       const c = D.causes[news.cause];
-      return top + `<div class="feedback-heading">${heading(phase === 'correction' ? '틀린 부분을 개인 기록지에서 고치세요.' : '원인과 환율을 나누어 확인합니다.', `${c.label} → 환율 ${D.direction(c.rate)}`)}${phase === 'correction' ? `${timer(true, '<button type="button" data-action="correctionToggle" aria-controls="correction-records" aria-expanded="false" class="quiet">모둠 수정 기록</button>')}` : ''}</div>` + resultTable() + (phase === 'correction' ? `<details class="correction-editor" id="correction-records"><summary class="sr-only">모둠 수정 기록 · 선택</summary><p>고친 답은 개인 기록지의 선택어로 표시합니다. 앱 수정 기록은 최초 점수에 합치지 않습니다.</p>${inputKeyboardHint()}${responseTable(true)}</details>` : '') + footer(phase === 'correction' ? '기록지의 거래·원인·환율 선택어를 다시 확인하세요.' : '각 요소 2점 · 틀린 판단의 이유를 다시 설명해 보세요.', 'next', phase === 'roundFeedback' ? '개인 기록 고치기 · 30초' : state.index + 1 === state.config.length ? '개인 확인 시작' : '다음 뉴스 읽기', false);
+      return top + `<div class="feedback-heading">${heading(phase === 'correction' ? '개인 기록 고치기' : '모둠 결과 확인', `${c.label} → 환율 ${D.direction(c.rate)}`)}${phase === 'correction' ? `${timer(true, '<button type="button" data-action="correctionToggle" aria-controls="correction-records" aria-expanded="false" class="quiet">모둠 수정 기록</button>')}` : ''}</div>` + resultTable() + (phase === 'correction' ? `<details class="correction-editor" id="correction-records"><summary class="sr-only">모둠 수정 기록 · 선택</summary><p class="correction-hint">모둠 수정 기록은 선택 사항입니다. 최초 답안과 점수는 유지됩니다.</p>${responseTable(true)}</details>` : '') + footer(phase === 'correction' ? '기록지의 거래·원인·환율 선택어를 다시 확인하세요.' : '각 요소 2점 · 틀린 판단의 이유를 다시 설명해 보세요.', 'next', phase === 'roundFeedback' ? '개인 기록 고치기 · 30초' : state.index + 1 === state.config.length ? '개인 확인 시작' : '다음 뉴스 읽기', false);
     }
     if (['individualA', 'individualB'].includes(phase)) {
       const q = D.individual[phase === 'individualA' ? 0 : 1];
@@ -329,7 +338,7 @@
     return '';
   }
   function setupView() {
-    return heading('함께 분석할 수업을 준비하세요.') + `<form id="setup-form" class="setup-panel"><div class="setup-grid"><label>모둠 수<select name="count" id="team-count">${[2,3,4,5,6,7,8].map(n => `<option value="${n}" ${draft.count === n ? 'selected' : ''}>${n}모둠</option>`).join('')}</select></label><fieldset><legend>수업 길이</legend><label class="setup-choice"><input type="radio" name="length" value="6" ${draft.length === 6 ? 'checked' : ''}>기본 6라운드 · 약 30분 · 36점</label><label class="setup-choice"><input type="radio" name="length" value="4" ${draft.length === 4 ? 'checked' : ''}>단축 4라운드 · 약 20분 · 24점</label></fieldset></div><fieldset><legend>모둠 이름 <small>최대 8자 · 같은 이름도 번호로 구분합니다.</small></legend><div class="team-names">${Array.from({ length: draft.count }, (_, i) => `<label>${i + 1}모둠<input type="text" name="name-${i}" value="${esc(draft.names[i] || `${i + 1}모둠`)}" maxlength="8"></label>`).join('')}</div></fieldset><div class="actions">${button('worksheet', '개인 기록지 인쇄')}${button('home', '처음으로', 'quiet')}<button class="primary" type="submit">수업 시작</button></div></form>`;
+    return heading('수업 준비') + `<form id="setup-form" class="setup-panel"><div class="setup-grid"><label>모둠 수<select name="count" id="team-count">${[2,3,4,5,6,7,8].map(n => `<option value="${n}" ${draft.count === n ? 'selected' : ''}>${n}모둠</option>`).join('')}</select></label><fieldset><legend>수업 길이</legend><label class="setup-choice"><input type="radio" name="length" value="6" ${draft.length === 6 ? 'checked' : ''}>기본 6라운드 · 약 30분 · 36점</label><label class="setup-choice"><input type="radio" name="length" value="4" ${draft.length === 4 ? 'checked' : ''}>단축 4라운드 · 약 20분 · 24점</label></fieldset></div><fieldset><legend>모둠 이름 <small>최대 8자 · 같은 이름도 번호로 구분합니다.</small></legend><div class="team-names">${Array.from({ length: draft.count }, (_, i) => `<label>${i + 1}모둠<input type="text" name="name-${i}" value="${esc(draft.names[i] || `${i + 1}모둠`)}" maxlength="8"></label>`).join('')}</div></fieldset><div class="actions">${button('worksheet', '개인 기록지 인쇄')}${button('home', '처음으로', 'quiet')}<button class="primary" type="submit">수업 시작</button></div></form>`;
   }
   function landingView() {
     return `<section class="landing"><div class="landing-intro"><div><span class="tag">경제 · 뉴스 분석 수업</span><h1 tabindex="-1">뉴스를 읽고,<br>환율의 이유를 밝혀라.</h1><p class="large">달러를 사거나 파는 거래에서 시작해<br>환율 변동의 원인과 방향을 설명합니다.</p></div>${exchangeGraphic()}</div><div class="landing-start"><div class="landing-flow"><span>개인 판단</span><span>모둠 토의</span><span>동시 응답</span><span>이유 확인</span></div><p>6라운드 · 약 30분 · 2~8모둠</p><div class="actions">${state ? button('resume', `이어서 수업 · ${phaseLabel()}`, 'primary') : ''}${button('setup', state ? '새 수업 준비' : '수업 준비', state ? '' : 'primary')}${button('teacherRehearsal', '수업 리허설', 'quiet')}${button('worksheet', '개인 기록지 인쇄', 'quiet')}</div>${state ? '<p class="hint">새 수업은 시작 버튼을 누를 때 기존 기록을 교체합니다.</p>' : ''}</div></section>`;
@@ -396,6 +405,7 @@
     const title = document.querySelector('#dialog-content h1, #dialog-content h2');
     if (title) { title.id = 'dialog-title'; document.querySelector('#dialog').setAttribute('aria-labelledby', title.id); }
     document.querySelector('#dialog').showModal();
+    if (title) { title.tabIndex = -1; title.focus({ preventScroll: true }); }
   }
   document.querySelector('#teacher-guide').addEventListener('click', () => {
     closeMenu();
@@ -437,6 +447,7 @@
       const row = input.closest('.team-row'), answer = state.rounds[state.index][state.phase === 'correction' ? 'corrections' : 'entries'][team];
       const status = row.querySelector('[data-status]');
       status.querySelector('span').outerHTML = answerStatus(answer);
+      updateAnswerOverview();
       if (state.phase === 'responseEntry') {
         const answers = state.rounds[state.index].entries;
         document.querySelector('#input-count').textContent = `${answers.filter(C.complete).length}/${answers.length}모둠 입력 완료`;
@@ -488,6 +499,8 @@
     if (!open) fitResultRows();
   }
   app.addEventListener('click', async event => {
+    const entryTeam = event.target.closest('[data-entry-team]');
+    if (entryTeam && !mutationPending) { selectInputTeam(Number(entryTeam.dataset.entryTeam), true); return; }
     const action = event.target.closest('[data-action]'); if (action) handleAction(action.dataset.action);
     const missing = event.target.closest('[data-missing]');
     if (missing) {

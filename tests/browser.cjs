@@ -22,9 +22,14 @@ let browser;
   const shot = name => page.screenshot({ path: path.join(out, name + '.png'), fullPage: true });
   const choose = async (team, field, value) => {
     const input = page.locator(`.team-row[data-row="${team}"] input[data-field="${field}"][value="${value}"]`);
+    if (!await page.locator(`.team-row[data-row="${team}"]`).isVisible()) await page.locator(`[data-entry-team="${team}"]`).click();
     await input.locator('..').click();
     await settled();
     assert.equal(await input.isChecked(), true);
+  };
+  const markMissing = async team => {
+    if (!await page.locator(`.team-row[data-row="${team}"]`).isVisible()) await page.locator(`[data-entry-team="${team}"]`).click();
+    await page.locator(`[data-missing="${team}"]`).click(); await settled();
   };
   const stored = () => page.evaluate(key => JSON.parse(localStorage.getItem(key)), C.STORAGE_KEY);
   await page.goto(url); await page.evaluate(() => document.fonts.ready);
@@ -138,13 +143,13 @@ let browser;
     await settled();
     await choose(0, 'rate', key.rate);
     await page.locator('[data-action="teamNext"]').click();
-    await page.locator('[data-missing="1"]').click();
+    await markMissing(1);
     await settled();
     if (i === 0) {
-      await page.locator('[data-missing="1"]').click();
+      await markMissing(1);
       await settled();
       assert.equal(await page.locator('[data-action="next"]').isDisabled(), true);
-      await page.locator('[data-missing="1"]').click(); await shot('entry-mobile');
+      await markMissing(1); await shot('entry-mobile');
       await settled();
     }
     await next();

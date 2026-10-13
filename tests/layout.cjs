@@ -44,6 +44,7 @@ function fixtures() {
         transferBottom: document.querySelector('.individual-answer-grid')?.getBoundingClientRect().bottom,
         inputCountBottom: document.querySelector('.input-summary .input-count')?.getBoundingClientRect().bottom,
         finalBottom: document.querySelector('.final-grid')?.getBoundingClientRect().bottom,
+        lockedBottom: Math.max(0,...[...document.querySelectorAll('.locked-list li')].map(n=>n.getBoundingClientRect().bottom)),
         causeLabelOverflow: [...document.querySelectorAll('.cause-group .option>span')].filter(n => {
           if (!n.getClientRects().length) return false;
           const range = document.createRange(); range.selectNodeContents(n);
@@ -52,11 +53,13 @@ function fixtures() {
         }).map(n => n.textContent),
         visibleTeamRows: (() => {
           const table = document.querySelector('.team-table'); if (!table) return null;
-          const area = table.getBoundingClientRect(), header = table.querySelector('.head').getBoundingClientRect();
+          const area = table.getBoundingClientRect(), header = table.querySelector('.head')?.getBoundingClientRect() || {bottom:area.top};
           return [...table.querySelectorAll('.team-row:not(.head)')].filter(n => {
             const b = n.getBoundingClientRect(); return b.top >= header.bottom - 1 && b.bottom <= area.bottom + 1;
           }).length;
         })(),
+        visibleOverview: [...document.querySelectorAll('[data-entry-team]')].filter(n=>n.getBoundingClientRect().bottom<=document.querySelector('.footer').getBoundingClientRect().top).length,
+        visibleAnswerOptions: [...document.querySelectorAll('.team-row:not([hidden]) .option')].filter(n=>n.getClientRects().length).length,
         panels: [...document.querySelector('#app').children].map(n => ({ class: n.className, height: Math.round(n.getBoundingClientRect().height) })),
         labels: [...document.querySelectorAll('#market-graph svg text')].map(n => {
           const b = n.getBBox(), svg = n.ownerSVGElement.viewBox.baseVal;
@@ -75,9 +78,11 @@ function fixtures() {
       }
       if (width >= 1200 && name === 'responseEntry') {
         assert.ok(measurements.inputCountBottom <= measurements.footerTop, 'entry progress count stays above teaching controls');
-        assert.ok(measurements.visibleTeamRows >= 5, 'compact entry shows at least five complete team rows on projection screens');
+        assert.equal(measurements.visibleAnswerOptions,6,'one group editor exposes six options');
+        assert.equal(measurements.visibleOverview,8,'all eight groups remain visible on projection screens');
       }
       if (width >= 1200 && name === 'final') assert.ok(measurements.finalBottom <= measurements.footerTop, 'principles and all team results fit together above teaching controls');
+      if (width >= 900 && name === 'responsesLocked') assert.ok(measurements.lockedBottom <= measurements.footerTop, `all eight complete first answers fit above teacher controls: ${measurements.lockedBottom} > ${measurements.footerTop}`);
       report.push({ width, phase: name, ...measurements });
       if (width === 1366 && name === 'explanation3' || width === 390 && name === 'responseEntry') await page.screenshot({ path: path.join(out, `layout-${width}-${name}.png`), fullPage: true });
     }

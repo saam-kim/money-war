@@ -26,6 +26,7 @@ let browser;
     const next = async () => { await settled(); await page.locator('[data-action="next"]').click(); await settled(); record.nextClicks++; };
     const choose = async (team, field, value) => {
       await settled();
+      if (!await page.locator(`.team-row[data-row="${team}"]`).isVisible()) await page.locator(`[data-entry-team="${team}"]`).click();
       await page.locator(`.team-row[data-row="${team}"] input[data-field="${field}"][value="${value}"]`).locator('..').click();
       await settled(); record.answerClicks++;
     };
@@ -88,6 +89,7 @@ let browser;
       const code = D.rounds[round].cause, key = D.causes[code], wrongCode = {A:'D',B:'C',C:'B',D:'A'}[code];
       for (let team=0; team<profile.count; team++) {
         if (team===7 || team===4 && round===0) {
+          if (!await page.locator(`.team-row[data-row="${team}"]`).isVisible()) await page.locator(`[data-entry-team="${team}"]`).click();
           await page.locator(`[data-missing="${team}"]`).click(); await settled(); continue;
         }
         const cause = team===2 || team===5 ? wrongCode : code;

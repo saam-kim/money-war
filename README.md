@@ -73,7 +73,7 @@ python -m http.server 8766 --bind 127.0.0.1
 | 뉴스 다시 보기 / 수정 기록 열기·닫기 | V / R |
 | 단축키 안내 / 팝업 닫기 | H / Esc |
 
-답안 입력에서는 선택된 모둠을 표시하며 마우스로 선택한 모둠과 연동합니다. 원인 1~4는 버튼의 왼쪽부터 순서대로 대응합니다. 수정 입력은 `모둠 수정 기록`을 연 뒤 사용합니다. 이름 입력·메뉴·팝업·저장 충돌 중에는 수업 단축키를 막고, 미완료 답안의 확정과 공개 뒤 원본 답안 변경은 기존 규칙대로 차단합니다. 답안 입력과 수정 입력의 ↑·↓는 모둠만 이동하며 답안을 바꾸지 않습니다. Tab·Enter·Space와 ←·→의 기존 버튼·라디오 조작도 유지합니다.
+답안 입력에는 선택한 모둠의 원인 4개(2×2)와 환율 2개만 표시하고, 전체 모둠의 답안과 완료 여부를 옆에서 확인합니다. 요약의 모둠 이름을 누르거나 ↑·↓로 입력 모둠을 바꿉니다. 원인 1~4는 위쪽 행의 왼쪽→오른쪽, 아래쪽 행의 왼쪽→오른쪽 순서입니다. 자동으로 다음 모둠으로 넘어가지 않으며, 수정 입력도 `모둠 수정 기록`을 연 뒤 같은 방식을 사용합니다. 이름 입력·메뉴·팝업·저장 충돌 중에는 수업 단축키를 막고, 미완료 답안의 확정과 공개 뒤 원본 답안 변경은 기존 규칙대로 차단합니다. 답안 입력과 수정 입력의 ↑·↓는 모둠만 이동하며 답안을 바꾸지 않습니다. Tab·Enter·Space와 ←·→의 기존 버튼·라디오 조작도 유지합니다.
 
 ## 파일과 검증
 
@@ -108,6 +108,7 @@ node tests/layout.cjs
 node tests/classroom-simulation.cjs
 node tests/rehearsal-browser.cjs
 node tests/keyboard-browser.cjs
+node tests/answer-console-browser.cjs
 node tests/combined-activity-browser.cjs
 node tests/explanation-navigation-browser.cjs
 ```
